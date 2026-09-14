@@ -41,6 +41,7 @@ import {
   ShieldAlert,
   ShieldCheck
 } from 'lucide-react';
+import { safeResponseJson } from '../utils/apiClient';
 import {
   Pipeline01NaverReport,
   Pipeline01CollectionOverview,
@@ -314,11 +315,11 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
 
     try {
       const res = await fetch(`/api/pipeline-01/naver-report-content?nid=${item.nid}`);
-      const data = await res.json();
-      if (data.success) {
+      const data = await safeResponseJson(res, { success: false, error: '본문 데이터를 불러오지 못했습니다.' });
+      if (data && data.success) {
         setWebArticleData(data);
       } else {
-        setArticleError(data.error || '네이버 증권에서 리포트 본문을 불러오지 못했습니다.');
+        setArticleError(data?.error || '네이버 증권에서 리포트 본문을 불러오지 못했습니다.');
       }
     } catch (err: any) {
       setArticleError(err.message || '네이버 웹본문 연동 중 네트워크 오류가 발생했습니다.');
@@ -354,8 +355,8 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
   const fetchEstimates = async () => {
     try {
       const res = await fetch('/api/pipeline-01/selection-estimates');
-      const data = await res.json();
-      if (data.success && data.estimates) {
+      const data = await safeResponseJson(res, { success: false });
+      if (data && data.success && data.estimates) {
         setEstimatesMap(data.estimates);
       }
     } catch (err) {
@@ -371,8 +372,8 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
   const fetchScopeConfig = async () => {
     try {
       const res = await fetch('/api/pipeline-01/collection-scope');
-      const data = await res.json();
-      if (data.success && data.config) {
+      const data = await safeResponseJson(res, { success: false });
+      if (data && data.success && data.config) {
         setScopeConfig(data.config);
       }
     } catch (err) {
@@ -389,8 +390,8 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ blockPostJuly })
       });
-      const data = await res.json();
-      if (data.success && data.config) {
+      const data = await safeResponseJson(res, { success: false });
+      if (data && data.success && data.config) {
         setScopeConfig(data.config);
         // Clear local cache if locking to avoid displaying out-of-scope data
         if (blockPostJuly) {
@@ -430,8 +431,8 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
     setIsLoadingOverview(true);
     try {
       const res = await fetch('/api/pipeline-01/monthly-stats');
-      const data = await res.json();
-      if (data.success && data.overview) {
+      const data = await safeResponseJson(res, { success: false });
+      if (data && data.success && data.overview) {
         setOverviewStats(data.overview);
         if (data.overview.scopeConfig) {
           setScopeConfig(data.overview.scopeConfig);
@@ -535,9 +536,9 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
       }
 
       const res = await fetch(url);
-      const data = await res.json();
+      const data = await safeResponseJson(res, { success: false, error: '서버 응답을 처리할 수 없습니다.' });
 
-      if (data.success && Array.isArray(data.reports)) {
+      if (data && data.success && Array.isArray(data.reports)) {
         // Accumulate and deduplicate with existing cached reports by NID
         const existingCache = reportsCache[cacheKey] || [];
         const reportMap = new Map<string, Pipeline01NaverReport>();
@@ -553,11 +554,29 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
         setSelectedNids(allNids);
         setHasFetchedCurrent(true);
       } else {
-        setError(data.error || '네이버 증권 리포트를 불러오지 못했습니다.');
+        // Graceful fallback to existing cache if server request fails
+        const existingCache = reportsCache[cacheKey] || [];
+        if (existingCache.length > 0) {
+          setReports(existingCache);
+          setSelectedNids(new Set(existingCache.map(r => r.nid)));
+          setHasFetchedCurrent(true);
+          setError(null);
+        } else {
+          setError(data?.error || '네이버 증권 리포트를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+        }
       }
     } catch (err: any) {
-      console.error('Fetch error:', err);
-      setError(err.message || '네이버 증권 서버 통신 중 오류가 발생했습니다.');
+      console.warn('Fetch error:', err);
+      // Graceful fallback to existing cache on network failure
+      const existingCache = reportsCache[cacheKey] || [];
+      if (existingCache.length > 0) {
+        setReports(existingCache);
+        setSelectedNids(new Set(existingCache.map(r => r.nid)));
+        setHasFetchedCurrent(true);
+        setError(null);
+      } else {
+        setError('서버와 통신할 수 없습니다. 로컬 캐시를 사용하거나 잠시 후 다시 시도해 주세요.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -768,14 +787,14 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reports: selectedReports })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await safeResponseJson(res, { success: false, error: '등록 처리에 실패했습니다.' });
+      if (data && data.success) {
         setIngestSuccessMessage(data.message || `리포트 ${selectedReports.length}건이 성공적으로 등록되었습니다.`);
         if (onIngestReportsToHub) {
           onIngestReportsToHub(selectedReports);
         }
       } else {
-        alert(`등록 실패: ${data.error}`);
+        alert(`등록 실패: ${data?.error || '알 수 없는 오류'}`);
       }
     } catch (err: any) {
       alert(`오류: ${err.message}`);
@@ -803,12 +822,12 @@ export const Pipeline01NaverCollector: React.FC<Pipeline01NaverCollectorProps> =
           month: selectedMonth
         })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await safeResponseJson(res, { success: false, error: 'DB 동기화에 실패했습니다.' });
+      if (data && data.success) {
         setDownloadSuccessMessage(`🗄️ [DB 동기화 완료] 총 ${data.totalChecked}건 중 신규 저장 ${data.insertedCount}건, 변경 업데이트 ${data.updatedCount}건, 유지 ${data.skippedCount}건이 DB에 안전하게 보관되었습니다 (${data.durationMs}ms).`);
         fetchOverviewStats();
       } else {
-        setError(data.error || 'DB 동기화 처리에 실패했습니다.');
+        setError(data?.error || 'DB 동기화 처리에 실패했습니다.');
       }
     } catch (err: any) {
       setError(err.message || 'DB 동기화 통신 중 오류가 발생했습니다.');

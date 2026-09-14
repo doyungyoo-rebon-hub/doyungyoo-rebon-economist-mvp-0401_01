@@ -137,8 +137,12 @@ const DB_DIR = path.join(process.cwd(), 'downloads/database');
 const MASTER_DB_FILE = path.join(DB_DIR, 'reports_master_db.json');
 const SYNC_LOGS_FILE = path.join(DB_DIR, 'sync_logs.json');
 
-if (!fs.existsSync(DB_DIR)) {
-  fs.mkdirSync(DB_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(DB_DIR)) {
+    fs.mkdirSync(DB_DIR, { recursive: true });
+  }
+} catch (e) {
+  // Read-only filesystem in serverless environments (e.g. Vercel/Lambda)
 }
 
 export function loadMasterDbRecords(): Map<string, any> {
@@ -8404,11 +8408,19 @@ export async function startServer() {
   });
 }
 
-// Auto start if not in Vercel serverless environment
-if (!process.env.VERCEL) {
+// Check if executed directly as the main process
+const isDirectMain = Boolean(
+  process.argv[1] &&
+  (process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.cjs'))
+);
+
+// Auto start if not in Vercel serverless environment and run directly
+if (!process.env.VERCEL && !process.env.NOW_REGION && isDirectMain) {
   startServer().catch((err) => {
     console.error("Fatal error starting server:", err);
     process.exit(1);
   });
 }
+
+export default app;
 

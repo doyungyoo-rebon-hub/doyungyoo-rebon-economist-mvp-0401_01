@@ -1,4 +1,5 @@
-import { SectorCategory, STANDARD_12_SECTORS } from '../types';
+import type { SectorCategory } from '../types.ts';
+import { STANDARD_12_SECTORS } from '../types.ts';
 
 export { STANDARD_12_SECTORS };
 

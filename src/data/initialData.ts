@@ -1,4 +1,4 @@
-import { Analyst, Broker, NotificationItem, NotificationSetting, PipelineLog, PipelineMetrics, Report } from '../types';
+import type { Analyst, Broker, NotificationItem, NotificationSetting, PipelineLog, PipelineMetrics, Report } from '../types.ts';
 
 export const INITIAL_BROKERS: Broker[] = [
   { id: "b1", name: "미래에셋증권", reportCount: 0, lastSyncTime: "-", status: "idle", accuracyRate: 0 },

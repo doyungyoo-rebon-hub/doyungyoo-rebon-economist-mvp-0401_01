@@ -1,4 +1,4 @@
-import { VersionInfo } from '../types';
+import type { VersionInfo } from '../types.ts';
 
 export const APP_VERSIONS: VersionInfo[] = [
   {

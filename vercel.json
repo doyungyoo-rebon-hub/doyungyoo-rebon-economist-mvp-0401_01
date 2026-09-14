@@ -2,8 +2,8 @@
   "version": 2,
   "functions": {
     "api/index.ts": {
-      "includeFiles": "downloads/**",
-      "maxDuration": 60
+      "includeFiles": "downloads/database/**",
+      "maxDuration": 15
     }
   },
   "rewrites": [
