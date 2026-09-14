@@ -135,11 +135,35 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
       try {
         const res = await fetch(`/api/pipeline-01/hall-of-fame-eval?period=${selectedPeriod}&force=false`);
         const data = await safeResponseJson(res, { success: false });
-        if (data && data.success) {
+        if (data && data.success && data.top20 && data.top20.length > 0) {
           setHofData(data);
+        } else {
+          // If initial cached fetch is empty or failed, auto-trigger evaluation
+          const retryRes = await fetch('/api/pipeline-01/hall-of-fame-eval/re-evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ period: selectedPeriod })
+          });
+          const retryData = await safeResponseJson(retryRes, { success: false });
+          if (retryData && retryData.success) {
+            setHofData(retryData);
+          }
         }
       } catch (err) {
-        console.warn('Failed to load hall of fame data:', err);
+        console.warn('Failed to load hall of fame data, trying evaluation endpoint:', err);
+        try {
+          const retryRes = await fetch('/api/pipeline-01/hall-of-fame-eval/re-evaluate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ period: selectedPeriod })
+          });
+          const retryData = await safeResponseJson(retryRes, { success: false });
+          if (retryData && retryData.success) {
+            setHofData(retryData);
+          }
+        } catch (retryErr) {
+          console.error('Secondary eval also failed:', retryErr);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -507,6 +531,26 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
             <p className="text-sm font-semibold text-slate-400">
               {selectedPeriod} 평가 데이터 및 AI 심사평 로딩 중...
             </p>
+          </div>
+        )}
+
+        {/* EMPTY / RETRY STATE */}
+        {!isLoading && !hofData && (
+          <div className="py-16 text-center space-y-4 bg-slate-900/60 border border-slate-800 rounded-3xl p-8 my-6">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+              <Award className="w-6 h-6" />
+            </div>
+            <h4 className="text-lg font-bold text-white">평가 데이터 준비 중입니다</h4>
+            <p className="text-sm text-slate-400 max-w-md mx-auto">
+              서버리스 환경에서 데이터베이스 초기화가 진행 중이거나 평가 캐시 생성이 필요합니다. 아래 버튼을 클릭하여 AI 평가 및 랭킹을 즉시 생성하십시오.
+            </p>
+            <button
+              onClick={() => fetchHallOfFame(true)}
+              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-amber-500/20 inline-flex items-center space-x-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>AI 평가 및 랭킹 즉시 생성</span>
+            </button>
           </div>
         )}
 
