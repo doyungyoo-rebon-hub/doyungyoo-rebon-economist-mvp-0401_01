@@ -39,6 +39,7 @@ import {
   BookOpen,
   Quote
 } from 'lucide-react';
+import { safeResponseJson } from '../utils/apiClient';
 
 interface AnalystReportSearch01Props {
   onGoToPipeline01?: () => void;
@@ -253,12 +254,12 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
     setLoadingOverview(true);
     try {
       const res = await fetch('/api/pipeline-01/search/overview');
-      const json = await res.json();
-      if (json.success) {
+      const json = await safeResponseJson(res, { success: false });
+      if (json && json.success) {
         setOverview(json.data);
       }
     } catch (err) {
-      console.error('Failed to load search overview:', err);
+      console.warn('Failed to load search overview:', err);
     } finally {
       setLoadingOverview(false);
     }
@@ -283,15 +284,15 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
       params.append('sortOrder', sortOrder);
 
       const res = await fetch(`/api/pipeline-01/search/reports?${params.toString()}`);
-      const json = await res.json();
-      if (json.success && json.data) {
+      const json = await safeResponseJson(res, { success: false });
+      if (json && json.success && json.data) {
         setReports(json.data.items || []);
         setTotalItems(json.data.pagination.totalItems || 0);
         setTotalPages(json.data.pagination.totalPages || 1);
         setCurrentPage(json.data.pagination.currentPage || 1);
       }
     } catch (err) {
-      console.error('Failed to fetch filtered reports:', err);
+      console.warn('Failed to fetch filtered reports:', err);
     } finally {
       setLoadingReports(false);
     }
@@ -308,8 +309,8 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetMonth })
       });
-      const json = await res.json();
-      if (json.success && json.audit) {
+      const json = await safeResponseJson(res, { success: false });
+      if (json && json.success && json.audit) {
         setAuditResult(json.audit);
         if (json.audit.isMatched) {
           showToast(`✓ [정합성 100% 일치] ${targetMonth} 원본 데이터와 내부 DB가 완벽히 동기화되어 있습니다.`);
@@ -319,7 +320,7 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
         fetchOverview();
       }
     } catch (err: any) {
-      console.error('Audit run error:', err);
+      console.warn('Audit run error:', err);
       showToast('정합성 검사 중 통신 오류가 발생했습니다.');
     } finally {
       setIsAuditing(false);
@@ -339,8 +340,8 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
           targetNids: missingNids
         })
       });
-      const json = await res.json();
-      if (json.success) {
+      const json = await safeResponseJson(res, { success: false });
+      if (json && json.success) {
         setResyncSuccessMsg(json.message);
         showToast(json.message);
         // Refresh audit and reports
@@ -349,7 +350,7 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
         await fetchOverview();
       }
     } catch (err: any) {
-      console.error('Resync execution error:', err);
+      console.warn('Resync execution error:', err);
       showToast('재수집 동기화 중 오류가 발생했습니다.');
     } finally {
       setIsResyncing(false);
@@ -365,8 +366,8 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetMonth: target, gapCount: 6 })
       });
-      const json = await res.json();
-      if (json.success) {
+      const json = await safeResponseJson(res, { success: false });
+      if (json && json.success) {
         showToast(`[테스트 시뮬레이션] ${target} DB에서 6건의 의도적 누락을 생성했습니다.`);
         await handleRunAudit(target);
         await fetchReports(1);

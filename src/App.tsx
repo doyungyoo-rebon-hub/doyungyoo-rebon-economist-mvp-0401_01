@@ -25,6 +25,7 @@ import {
 import { Analyst, Broker, NotificationItem, NotificationSetting, PipelineLog, PipelineMetrics, Report, isSectorMatch } from './types';
 import { synthesizeAnalystsFromReports } from './utils/analystSynthesizer';
 import { classifyKrxStockSector } from './utils/sectorClassifier';
+import { safeResponseJson } from './utils/apiClient';
 import { Sparkles, X } from 'lucide-react';
 
 // Helper function to handle browser localStorage setItem with quota protection
@@ -77,17 +78,29 @@ export default function App() {
     const fetchData = async () => {
       try {
         const resReports = await fetch('/api/reports');
-        const dataReports = await resReports.json();
-        if (dataReports.success && Array.isArray(dataReports.reports)) {
+        const dataReports = await safeResponseJson(resReports, { success: false, reports: [] });
+        if (dataReports.success && Array.isArray(dataReports.reports) && dataReports.reports.length > 0) {
           // Filter out legacy mock reports if any exist in DB
           const realReports = (dataReports.reports as Report[]).filter(r => !r.id?.startsWith('rep-init-'));
           setReports(realReports);
         } else {
+          // If API returns HTML 404 or empty (e.g. serverless static deployment), retain existing local reports
+          const saved = localStorage.getItem('app_reports');
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                setReports(parsed);
+                return;
+              }
+            } catch (e) {
+              // ignore
+            }
+          }
           setReports([]);
         }
       } catch (err) {
-        console.error('Failed to fetch data from DB:', err);
-        setReports([]);
+        console.warn('Failed to fetch data from DB:', err);
       }
     };
     fetchData();
@@ -177,7 +190,7 @@ export default function App() {
     showToast('2026년 01월 전체 851건 실데이터 수집 및 AI 요약 분석을 진행 중입니다...');
     try {
       const res = await fetch('/api/naver-reports?year=2026&month=01&mode=all');
-      const data = await res.json();
+      const data = await safeResponseJson(res, { success: false, reports: [] });
       if (data.success && Array.isArray(data.reports)) {
         handleBatchIngestReports(data.reports);
         // Sync monthly download statistics to localStorage for MonthlyDataStats view
@@ -208,7 +221,7 @@ export default function App() {
     let wasDeleted = false;
     try {
       const res = await fetch(`/api/reports/month/${yearMonth}`, { method: 'DELETE' });
-      const data = await res.json();
+      const data = await safeResponseJson(res, { success: false, deletedCount: 0 });
       if (data.success && data.deletedCount >= 0) {
         wasDeleted = true;
       }
@@ -269,7 +282,7 @@ export default function App() {
     setIsSyncing(true);
     try {
       const res = await fetch('/api/pipeline/sync', { method: 'POST' });
-      const data = await res.json();
+      const data = await safeResponseJson(res, { success: false });
 
       if (data.success && data.newReport) {
         // Append new report & log
@@ -320,7 +333,7 @@ export default function App() {
         body: JSON.stringify(input),
       });
 
-      const aiResult = await response.json();
+      const aiResult = await safeResponseJson(response, {});
 
       const finalAnalystName = input.analystName || aiResult.extractedAnalystName || '담당 연구원';
       const finalBrokerName = input.brokerName || aiResult.extractedBrokerName || '개별 업로드 리포트';

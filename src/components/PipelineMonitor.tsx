@@ -6,6 +6,7 @@ import { PdfCollectionManager } from './PdfCollectionManager';
 import { Step1MetadataViewer } from './Step1MetadataViewer';
 import { Step2DirectoryStorageViewer } from './Step2DirectoryStorageViewer';
 import { ReportDetailModal } from './ReportDetailModal';
+import { safeResponseJson } from '../utils/apiClient';
 
 interface PipelineMonitorProps {
   brokers: Broker[];
@@ -63,12 +64,12 @@ export const PipelineMonitor: React.FC<PipelineMonitorProps> = ({
   const fetchAllSystemReports = async () => {
     try {
       const res = await fetch('/api/reports');
-      const data = await res.json();
-      if (data.success && Array.isArray(data.reports)) {
+      const data = await safeResponseJson(res, { success: false, reports: [] });
+      if (data && data.success && Array.isArray(data.reports)) {
         setAllSystemReports(data.reports);
       }
     } catch (e) {
-      console.error('Failed to fetch system reports:', e);
+      console.warn('Failed to fetch system reports:', e);
     }
   };
 

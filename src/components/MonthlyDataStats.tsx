@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Report, SectorCategory, STANDARD_12_SECTORS, getCanonicalSector } from '../types';
 import { classifyKrxStockSector } from '../utils/sectorClassifier';
+import { safeResponseJson } from '../utils/apiClient';
 
 interface MonthlyDataStatsProps {
   reports: Report[];
@@ -89,8 +90,8 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
     try {
       setIsLoadingServerDb(true);
       const res = await fetch('/api/pipeline-01/search/reports?limit=10000');
-      const data = await res.json();
-      if (data.success && data.data?.items) {
+      const data = await safeResponseJson(res, { success: false, data: { items: [] } });
+      if (data && data.success && data.data?.items) {
         setServerReports(data.data.items);
       }
     } catch (err) {
@@ -228,12 +229,12 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
-      const data = await response.json();
+      const data = await safeResponseJson(response, { success: false });
 
       setClassificationProgress(80);
       setClassificationStatusMsg('AI 섹터 분류 결과 데이터베이스 일괄 동기화 중...');
 
-      if (data.success) {
+      if (data && data.success) {
         setLastClassificationResult(data);
         setClassificationProgress(100);
         setClassificationStatusMsg(data.message || '12대 표준 대분류가 성공적으로 적용되었습니다.');
@@ -241,10 +242,10 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
         await fetchServerDbReports();
         onRefreshReports?.();
       } else {
-        setClassificationStatusMsg('분류 처리 실패: ' + (data.error || '알 수 없는 오류'));
+        setClassificationStatusMsg('분류 처리 실패: ' + (data?.error || '알 수 없는 오류'));
       }
     } catch (err: any) {
-      console.error('Batch classification error:', err);
+      console.warn('Batch classification error:', err);
       setClassificationStatusMsg('오류 발생: ' + err.message);
     } finally {
       setTimeout(() => {
@@ -265,13 +266,13 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
           updateDb: true,
         })
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = await safeResponseJson(res, { success: false });
+      if (data && data.success) {
         await fetchServerDbReports();
         onRefreshReports?.();
       }
     } catch (err) {
-      console.error('Single classify error:', err);
+      console.warn('Single classify error:', err);
     }
   };
 

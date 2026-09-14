@@ -28,6 +28,7 @@ import {
   Eye,
   Info
 } from 'lucide-react';
+import { safeResponseJson } from '../utils/apiClient';
 import { Analyst, Report, STANDARD_12_SECTORS } from '../types';
 import { AnalystBottomSheet } from './AnalystBottomSheet';
 
@@ -98,8 +99,8 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
       params.append('sortOrder', sortOrder);
 
       const res = await fetch(`/api/pipeline-01/analysts-overview?${params.toString()}`);
-      const data = await res.json();
-      if (data.success) {
+      const data = await safeResponseJson(res, { success: false });
+      if (data && data.success) {
         setAnalystsList(data.analysts || []);
         setKpi(data.kpi || null);
         if (data.filterOptions) {
@@ -107,7 +108,7 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
         }
       }
     } catch (err) {
-      console.error('Failed to fetch analysts:', err);
+      console.warn('Failed to fetch analysts:', err);
     } finally {
       setIsLoading(false);
     }

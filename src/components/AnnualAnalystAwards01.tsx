@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { AnalystBottomSheet } from './AnalystBottomSheet';
 import { STANDARD_12_SECTORS } from '../types';
+import { safeResponseJson } from '../utils/apiClient';
 
 interface AnnualAnalystAwards01Props {
   onSelectReportByStock?: (stockName: string) => void;
@@ -114,13 +115,13 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ period: selectedPeriod })
         });
-        const data = await res.json();
+        const data = await safeResponseJson(res, { success: false });
         clearInterval(timer);
         setReEvalProgress(100);
         setTimeout(() => {
           setIsReEvaluating(false);
           setReEvalProgress(0);
-          if (data.success) {
+          if (data && data.success) {
             setHofData(data);
           }
         }, 400);
@@ -133,12 +134,12 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
       setIsLoading(true);
       try {
         const res = await fetch(`/api/pipeline-01/hall-of-fame-eval?period=${selectedPeriod}&force=false`);
-        const data = await res.json();
-        if (data.success) {
+        const data = await safeResponseJson(res, { success: false });
+        if (data && data.success) {
           setHofData(data);
         }
       } catch (err) {
-        console.error('Failed to load hall of fame data:', err);
+        console.warn('Failed to load hall of fame data:', err);
       } finally {
         setIsLoading(false);
       }

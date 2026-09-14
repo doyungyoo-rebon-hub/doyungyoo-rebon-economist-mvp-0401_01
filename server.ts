@@ -289,11 +289,10 @@ function sanitizeStockNameAndCode(rawStockName: string, rawText: string = ''): {
   };
 }
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+export const app = express();
+const PORT = 3000;
 
-  app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "10mb" }));
 
   // Initialize Gemini AI Client (Server-Side Only)
   const apiKey = process.env.GEMINI_API_KEY;
@@ -8360,7 +8359,8 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
   });
 
 
-  // Serve static UI in production
+  // Serve static UI in production & start HTTP server
+export async function startServer() {
   let distPath = path.join(process.cwd(), "dist");
   if (!fs.existsSync(path.join(distPath, "index.html"))) {
     if (typeof __dirname !== "undefined" && fs.existsSync(path.join(__dirname, "index.html"))) {
@@ -8372,6 +8372,7 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
 
   const isProduction =
     process.env.NODE_ENV === "production" ||
+    process.env.VERCEL === "1" ||
     (process.argv[1] && process.argv[1].includes("server.cjs")) ||
     (!process.env.NODE_ENV && fs.existsSync(path.join(distPath, "index.html")));
 
@@ -8395,13 +8396,19 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
     app.use(vite.middlewares);
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
+  return new Promise<void>((resolve) => {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
+      resolve();
+    });
   });
 }
 
-startServer().catch((err) => {
-  console.error("Fatal error starting server:", err);
-  process.exit(1);
-});
+// Auto start if not in Vercel serverless environment
+if (!process.env.VERCEL) {
+  startServer().catch((err) => {
+    console.error("Fatal error starting server:", err);
+    process.exit(1);
+  });
+}
 
