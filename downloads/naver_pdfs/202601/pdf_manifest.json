@@ -1,0 +1,31 @@
+{
+  "year": "2026",
+  "month": "01",
+  "downloadedAt": "2026-08-08T10:10:42.738Z",
+  "namingRuleUsed": "rule1",
+  "pdfTypeTag": "원문_PDF",
+  "totalPdfsSaved": 1,
+  "totalPdfsFailed": 0,
+  "newlyDownloadedCount": 1,
+  "skippedCount": 0,
+  "directory": "downloads/naver_pdfs/202601",
+  "pdfFiles": [
+    {
+      "fileName": "[원문_PDF]삼성전자_KB증권_005930_2026-01-31.pdf",
+      "filePath": "downloads/naver_pdfs/202601/[원문_PDF]삼성전자_KB증권_005930_2026-01-31.pdf",
+      "fileSize": "730.2 KB",
+      "stockName": "삼성전자",
+      "stockCode": "005930",
+      "brokerName": "KB증권",
+      "analystName": "강동진",
+      "targetPrice": 105000,
+      "reportTitle": "HBM3E 공급 확대 및 메모리 반도체 업황 회복 본격화",
+      "pdfUrl": "https://ssl.pstatic.net/imgstock/upload/research/company/1721520001_report.pdf",
+      "pdfTypeTag": "원문_PDF",
+      "contentSnippet": "[삼성전자 005930] 2026-01-31 KB증권 강동진 연구원 종목분석 리포트",
+      "isNewDownload": true,
+      "status": "신규 다운로드 완료"
+    }
+  ],
+  "failedFiles": []
+}

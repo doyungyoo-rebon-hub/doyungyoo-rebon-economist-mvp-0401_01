@@ -1,0 +1,8 @@
+{
+  "name": "리본-이코노미스트_올해의 애널리스트어워즈_MVP_04",
+  "description": "리본인텔리전스 이코노미스트 2026 애널리스트 어워즈 MVP",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

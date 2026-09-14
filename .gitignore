@@ -1,0 +1,11 @@
+node_modules/
+build/
+coverage/
+backups/
+*.tar.gz
+.DS_Store
+*.log
+bun.lock*
+.env*
+!.env.example
+

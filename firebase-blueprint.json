@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "Report": {
+      "title": "Report",
+      "description": "AI-Ready Stock Analysis Research Report entity with raw data retention, vector embedding slot, change detection hash, and versioning.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique report identifier (e.g. rep_88888 or standard key)" },
+        "nid": { "type": "string", "description": "Naver Research Article unique ID" },
+        "stockCode": { "type": "string", "description": "6-digit KRX stock code (e.g. 005930)" },
+        "stockName": { "type": "string", "description": "Official company/stock name in Korean" },
+        "sector": { "type": "string", "description": "Industry sector category" },
+        "reportTitle": { "type": "string", "description": "Full title of the research report" },
+        "brokerName": { "type": "string", "description": "Securities firm name (e.g. 하나증권, 미래에셋증권)" },
+        "analystName": { "type": "string", "description": "Name of the publishing analyst/researcher" },
+        "publishDate": { "type": "string", "description": "Standardized publication date (YYYY-MM-DD)" },
+        "rawDate": { "type": "string", "description": "Original raw date string from portal (e.g. 26.01.02)" },
+        "yymmdd": { "type": "string", "description": "Compact date representation (YYMMDD)" },
+        "month": { "type": "string", "description": "Year-Month bucket identifier (YYYY-MM)" },
+        "targetPrice": { "type": "number", "description": "Analyst target price in KRW" },
+        "currentPrice": { "type": "number", "description": "Market stock price at report publication time" },
+        "investmentOpinion": { "type": "string", "description": "Rating (BUY, HOLD, SELL, etc.)" },
+        "hits": { "type": "number", "description": "View count / Hits" },
+        "hasPdf": { "type": "boolean", "description": "Whether PDF attachment is present" },
+        "pdfUrl": { "type": "string", "description": "Direct download link for official PDF attachment" },
+        "reportUrl": { "type": "string", "description": "Original web article URL" },
+        "standardFileName": { "type": "string", "description": "Standardized file naming convention string" },
+        "pdfStatus": { "type": "string", "description": "Detailed PDF acquisition status (OBTAINED, MISSING_ORIGINAL, etc.)" },
+        "pdfStoragePath": { "type": "string", "description": "Local/Cloud storage archived path" },
+        "bodyText": { "type": "string", "description": "Extracted text content from web article body or PDF text" },
+        "paragraphs": { "type": "array", "description": "Structured paragraph array of report body content" },
+        "characterCount": { "type": "number", "description": "Character count of the report text" },
+        "contentHash": { "type": "string", "description": "SHA-256 hash of core report content for update-on-change detection" },
+        "version": { "type": "number", "description": "Monotonically incrementing schema version number for this record" },
+        "syncStatus": { "type": "string", "description": "Latest sync status (INSERTED, UPDATED, UNCHANGED)" },
+        "firstSavedAt": { "type": "string", "description": "ISO timestamp when record was first inserted into DB" },
+        "lastUpdatedAt": { "type": "string", "description": "ISO timestamp when record was last updated in DB" },
+        "isAIAnalyzed": { "type": "boolean", "description": "Whether AI deep analysis has been performed" },
+        "aiSummary": { "type": "string", "description": "AI-generated executive summary and core thesis" },
+        "objectivityScore": { "type": "number", "description": "AI objectivity evaluation score (0-100)" },
+        "sentimentScore": { "type": "number", "description": "AI tone/sentiment score (-1.0 to +1.0)" },
+        "embeddingVector": { "type": "array", "description": "Vector embedding coordinates (768-dim) for RAG semantic search" },
+        "isSourceVerified": { "type": "boolean", "description": "Raw data integrity verification flag" }
+      },
+      "required": ["nid", "stockCode", "stockName", "reportTitle", "brokerName", "publishDate", "contentHash", "version"]
+    },
+    "SyncLog": {
+      "title": "SyncLog",
+      "description": "Audit log for database synchronization operations with change tracking metrics.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique sync log ID" },
+        "timestamp": { "type": "string", "description": "ISO timestamp of sync execution" },
+        "targetMonth": { "type": "string", "description": "Target month or scope synced (e.g. 2026-01, ALL)" },
+        "totalChecked": { "type": "number", "description": "Total candidate records evaluated" },
+        "insertedCount": { "type": "number", "description": "Number of newly inserted records" },
+        "updatedCount": { "type": "number", "description": "Number of records modified due to content changes" },
+        "skippedCount": { "type": "number", "description": "Number of unchanged records skipped to save writes" },
+        "durationMs": { "type": "number", "description": "Sync execution latency in milliseconds" },
+        "status": { "type": "string", "description": "Execution status (SUCCESS, PARTIAL, ERROR)" }
+      },
+      "required": ["timestamp", "totalChecked", "insertedCount", "updatedCount", "skippedCount"]
+    }
+  },
+  "firestore": {
+    "/reports/{reportId}": {
+      "schema": { "$ref": "#/entities/Report" },
+      "description": "Collection of research reports stored with safe change-detection versioning and AI analysis fields."
+    },
+    "/sync_logs/{syncLogId}": {
+      "schema": { "$ref": "#/entities/SyncLog" },
+      "description": "Collection of database synchronization batch audit records."
+    }
+  }
+}
