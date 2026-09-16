@@ -4,8 +4,7 @@ import fs from "fs";
 import crypto from "crypto";
 import { fileURLToPath } from "url";
 
-const __filename = typeof import.meta.url === "string" ? fileURLToPath(import.meta.url) : "";
-const __dirname = __filename ? path.dirname(__filename) : process.cwd();
+const serverDir = path.dirname(fileURLToPath(import.meta.url));
 
 // Process level safety handlers for production resilience
 process.on("unhandledRejection", (reason, promise) => {
@@ -138,7 +137,7 @@ import {
 
 // Database Paths & Master DB Store
 export function resolveDbFilePath(subPath: string): string {
-  const currentDir = typeof __dirname !== 'undefined' && __dirname ? __dirname : process.cwd();
+  const currentDir = serverDir || process.cwd();
   const candidates = [
     path.join(process.cwd(), subPath),
     path.join(currentDir, '..', subPath),
@@ -240,8 +239,8 @@ export function saveMasterDbRecords(recordsMap: Map<string, any>) {
 
 // Initialize Firebase (Server-Side using Client SDK because of permissions)
 let firebaseConfigPath = path.join(process.cwd(), 'firebase-applet-config.json');
-if (!fs.existsSync(firebaseConfigPath) && typeof __dirname !== 'undefined') {
-  const altPath = path.join(__dirname, '..', 'firebase-applet-config.json');
+if (!fs.existsSync(firebaseConfigPath)) {
+  const altPath = path.join(serverDir, '..', 'firebase-applet-config.json');
   if (fs.existsSync(altPath)) {
     firebaseConfigPath = altPath;
   }
@@ -8447,20 +8446,22 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
 export async function startServer() {
   let distPath = path.join(process.cwd(), "dist");
   if (!fs.existsSync(path.join(distPath, "index.html"))) {
-    if (typeof __dirname !== "undefined" && fs.existsSync(path.join(__dirname, "index.html"))) {
-      distPath = __dirname;
-    } else if (typeof __dirname !== "undefined" && fs.existsSync(path.join(__dirname, "dist", "index.html"))) {
-      distPath = path.join(__dirname, "dist");
+    const currentDir = serverDir || process.cwd();
+    if (fs.existsSync(path.join(currentDir, "index.html"))) {
+      distPath = currentDir;
+    } else if (fs.existsSync(path.join(currentDir, "dist", "index.html"))) {
+      distPath = path.join(currentDir, "dist");
     }
   }
 
+  const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
   const isProduction =
     process.env.NODE_ENV === "production" ||
+    process.env.K_SERVICE !== undefined ||
     process.env.VERCEL === "1" ||
-    (process.argv[1] && process.argv[1].includes("server.cjs")) ||
-    (!process.env.NODE_ENV && fs.existsSync(path.join(distPath, "index.html")));
+    hasStaticDist;
 
-  if (isProduction) {
+  if (isProduction || hasStaticDist) {
     app.use(express.static(distPath));
     app.get("*", (req: express.Request, res: express.Response) => {
       const indexPath = path.join(distPath, "index.html");
@@ -8480,22 +8481,26 @@ export async function startServer() {
     app.use(vite.middlewares);
   }
 
-  return new Promise<void>((resolve) => {
-    app.listen(PORT, "0.0.0.0", () => {
+  return new Promise<void>((resolve, reject) => {
+    const server = app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://0.0.0.0:${PORT}`);
       resolve();
+    });
+    server.on("error", (err: any) => {
+      console.error(`[Server Listen Error] Failed to bind to 0.0.0.0:${PORT}:`, err);
+      reject(err);
     });
   });
 }
 
-// Check if executed directly as the main process
-const isDirectMain = Boolean(
-  process.argv[1] &&
-  (process.argv[1].endsWith('server.ts') || process.argv[1].endsWith('server.cjs'))
+// Auto start if not in a serverless lambda/function environment (e.g. Vercel)
+const isServerlessFunction = Boolean(
+  process.env.VERCEL ||
+  process.env.NOW_REGION ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME
 );
 
-// Auto start if not in Vercel serverless environment and run directly
-if (!process.env.VERCEL && !process.env.NOW_REGION && isDirectMain) {
+if (!isServerlessFunction) {
   startServer().catch((err) => {
     console.error("Fatal error starting server:", err);
     process.exit(1);
