@@ -1,6 +1,6 @@
 {
   "name": "리본-이코노미스트_올해의 애널리스트어워즈_MVP_04",
-  "description": "리본인텔리전스 이코노미스트 2026 애널리스트 어워즈 MVP",
+  "description": "리본인텔리전스 이코노미스트 2026 애널리스트 어워즈 - VERSION 1.6 차세대 실시간 리포트 평가 & 파이프라인 대시보드",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

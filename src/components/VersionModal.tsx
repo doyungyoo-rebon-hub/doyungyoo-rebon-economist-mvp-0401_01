@@ -8,13 +8,15 @@ interface VersionModalProps {
 }
 
 export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) => {
-  const [downloadingType, setDownloadingType] = useState<'standard' | 'full' | null>(null);
+  const [downloadingType, setDownloadingType] = useState<'standard' | 'full' | 'v15' | null>(null);
 
   if (!isOpen) return null;
 
-  const handleDownload = (isFull: boolean) => {
-    setDownloadingType(isFull ? 'full' : 'standard');
-    const url = isFull ? '/api/export-project-zip?full=true' : '/api/export-project-zip';
+  const handleDownload = (type: 'standard' | 'full' | 'v15') => {
+    setDownloadingType(type);
+    let url = '/api/export-project-zip';
+    if (type === 'full') url = '/api/export-project-zip?full=true';
+    if (type === 'v15') url = '/api/export-v1-5-backup-zip';
     window.location.href = url;
     setTimeout(() => {
       setDownloadingType(null);
@@ -70,18 +72,18 @@ export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) =
               사내 서버(Ubuntu, CentOS, Windows Server, Docker)로 전체 소스코드와 4,868건의 증권사 리포트 마스터 DB, 명예의 전당 랭킹, AI 분석 캐시, 실행 스크립트 일체를 원클릭으로 압축 백업합니다.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
               {/* Option 1: Standard Onprem Backup */}
               <button
                 type="button"
-                onClick={() => handleDownload(false)}
+                onClick={() => handleDownload('standard')}
                 disabled={downloadingType !== null}
-                className="flex flex-col text-left p-3.5 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/70 border border-emerald-600/60 hover:border-emerald-400 transition-all cursor-pointer shadow-md group"
+                className="flex flex-col text-left p-3 rounded-lg bg-emerald-900/40 hover:bg-emerald-900/70 border border-emerald-600/60 hover:border-emerald-400 transition-all cursor-pointer shadow-md group"
               >
                 <div className="flex items-center justify-between w-full mb-1.5">
                   <span className="font-bold text-xs text-emerald-200 group-hover:text-white flex items-center">
                     <Download className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
-                    온프레미스 소스 + 마스터 DB (권장)
+                    v1.6 온프레미스 (권장)
                   </span>
                   <span className="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">
                     약 12MB
@@ -100,14 +102,14 @@ export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) =
               {/* Option 2: Full Archive Backup */}
               <button
                 type="button"
-                onClick={() => handleDownload(true)}
+                onClick={() => handleDownload('full')}
                 disabled={downloadingType !== null}
-                className="flex flex-col text-left p-3.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/60 transition-all cursor-pointer shadow-md group"
+                className="flex flex-col text-left p-3 rounded-lg bg-slate-800/80 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500/60 transition-all cursor-pointer shadow-md group"
               >
                 <div className="flex items-center justify-between w-full mb-1.5">
                   <span className="font-bold text-xs text-slate-200 group-hover:text-cyan-300 flex items-center">
                     <HardDrive className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
-                    전체 풀백업 (원본 PDF 포함)
+                    v1.6 전체 풀백업 (PDF 포함)
                   </span>
                   <span className="text-[10px] bg-slate-900 text-cyan-300 px-1.5 py-0.5 rounded border border-slate-700">
                     약 30~50MB
@@ -119,6 +121,32 @@ export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) =
                 {downloadingType === 'full' && (
                   <span className="text-[10px] text-cyan-400 font-bold mt-2 animate-pulse">
                     ⏳ 전체 대용량 아카이브 압축 중...
+                  </span>
+                )}
+              </button>
+
+              {/* Option 3: v1.5 Final Snapshot Backup */}
+              <button
+                type="button"
+                onClick={() => handleDownload('v15')}
+                disabled={downloadingType !== null}
+                className="flex flex-col text-left p-3 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-500/50 hover:border-indigo-400 transition-all cursor-pointer shadow-md group"
+              >
+                <div className="flex items-center justify-between w-full mb-1.5">
+                  <span className="font-bold text-xs text-indigo-200 group-hover:text-white flex items-center">
+                    <FileCheck className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
+                    v1.5 풀백업 ZIP
+                  </span>
+                  <span className="text-[10px] bg-indigo-900 text-indigo-200 px-1.5 py-0.5 rounded border border-indigo-700">
+                    12MB 보존
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-tight">
+                  VERSION 1.5 최종 동결 스냅샷 전체 무손실 풀백업 패키지 (1클릭 복구 지원)
+                </p>
+                {downloadingType === 'v15' && (
+                  <span className="text-[10px] text-indigo-400 font-bold mt-2 animate-pulse">
+                    ⏳ v1.5 백업 파일 다운로드 중...
                   </span>
                 )}
               </button>
@@ -173,7 +201,7 @@ export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) =
                       ? 'bg-blue-500 text-white ring-4 ring-blue-950 shadow-lg shadow-blue-500/50'
                       : 'bg-slate-800 text-slate-400 border border-slate-700'
                   }`}>
-                    {v.version.startsWith('VERSION ') ? '1.1' : v.version.replace('v', '')}
+                    {v.version.replace(/^VERSION\s*/i, '').split(' ')[0]}
                   </div>
                   <div className="flex-1 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 hover:border-slate-700 transition-colors">
                     <div className="flex items-center justify-between mb-1">

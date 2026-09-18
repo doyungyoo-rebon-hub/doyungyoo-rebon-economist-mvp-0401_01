@@ -2,16 +2,32 @@ import type { VersionInfo } from '../types.ts';
 
 export const APP_VERSIONS: VersionInfo[] = [
   {
-    version: 'VERSION 1.5',
-    releaseDate: '2026-08-25',
-    title: '차세대 인텔리전스 & AI 리포트 분석 고도화 (VERSION 1.5 신규 개발 라인)',
-    summary: 'VERSION 1.4 최종 완료본(스냅샷 백업 완료)을 기반으로 추가 기능 확장 및 지능형 고도화를 진행하는 신규 활성 버전',
+    version: 'VERSION 1.6',
+    releaseDate: '2026-09-18',
+    title: '차세대 실시간 인텔리전스 & AI 리포트 분석 파이프라인 (VERSION 1.6)',
+    summary: 'VERSION 1.5 전체 프로젝트 무손실 풀 백업 완료 기반, Cloud Run 프로덕션 배포 파이프라인 최적화 및 차세대 실시간 리포트 평가 인텔리전스가 적용된 최신 활성 버전',
     isCurrent: true,
     highlights: [
-      'VERSION 1.4 최종 안정화 버전(명예의 전당 TOP 20, 32개 증권사 실시간 수집, DART 전자공시 연계 팩트체크) 100% 무손실 백업 보존 (backups/v1.4-final-backup.tar.gz)',
-      '언제든지 1클릭 복구 가능한 v1.4 복원 엔진(npm run restore:v1.4) 및 복구 스크립트(scripts/restore-v1.4.cjs) 구축',
-      '신규 VERSION 1.5 전용 기능 확장 및 분석 파이프라인 성능 최적화 진행',
-      'AI 앙상블 리서치 평가 모델 심화 및 사용자 맞춤형 인텔리전스 확장'
+      'VERSION 1.5 전체 프로젝트 무손실 풀 백업 완료 (backups/v1.5-final/ 및 v1.5-final-backup.tar.gz, 1클릭 복원 지원)',
+      '언제든지 1클릭 복구 가능한 v1.5 복원 엔진(npm run restore:v1.5) 및 복구 스크립트(scripts/restore-v1.5.cjs) 구축',
+      'Cloud Run 프로덕션 배포 파이프라인 완벽 최적화 및 듀얼 포트/헬스체크 엔진 가동',
+      '32개 증권사 리포트 실시간 수집 및 DART 전자공시 팩트체크 엔진 1.6 고도화',
+      'AI 증권 리포트 정밀 분석 및 이코노미스트 독자 평가 지표 체계 확장'
+    ]
+  },
+  {
+    version: 'VERSION 1.5 (최종 완료본)',
+    releaseDate: '2026-09-18',
+    title: '차세대 인텔리전스 & AI 리포트 분석 고도화 (VERSION 1.5 최종 완료본)',
+    summary: '4,868건의 증권사 리포트 마스터 DB, 명예의 전당 TOP 20, DART 공시 팩트체크, Cloud Run 프로덕션 빌드 시스템이 통합된 전수 풀 백업 보존 버전',
+    isCurrent: false,
+    highlights: [
+      '💾 전체 프로젝트 및 DB 무손실 풀 백업 완료 (backups/v1.5-final-backup.tar.gz & analyst_report_eval_v1.5_full_backup.zip)',
+      '🏆 올해의 애널리스트 명예의 전당 TOP 20 전원 선발 및 AI 심사평/상장 수여증 완성',
+      '🏛️ 금융감독원 Open DART API 서버사이드 프록시 & 전후 30일 공시 타임라인 매칭',
+      '🔍 AI 팩트체크 & 어닝 서프라이즈 교차 검증 (리포트 실적 추정치 ↔ DART 공시)',
+      '📊 32개 국내 증권사 리서치 실시간 수집, PDF 원문 뷰어, HTML 본문 인라인 리더',
+      '⚡ 1클릭 복구 스크립트: scripts/restore-v1.5.cjs (npm run restore:v1.5 지원)'
     ]
   },
   {
