@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, FileText, Search, Cpu, BarChart3, Bell, Activity, Sparkles, Tag, Database, UserCheck } from 'lucide-react';
+import { Award, FileText, Search, Cpu, BarChart3, Bell, Activity, Sparkles, Tag, Database, UserCheck, HardDrive } from 'lucide-react';
 import { PipelineMetrics } from '../types';
 import { CURRENT_VERSION } from '../data/versions';
 
@@ -39,6 +39,14 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="flex items-center space-x-3 text-slate-400 text-xs">
+            <button
+              onClick={onOpenVersionModal}
+              className="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/70 text-emerald-300 hover:text-emerald-100 px-2.5 py-0.5 rounded text-[11px] font-bold transition-all flex items-center space-x-1 cursor-pointer shadow-sm"
+              title="사내 서버 온프레미스 배포용 전체 소스코드 및 4,868건 마스터 DB 풀백업 다운로드"
+            >
+              <HardDrive className="w-3 h-3 text-emerald-400" />
+              <span>💾 온프레미스 풀백업</span>
+            </button>
             {onClearData && (
               <button
                 onClick={onClearData}
@@ -88,8 +96,18 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Quick Status Pill */}
+          {/* Quick Status Pill & On-premise Backup Action */}
           <div className="flex items-center space-x-2 shrink-0">
+            <button
+              type="button"
+              onClick={onOpenVersionModal}
+              className="flex items-center space-x-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-900/40 border border-emerald-400/40 cursor-pointer transition-all hover:scale-105"
+              title="사내 서버 온프레미스 배포용 전체 소스코드 및 4,868건 마스터 DB 풀백업 다운로드"
+            >
+              <HardDrive className="w-4 h-4 text-emerald-100" />
+              <span className="tracking-tight">💾 온프레미스 풀백업</span>
+            </button>
+
             <button
               onClick={() => setActiveTab('notifications')}
               className="sm:hidden relative p-2 rounded-lg text-slate-400 hover:text-white bg-slate-800 border border-slate-700"

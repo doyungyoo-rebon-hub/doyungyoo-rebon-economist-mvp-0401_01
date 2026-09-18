@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  ai-report-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.onprem
+    container_name: ai_analyst_report_service
+    restart: unless-stopped
+    ports:
+      # 호스트 포트 3000 -> 컨테이너 내부 3000 (필요 시 "80:3000" 또는 "8080:3000"으로 변경 가능)
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - TZ=Asia/Seoul
+      # Google Gemini AI API 키 설정 (.env 파일 또는 직접 입력)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      # [중요] 마스터 DB(JSON) 및 수집된 PDF 원문 데이터가 컨테이너 재시작 시에도 영구 보존되도록 로컬 디렉토리 마운트
+      - ./downloads:/app/downloads
+      - ./fonts:/app/fonts
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"

@@ -938,8 +938,22 @@ function restoreVectorDbMode() {
 }
 
 // server.ts
-var __filename = typeof import.meta.url === "string" ? fileURLToPath(import.meta.url) : "";
-var __dirname = __filename ? path2.dirname(__filename) : process.cwd();
+var getServerDir = () => {
+  try {
+    if (typeof __dirname !== "undefined" && __dirname) {
+      return __dirname;
+    }
+  } catch (_) {
+  }
+  try {
+    if (typeof import.meta !== "undefined" && import.meta?.url) {
+      return path2.dirname(fileURLToPath(import.meta.url));
+    }
+  } catch (_) {
+  }
+  return process.cwd();
+};
+var serverDir = getServerDir();
 process.on("unhandledRejection", (reason, promise) => {
   console.error("[Process Warning] Unhandled Rejection at:", promise, "reason:", reason);
 });
@@ -1016,7 +1030,7 @@ async function safeFirestoreDeleteDoc(collectionName, docId) {
   }
 }
 function resolveDbFilePath(subPath) {
-  const currentDir = typeof __dirname !== "undefined" && __dirname ? __dirname : process.cwd();
+  const currentDir = serverDir || process.cwd();
   const candidates = [
     path2.join(process.cwd(), subPath),
     path2.join(currentDir, "..", subPath),
@@ -1106,8 +1120,8 @@ function saveMasterDbRecords(recordsMap) {
   }
 }
 var firebaseConfigPath = path2.join(process.cwd(), "firebase-applet-config.json");
-if (!fs2.existsSync(firebaseConfigPath) && typeof __dirname !== "undefined") {
-  const altPath = path2.join(__dirname, "..", "firebase-applet-config.json");
+if (!fs2.existsSync(firebaseConfigPath)) {
+  const altPath = path2.join(serverDir, "..", "firebase-applet-config.json");
   if (fs2.existsSync(altPath)) {
     firebaseConfigPath = altPath;
   }
@@ -1228,9 +1242,20 @@ app.get("/api/export-project-zip", (req, res) => {
       for (const item of items) {
         if (item === "node_modules" || item === "dist" || item === ".git" || item === ".cache") continue;
         if (localDir === rootDir && item === "downloads") {
-          const dbDir = path2.join(rootDir, "downloads", "database");
-          if (fs2.existsSync(dbDir)) {
-            zip.addLocalFolder(dbDir, path2.join(zipPathPrefix, "downloads", "database"));
+          if (isFull) {
+            const downloadsDir = path2.join(rootDir, "downloads");
+            if (fs2.existsSync(downloadsDir)) {
+              zip.addLocalFolder(downloadsDir, path2.join(zipPathPrefix, "downloads"));
+            }
+          } else {
+            const dbDir = path2.join(rootDir, "downloads", "database");
+            if (fs2.existsSync(dbDir)) {
+              zip.addLocalFolder(dbDir, path2.join(zipPathPrefix, "downloads", "database"));
+            }
+            const cacheFile = path2.join(rootDir, "downloads", "naver_stock_reports_cache.json");
+            if (fs2.existsSync(cacheFile)) {
+              zip.addLocalFile(cacheFile, path2.join(zipPathPrefix, "downloads"));
+            }
           }
           continue;
         }
@@ -1243,12 +1268,14 @@ app.get("/api/export-project-zip", (req, res) => {
         }
       }
     };
+    const isFull = req.query.full === "true" || req.query.includePdfs === "true";
     const zip = new AdmZip();
     const rootDir = process.cwd();
     addDirectoryFiltered(rootDir, "");
     const zipBuffer = zip.toBuffer();
+    const filename = isFull ? "analyst_report_eval_v1.5_full_backup.zip" : "analyst_report_eval_v1.5_onprem_source.zip";
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", 'attachment; filename="source_code_v1.5.zip"');
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Length", zipBuffer.length);
     res.send(zipBuffer);
   } catch (err) {
@@ -8095,14 +8122,16 @@ app.get("/api/pipeline-01/sector-stats", (req, res) => {
 async function startServer() {
   let distPath = path2.join(process.cwd(), "dist");
   if (!fs2.existsSync(path2.join(distPath, "index.html"))) {
-    if (typeof __dirname !== "undefined" && fs2.existsSync(path2.join(__dirname, "index.html"))) {
-      distPath = __dirname;
-    } else if (typeof __dirname !== "undefined" && fs2.existsSync(path2.join(__dirname, "dist", "index.html"))) {
-      distPath = path2.join(__dirname, "dist");
+    const currentDir = serverDir || process.cwd();
+    if (fs2.existsSync(path2.join(currentDir, "index.html"))) {
+      distPath = currentDir;
+    } else if (fs2.existsSync(path2.join(currentDir, "dist", "index.html"))) {
+      distPath = path2.join(currentDir, "dist");
     }
   }
-  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1" || process.argv[1] && process.argv[1].includes("server.cjs") || !process.env.NODE_ENV && fs2.existsSync(path2.join(distPath, "index.html"));
-  if (isProduction) {
+  const hasStaticDist = fs2.existsSync(path2.join(distPath, "index.html"));
+  const isProduction = process.env.NODE_ENV === "production" || process.env.K_SERVICE !== void 0 || process.env.VERCEL === "1" || hasStaticDist;
+  if (isProduction || hasStaticDist) {
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       const indexPath = path2.join(distPath, "index.html");
@@ -8120,17 +8149,21 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   }
-  return new Promise((resolve) => {
-    app.listen(PORT, "0.0.0.0", () => {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://0.0.0.0:${PORT}`);
       resolve();
     });
+    server.on("error", (err) => {
+      console.error(`[Server Listen Error] Failed to bind to 0.0.0.0:${PORT}:`, err);
+      reject(err);
+    });
   });
 }
-var isDirectMain = Boolean(
-  process.argv[1] && (process.argv[1].endsWith("server.ts") || process.argv[1].endsWith("server.cjs"))
+var isServerlessFunction = Boolean(
+  process.env.VERCEL || process.env.NOW_REGION || process.env.AWS_LAMBDA_FUNCTION_NAME
 );
-if (!process.env.VERCEL && !process.env.NOW_REGION && isDirectMain) {
+if (!isServerlessFunction) {
   startServer().catch((err) => {
     console.error("Fatal error starting server:", err);
     process.exit(1);

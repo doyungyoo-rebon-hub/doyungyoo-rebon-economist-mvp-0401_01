@@ -4,7 +4,24 @@ import fs from "fs";
 import crypto from "crypto";
 import { fileURLToPath } from "url";
 
-const serverDir = path.dirname(fileURLToPath(import.meta.url));
+const getServerDir = () => {
+  try {
+    // @ts-ignore
+    if (typeof __dirname !== "undefined" && __dirname) {
+      // @ts-ignore
+      return __dirname;
+    }
+  } catch (_) {}
+  try {
+    // @ts-ignore
+    if (typeof import.meta !== "undefined" && import.meta?.url) {
+      // @ts-ignore
+      return path.dirname(fileURLToPath(import.meta.url));
+    }
+  } catch (_) {}
+  return process.cwd();
+};
+const serverDir = getServerDir();
 
 // Process level safety handlers for production resilience
 process.on("unhandledRejection", (reason, promise) => {
@@ -334,7 +351,10 @@ function sanitizeStockNameAndCode(rawStockName: string, rawText: string = ''): {
 }
 
 export const app = express();
-const PORT = 3000;
+// In AI Studio dev sandbox, Nginx listens on PORT (8080) and reverse-proxies to DEFAULT_APP_PORT (3000).
+// In deployed Cloud Run (and standard production containers), the server MUST listen on process.env.PORT (8080).
+const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
+const PORT = isDevSandbox ? 3000 : (Number(process.env.PORT) || 3000);
 
 app.use(express.json({ limit: "10mb" }));
 
@@ -439,6 +459,7 @@ app.use(express.json({ limit: "10mb" }));
   // Source Code ZIP Export Endpoint (Full Current Workspace)
   app.get("/api/export-project-zip", (req, res) => {
     try {
+      const isFull = req.query.full === 'true' || req.query.includePdfs === 'true';
       const zip = new AdmZip();
       const rootDir = process.cwd();
 
@@ -447,10 +468,22 @@ app.use(express.json({ limit: "10mb" }));
         for (const item of items) {
           if (item === 'node_modules' || item === 'dist' || item === '.git' || item === '.cache') continue;
           if (localDir === rootDir && item === 'downloads') {
-            // Include db / database metadata if any, skip huge binary PDF downloads
-            const dbDir = path.join(rootDir, 'downloads', 'database');
-            if (fs.existsSync(dbDir)) {
-              zip.addLocalFolder(dbDir, path.join(zipPathPrefix, 'downloads', 'database'));
+            if (isFull) {
+              // Include entire downloads directory (database, caches, pdfs, reports)
+              const downloadsDir = path.join(rootDir, 'downloads');
+              if (fs.existsSync(downloadsDir)) {
+                zip.addLocalFolder(downloadsDir, path.join(zipPathPrefix, 'downloads'));
+              }
+            } else {
+              // Standard onprem export: include database master files + stock report caches, omit heavy pdfs
+              const dbDir = path.join(rootDir, 'downloads', 'database');
+              if (fs.existsSync(dbDir)) {
+                zip.addLocalFolder(dbDir, path.join(zipPathPrefix, 'downloads', 'database'));
+              }
+              const cacheFile = path.join(rootDir, 'downloads', 'naver_stock_reports_cache.json');
+              if (fs.existsSync(cacheFile)) {
+                zip.addLocalFile(cacheFile, path.join(zipPathPrefix, 'downloads'));
+              }
             }
             continue;
           }
@@ -466,8 +499,12 @@ app.use(express.json({ limit: "10mb" }));
 
       addDirectoryFiltered(rootDir, '');
       const zipBuffer = zip.toBuffer();
+      const filename = isFull
+        ? 'analyst_report_eval_v1.5_full_backup.zip'
+        : 'analyst_report_eval_v1.5_onprem_source.zip';
+
       res.setHeader('Content-Type', 'application/zip');
-      res.setHeader('Content-Disposition', 'attachment; filename="source_code_v1.5.zip"');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Length', zipBuffer.length);
       res.send(zipBuffer);
     } catch (err: any) {
@@ -8455,11 +8492,7 @@ export async function startServer() {
   }
 
   const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
-  const isProduction =
-    process.env.NODE_ENV === "production" ||
-    process.env.K_SERVICE !== undefined ||
-    process.env.VERCEL === "1" ||
-    hasStaticDist;
+  const isProduction = process.env.NODE_ENV === "production";
 
   if (isProduction || hasStaticDist) {
     app.use(express.static(distPath));
@@ -8482,12 +8515,16 @@ export async function startServer() {
   }
 
   return new Promise<void>((resolve, reject) => {
-    const server = app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on http://0.0.0.0:${PORT}`);
+    const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
+    const mainPort = isDevSandbox ? 3000 : (Number(process.env.PORT) || 3000);
+
+    const server = app.listen(mainPort, "0.0.0.0", () => {
+      console.log(`Server running on http://0.0.0.0:${mainPort}`);
       resolve();
     });
+
     server.on("error", (err: any) => {
-      console.error(`[Server Listen Error] Failed to bind to 0.0.0.0:${PORT}:`, err);
+      console.error(`[Server Listen Error] Failed to bind to 0.0.0.0:${mainPort}:`, err);
       reject(err);
     });
   });
