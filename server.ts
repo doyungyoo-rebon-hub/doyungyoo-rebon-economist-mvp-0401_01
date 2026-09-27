@@ -351,7 +351,8 @@ function sanitizeStockNameAndCode(rawStockName: string, rawText: string = ''): {
 }
 
 export const app = express();
-// Port resolution: Default to 3000 in dev sandbox; adapt to process.env.PORT in production/Cloud Run.
+// In AI Studio dev sandbox, Nginx listens on PORT (8080) and reverse-proxies to DEFAULT_APP_PORT (3000).
+// In deployed Cloud Run (and standard production containers), the server MUST listen on process.env.PORT (8080).
 const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
 const PORT = isDevSandbox ? 3000 : (Number(process.env.PORT) || 3000);
 
@@ -8559,6 +8560,11 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
 
   // Serve static UI in production & start HTTP server
 export async function startServer() {
+  // Cloud Run and container health check endpoints
+  app.get(["/healthz", "/api/health"], (_req: express.Request, res: express.Response) => {
+    res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() });
+  });
+
   let distPath = path.join(process.cwd(), "dist");
   if (!fs.existsSync(path.join(distPath, "index.html"))) {
     const currentDir = serverDir || process.cwd();
@@ -8570,9 +8576,11 @@ export async function startServer() {
   }
 
   const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
-  const isProduction = process.env.NODE_ENV === "production";
+  const isCloudRun = Boolean(process.env.K_SERVICE || process.env.K_REVISION || process.env.K_CONFIGURATION);
+  const isProduction = process.env.NODE_ENV === "production" || isCloudRun;
+  const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT) && !isProduction;
 
-  if (isProduction || hasStaticDist) {
+  if (isProduction || (!isDevSandbox && hasStaticDist)) {
     app.use(express.static(distPath));
     app.get("*", (req: express.Request, res: express.Response) => {
       const indexPath = path.join(distPath, "index.html");
@@ -8592,46 +8600,40 @@ export async function startServer() {
     app.use(vite.middlewares);
   }
 
-  return new Promise<void>((resolve, reject) => {
-    const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
-    const envPort = process.env.PORT ? Number(process.env.PORT) : NaN;
-    const targetPort = isDevSandbox ? 3000 : (!isNaN(envPort) && envPort > 0 ? envPort : 3000);
+  // In AI Studio Cloud Run containers, Nginx listens on 8080 and reverse-proxies to DEFAULT_APP_PORT (3000).
+  // The Node application must listen on 3000 to avoid EADDRINUSE collisions with Nginx.
+  const preferredPort = (process.env.DEFAULT_APP_PORT || process.env.CONTROL_PLANE_PORT)
+    ? (Number(process.env.DEFAULT_APP_PORT) || 3000)
+    : (Number(process.env.PORT) || 3000);
 
-    const server = app.listen(targetPort, "0.0.0.0", () => {
-      console.log(`Primary server listening on http://0.0.0.0:${targetPort}`);
+  const fallbackPort = preferredPort === 3000
+    ? (process.env.PORT && Number(process.env.PORT) !== 3000 ? Number(process.env.PORT) : null)
+    : 3000;
 
-      // In production/Cloud Run if targetPort is not 3000 (e.g. 8080), also optionally bind to 3000 for internal proxies
-      if (!isDevSandbox && targetPort !== 3000) {
-        try {
-          const secondaryServer = app.listen(3000, "0.0.0.0", () => {
-            console.log(`Secondary internal port listening on http://0.0.0.0:3000`);
-          });
-          secondaryServer.on("error", () => {
-            // Non-fatal if 3000 is occupied or restricted
-          });
-        } catch (_) {}
-      }
+  const tryListen = (port: number): Promise<void> => {
+    return new Promise<void>((resolve, reject) => {
+      const server = app.listen(port, "0.0.0.0", () => {
+        console.log(`Server running on http://0.0.0.0:${port} (mode: ${isProduction ? 'production' : 'development'}, Cloud Run: ${isCloudRun})`);
+        resolve();
+      });
 
-      resolve();
-    });
-
-    server.on("error", (err: any) => {
-      console.error(`[Server Listen Error] Failed to bind to 0.0.0.0:${targetPort}:`, err);
-      // If binding to process.env.PORT failed with EADDRINUSE or invalid port, fallback to 3000
-      if (targetPort !== 3000 && err?.code === 'EADDRINUSE') {
-        console.warn(`Attempting fallback to port 3000...`);
-        const fallbackServer = app.listen(3000, "0.0.0.0", () => {
-          console.log(`Fallback server listening on http://0.0.0.0:3000`);
-          resolve();
-        });
-        fallbackServer.on("error", (fallbackErr: any) => {
-          reject(fallbackErr);
-        });
-      } else {
+      server.on("error", (err: any) => {
         reject(err);
-      }
+      });
     });
-  });
+  };
+
+  try {
+    await tryListen(preferredPort);
+  } catch (err: any) {
+    if (err.code === "EADDRINUSE" && fallbackPort && fallbackPort !== preferredPort) {
+      console.warn(`[Server] Port ${preferredPort} is in use (EADDRINUSE). Attempting fallback port ${fallbackPort}...`);
+      await tryListen(fallbackPort);
+    } else {
+      console.error(`[Server Listen Error] Failed to bind to port ${preferredPort}:`, err);
+      throw err;
+    }
+  }
 }
 
 // Auto start if not in a serverless lambda/function environment (e.g. Vercel)
