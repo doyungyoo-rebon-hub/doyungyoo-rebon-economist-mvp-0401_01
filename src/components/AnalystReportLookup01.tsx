@@ -2126,6 +2126,7 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
             {/* Modal Iframe PDF Body */}
             <div className="flex-1 bg-slate-950 p-2 relative">
               <iframe
+                key={`${previewReport.nid || previewReport.standardFileName || previewReport.stockName}_${previewPdfType}`}
                 src={`/api/pipeline-01/view-pdf-stream?${new URLSearchParams({
                   nid: previewReport.nid || '',
                   pdfUrl: previewReport.pdfUrl || '',
