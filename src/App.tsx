@@ -16,6 +16,7 @@ import { AnalystLookup01 } from './components/AnalystLookup01';
 import { AnnualAnalystAwards01 } from './components/AnnualAnalystAwards01';
 import { ReportDetailModal } from './components/ReportDetailModal';
 import { VersionModal } from './components/VersionModal';
+import { Evaluation2026Simulator } from './components/Evaluation2026Simulator';
 
 import {
   INITIAL_BROKERS,
@@ -40,7 +41,7 @@ function safeSetLocalStorage(key: string, value: any) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'awards' | 'annual_analysts_01' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files'>('annual_analysts_01');
+  const [activeTab, setActiveTab] = useState<'awards' | 'annual_analysts_01' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files'>('annual_analysts_01');
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Application Data States - Loads from localStorage if present (for persistent real data collection)
@@ -694,6 +695,13 @@ export default function App() {
               setActiveTab('reports_lookup_01');
             }}
             onViewReportDetail={(r) => setSelectedReport(r)}
+          />
+        )}
+
+        {activeTab === 'kpi_simulator' && (
+          <Evaluation2026Simulator
+            analystsList={analysts}
+            onSelectAnalyst={(a) => setSelectedAnalyst(a)}
           />
         )}
 

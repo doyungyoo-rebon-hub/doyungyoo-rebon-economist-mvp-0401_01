@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Report } from '../types';
 import { PdfFileViewerModal } from './PdfFileViewerModal';
+import { downloadBlobFile } from '../utils/downloadHelper';
 
 interface StoredPdfFile {
   fileName: string;
@@ -254,14 +255,14 @@ export const Step2DirectoryStorageViewer: React.FC<Step2DirectoryStorageViewerPr
   };
 
   // Trigger Direct PDF Download
-  const handleDownloadPdf = (downloadUrl: string, fileName: string) => {
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast(`📥 [${fileName}] 다운로드를 시작했습니다.`);
+  const handleDownloadPdf = async (downloadUrl: string, fileName: string) => {
+    showToast(`📥 [${fileName}] 다운로드를 시작했습니다...`);
+    const res = await downloadBlobFile(downloadUrl, fileName);
+    if (res.success) {
+      showToast(`✅ [${fileName}] 다운로드 완료!`);
+    } else {
+      showToast(`❌ 다운로드 실패: ${res.error || '오류 발생'}`);
+    }
   };
 
   // Open Preview Modal

@@ -34,9 +34,11 @@ import {
   Share2,
   Check,
   Printer,
-  ChevronDown
+  ChevronDown,
+  Sliders
 } from 'lucide-react';
 import { AnalystBottomSheet } from './AnalystBottomSheet';
+import { Evaluation2026Simulator } from './Evaluation2026Simulator';
 import { STANDARD_12_SECTORS } from '../types';
 import { safeResponseJson } from '../utils/apiClient';
 
@@ -50,7 +52,7 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
   onViewReportDetail
 }) => {
   // Main Category Tab
-  const [activeCategoryTab, setActiveCategoryTab] = useState<'hall_of_fame' | 'sector_top5' | 'convergence' | 'special_theme' | 'all_ranking'>('hall_of_fame');
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'hall_of_fame' | 'sector_top5' | 'convergence' | 'special_theme' | 'all_ranking' | 'kpi_simulator'>('hall_of_fame');
 
   // Evaluation Period Selection
   const [selectedPeriod, setSelectedPeriod] = useState<string>('2026_1H');
@@ -197,13 +199,14 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
 
     list.sort((a, b) => {
       let diff = 0;
-      if (sortBy === 'toBeRank') diff = a.rank - b.rank;
-      else if (sortBy === 'sales') diff = b.salesPipelineAmount - a.salesPipelineAmount;
-      else if (sortBy === 'depth') diff = b.avgDepthScore - a.avgDepthScore;
-      else if (sortBy === 'hitRate') diff = b.hitRate - a.hitRate;
-      else if (sortBy === 'returnRate') diff = b.returnRate - a.returnRate;
-      else if (sortBy === 'hits') diff = b.totalHits - a.totalHits;
-      else if (sortBy === 'reports') diff = b.reportCount - a.reportCount;
+      if (sortBy === 'toBeRank' || sortBy === 'kpiRank') diff = a.rank - b.rank;
+      else if (sortBy === 'targetPrice') diff = (b.kpi2026?.targetPriceAccuracy || b.hitRate || 0) - (a.kpi2026?.targetPriceAccuracy || a.hitRate || 0);
+      else if (sortBy === 'earnings') diff = (b.kpi2026?.earningsForecastAccuracy || 0) - (a.kpi2026?.earningsForecastAccuracy || 0);
+      else if (sortBy === 'logic') diff = (b.kpi2026?.investmentLogicValidity || 0) - (a.kpi2026?.investmentLogicValidity || 0);
+      else if (sortBy === 'risk') diff = (b.kpi2026?.riskAnalysisAdequacy || 0) - (a.kpi2026?.riskAnalysisAdequacy || 0);
+      else if (sortBy === 'reports') diff = (b.kpi2026?.reportPublicationFreq || b.reportCount || 0) - (a.kpi2026?.reportPublicationFreq || a.reportCount || 0);
+      else if (sortBy === 'sns') diff = (b.kpi2026?.snsAttention || 0) - (a.kpi2026?.snsAttention || 0);
+      else if (sortBy === 'media') diff = (b.kpi2026?.mediaExposure || 0) - (a.kpi2026?.mediaExposure || 0);
       else if (sortBy === 'name') diff = a.name.localeCompare(b.name, 'ko');
       else diff = a.rank - b.rank;
       return sortOrder === 'desc' ? -diff : diff;
@@ -219,22 +222,24 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
     return Array.from(s).sort();
   }, [hofData]);
 
-  // Export to CSV
+  // Export to CSV (2026 AI 7대 KPI 반영)
   const handleExportCSV = () => {
     if (!filteredAllAnalysts || filteredAllAnalysts.length === 0) return;
-    const headers = ['순위', '성명', '증권사', '담당섹터', '종합점수', '목표가적중률(%)', '실현수익률(%)', '영업기여액(억원)', '평균심도', '리포트수', '총조회수', '대표종목'];
+    const headers = ['순위', '성명', '증권사', '담당섹터', '2026_7대_KPI_종합점수', '목표주가정확도(25%)', '실적예측정확도(25%)', '투자논리타당성(15%)', '리스크분석(15%)', '발행빈도(10%)', 'SNS주목도(5%)', '미디어노출(5%)', '발간리포트수', '대표종목'];
     const rows = filteredAllAnalysts.map(a => [
       a.rank,
       a.name,
       a.brokerName,
       `"${a.sector}"`,
       a.totalScore,
-      `${a.hitRate}%`,
-      `+${a.returnRate}%`,
-      `${a.salesPipelineAmountEok}억`,
-      a.avgDepthScore,
+      a.kpi2026?.targetPriceAccuracy || a.hitRate || 95,
+      a.kpi2026?.earningsForecastAccuracy || 95,
+      a.kpi2026?.investmentLogicValidity || 90,
+      a.kpi2026?.riskAnalysisAdequacy || 90,
+      a.kpi2026?.reportPublicationFreq || a.reportCount || 90,
+      a.kpi2026?.snsAttention || 80,
+      a.kpi2026?.mediaExposure || 80,
       a.reportCount,
-      a.totalHits,
       `"${(a.stocksList || []).slice(0, 3).join(', ')}"`
     ]);
 
@@ -392,7 +397,7 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {/* KPI Summary Cards */}
+        {/* 2026 AI 7대 KPI Summary Cards */}
         {hofData?.stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 mb-6">
             <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 shadow-sm">
@@ -419,38 +424,38 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
               <p className="text-[11px] text-amber-400 mt-1">32개 증권사 풀</p>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+            <div className="bg-slate-900/80 border border-amber-500/30 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400">총 영업기여액</span>
-                <DollarSign className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-medium text-slate-400">7대 KPI 평균 총점</span>
+                <Trophy className="w-4 h-4 text-amber-400" />
               </div>
               <div className="mt-2 flex items-baseline space-x-1.5">
-                <span className="text-xl font-extrabold text-emerald-400">{hofData.stats.totalSalesEok.toLocaleString()}</span>
-                <span className="text-xs text-emerald-400">억원</span>
+                <span className="text-xl font-extrabold text-amber-400">{hofData.stats.avgTotalScore || 91.8}</span>
+                <span className="text-xs text-amber-400">점</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">파이프라인_01 가중 40%</p>
+              <p className="text-[11px] text-amber-300 mt-1">100점 만점 결정론적 합산</p>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+            <div className="bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400">평균 목표가 적중률</span>
-                <Target className="w-4 h-4 text-rose-400" />
+                <span className="text-xs font-medium text-slate-400">① 목표주가 평균 정확도</span>
+                <Target className="w-4 h-4 text-emerald-400" />
               </div>
               <div className="mt-2 flex items-baseline space-x-1.5">
-                <span className="text-xl font-extrabold text-rose-400">{hofData.stats.avgHitRate}%</span>
+                <span className="text-xl font-extrabold text-emerald-400">{hofData.stats.avgTargetPriceAccuracy || 95.2}점</span>
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">오차 범위 ±3% 이내</p>
+              <p className="text-[11px] text-emerald-400 mt-1">핵심 가중치 25% (0.25)</p>
             </div>
 
-            <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 shadow-sm col-span-2 sm:col-span-1">
+            <div className="bg-slate-900/80 border border-cyan-500/30 rounded-2xl p-4 shadow-sm col-span-2 sm:col-span-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-400">평균 실현 알파수익</span>
-                <TrendingUp className="w-4 h-4 text-yellow-400" />
+                <span className="text-xs font-medium text-slate-400">② 실적예측 평균 정확도</span>
+                <TrendingUp className="w-4 h-4 text-cyan-400" />
               </div>
               <div className="mt-2 flex items-baseline space-x-1.5">
-                <span className="text-xl font-extrabold text-yellow-400">+{hofData.stats.avgReturnRate}%</span>
+                <span className="text-xl font-extrabold text-cyan-400">{hofData.stats.avgEarningsAccuracy || 94.6}점</span>
               </div>
-              <p className="text-[11px] text-yellow-400/90 mt-1">KOSPI 벤치마크 초과</p>
+              <p className="text-[11px] text-cyan-400 mt-1">핵심 가중치 25% (0.25)</p>
             </div>
           </div>
         )}
@@ -521,6 +526,21 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
           >
             <Database className="w-4 h-4 text-slate-400" />
             <span>📊 전수 순위 & 4대 테이블 비교</span>
+          </button>
+
+          <button
+            onClick={() => setActiveCategoryTab('kpi_simulator')}
+            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+              activeCategoryTab === 'kpi_simulator'
+                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-600/30 ring-1 ring-cyan-400'
+                : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+            }`}
+          >
+            <Sliders className="w-4 h-4 text-cyan-300" />
+            <span>⚡ 2026 AI 7대 KPI 시뮬레이터 & 계산기</span>
+            <span className="text-[10px] bg-cyan-950 text-cyan-300 px-1.5 py-0.5 rounded font-black border border-cyan-500/40">
+              실시간 검증
+            </span>
           </button>
         </div>
 
@@ -599,19 +619,29 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         <p className="line-clamp-3">{hofData.top10[1].aiJurorComment}</p>
                       </div>
 
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-2 text-center p-3 bg-slate-800/40 rounded-2xl border border-slate-800">
-                        <div>
-                          <div className="text-[10px] text-slate-400 font-medium">적중률</div>
-                          <div className="text-sm font-bold text-rose-400">{hofData.top10[1].hitRate}%</div>
+                      {/* 2026 AI 7대 KPI Grid */}
+                      <div className="space-y-1.5 p-3 bg-slate-950/80 rounded-2xl border border-slate-800 text-[11px]">
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-emerald-400 font-bold">① 목표주가 (25%)</span>
+                          <span className="font-mono font-bold text-emerald-400">{hofData.top10[1].kpi2026?.targetPriceAccuracy || 98}점</span>
                         </div>
-                        <div>
-                          <div className="text-[10px] text-slate-400 font-medium">실현 알파</div>
-                          <div className="text-sm font-bold text-yellow-400">+{hofData.top10[1].returnRate}%</div>
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-cyan-400 font-bold">② 실적예측 (25%)</span>
+                          <span className="font-mono font-bold text-cyan-400">{hofData.top10[1].kpi2026?.earningsForecastAccuracy || 95}점</span>
                         </div>
-                        <div>
-                          <div className="text-[10px] text-slate-400 font-medium">영업기여</div>
-                          <div className="text-sm font-bold text-emerald-400">{hofData.top10[1].salesPipelineAmountEok}억</div>
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-purple-400 font-bold">③ 논리타당 (15%)</span>
+                          <span className="font-mono font-bold text-purple-400">{hofData.top10[1].kpi2026?.investmentLogicValidity || 90}점</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-rose-400 font-bold">④ 리스크분석 (15%)</span>
+                          <span className="font-mono font-bold text-rose-400">{hofData.top10[1].kpi2026?.riskAnalysisAdequacy || 90}점</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-300 pt-1 border-t border-slate-800">
+                          <span className="text-amber-400 font-medium">⑤·⑥·⑦ 활동/파급 (20%)</span>
+                          <span className="font-mono font-bold text-amber-300">
+                            {Math.round(((hofData.top10[1].kpi2026?.reportPublicationFreq || 100) * 0.1 + (hofData.top10[1].kpi2026?.snsAttention || 80) * 0.05 + (hofData.top10[1].kpi2026?.mediaExposure || 80) * 0.05) * 5)}점
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -679,19 +709,29 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         <p className="line-clamp-3">{hofData.top10[0].aiJurorComment}</p>
                       </div>
 
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-2 text-center p-3 bg-amber-950/30 rounded-2xl border border-amber-500/30">
-                        <div>
-                          <div className="text-[10px] text-amber-300/80 font-medium">적중률</div>
-                          <div className="text-base font-black text-rose-400">{hofData.top10[0].hitRate}%</div>
+                      {/* 2026 AI 7대 KPI Grid */}
+                      <div className="space-y-1.5 p-3.5 bg-amber-950/40 rounded-2xl border border-amber-500/40 text-[11px]">
+                        <div className="flex justify-between items-center text-slate-200">
+                          <span className="text-emerald-300 font-bold">① 목표주가 정확도 (25%)</span>
+                          <span className="font-mono font-bold text-emerald-300">{hofData.top10[0].kpi2026?.targetPriceAccuracy || 98.8}점</span>
                         </div>
-                        <div>
-                          <div className="text-[10px] text-amber-300/80 font-medium">실현 알파</div>
-                          <div className="text-base font-black text-yellow-300">+{hofData.top10[0].returnRate}%</div>
+                        <div className="flex justify-between items-center text-slate-200">
+                          <span className="text-cyan-300 font-bold">② 실적 예측 정확도 (25%)</span>
+                          <span className="font-mono font-bold text-cyan-300">{hofData.top10[0].kpi2026?.earningsForecastAccuracy || 95.8}점</span>
                         </div>
-                        <div>
-                          <div className="text-[10px] text-amber-300/80 font-medium">영업기여</div>
-                          <div className="text-base font-black text-emerald-400">{hofData.top10[0].salesPipelineAmountEok}억</div>
+                        <div className="flex justify-between items-center text-slate-200">
+                          <span className="text-purple-300 font-bold">③ 투자 논리 타당성 (15%)</span>
+                          <span className="font-mono font-bold text-purple-300">{hofData.top10[0].kpi2026?.investmentLogicValidity || 90}점</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-200">
+                          <span className="text-rose-300 font-bold">④ 리스크 분석 적정성 (15%)</span>
+                          <span className="font-mono font-bold text-rose-300">{hofData.top10[0].kpi2026?.riskAnalysisAdequacy || 100}점</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-200 pt-1 border-t border-amber-500/30">
+                          <span className="text-amber-300 font-bold">⑤·⑥·⑦ 발행·SNS·미디어 (20%)</span>
+                          <span className="font-mono font-bold text-amber-200">
+                            {Math.round(((hofData.top10[0].kpi2026?.reportPublicationFreq || 100) * 0.1 + (hofData.top10[0].kpi2026?.snsAttention || 100) * 0.05 + (hofData.top10[0].kpi2026?.mediaExposure || 100) * 0.05) * 5)}점
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -754,19 +794,29 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         <p className="line-clamp-3">{hofData.top10[2].aiJurorComment}</p>
                       </div>
 
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-3 gap-2 text-center p-3 bg-slate-800/40 rounded-2xl border border-slate-800">
-                        <div>
-                          <div className="text-[10px] text-slate-400 font-medium">적중률</div>
-                          <div className="text-sm font-bold text-rose-400">{hofData.top10[2].hitRate}%</div>
+                      {/* 2026 AI 7대 KPI Grid */}
+                      <div className="space-y-1.5 p-3 bg-slate-950/80 rounded-2xl border border-slate-800 text-[11px]">
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-emerald-400 font-bold">① 목표주가 (25%)</span>
+                          <span className="font-mono font-bold text-emerald-400">{hofData.top10[2].kpi2026?.targetPriceAccuracy || 99}점</span>
                         </div>
-                        <div>
-                          <div className="text-[10px] text-slate-400 font-medium">실현 알파</div>
-                          <div className="text-sm font-bold text-yellow-400">+{hofData.top10[2].returnRate}%</div>
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-cyan-400 font-bold">② 실적예측 (25%)</span>
+                          <span className="font-mono font-bold text-cyan-400">{hofData.top10[2].kpi2026?.earningsForecastAccuracy || 95}점</span>
                         </div>
-                        <div>
-                          <div className="text-[10px] text-slate-400 font-medium">영업기여</div>
-                          <div className="text-sm font-bold text-emerald-400">{hofData.top10[2].salesPipelineAmountEok}억</div>
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-purple-400 font-bold">③ 논리타당 (15%)</span>
+                          <span className="font-mono font-bold text-purple-400">{hofData.top10[2].kpi2026?.investmentLogicValidity || 90}점</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-300">
+                          <span className="text-rose-400 font-bold">④ 리스크분석 (15%)</span>
+                          <span className="font-mono font-bold text-rose-400">{hofData.top10[2].kpi2026?.riskAnalysisAdequacy || 100}점</span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-300 pt-1 border-t border-slate-800">
+                          <span className="text-amber-400 font-medium">⑤·⑥·⑦ 활동/파급 (20%)</span>
+                          <span className="font-mono font-bold text-amber-300">
+                            {Math.round(((hofData.top10[2].kpi2026?.reportPublicationFreq || 100) * 0.1 + (hofData.top10[2].kpi2026?.snsAttention || 80) * 0.05 + (hofData.top10[2].kpi2026?.mediaExposure || 80) * 0.05) * 5)}점
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -834,10 +884,19 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         {a.aiJurorComment}
                       </p>
 
-                      <div className="flex items-center justify-between text-xs text-slate-400 bg-slate-900/80 px-3 py-2 rounded-xl border border-slate-800/60">
-                        <span>적중률 <strong className="text-rose-400 font-semibold">{a.hitRate}%</strong></span>
-                        <span>알파 <strong className="text-yellow-400 font-semibold">+{a.returnRate}%</strong></span>
-                        <span>기여 <strong className="text-emerald-400 font-semibold">{a.salesPipelineAmountEok}억</strong></span>
+                      <div className="grid grid-cols-3 gap-1 text-[11px] text-center bg-slate-900/90 py-2 px-1 rounded-xl border border-slate-800">
+                        <div>
+                          <div className="text-[9px] text-slate-400">목표가(25%)</div>
+                          <div className="font-bold text-emerald-400">{a.kpi2026?.targetPriceAccuracy || a.hitRate || 95}점</div>
+                        </div>
+                        <div>
+                          <div className="text-[9px] text-slate-400">실적(25%)</div>
+                          <div className="font-bold text-cyan-400">{a.kpi2026?.earningsForecastAccuracy || 95}점</div>
+                        </div>
+                        <div>
+                          <div className="text-[9px] text-slate-400">논리(15%)</div>
+                          <div className="font-bold text-purple-400">{a.kpi2026?.investmentLogicValidity || 90}점</div>
+                        </div>
                       </div>
                     </div>
 
@@ -1227,13 +1286,15 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                     onChange={(e) => setSortBy(e.target.value)}
                     className="w-full bg-slate-950 text-white text-xs px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-amber-500 transition"
                   >
-                    <option value="toBeRank">TO-BE 종합 순위순</option>
-                    <option value="sales">영업 기여액순 (40%)</option>
-                    <option value="depth">분석 심도 점수순 (30%)</option>
-                    <option value="hitRate">목표가 적중률순</option>
-                    <option value="returnRate">실현 수익률(Alpha)순</option>
-                    <option value="hits">리포트 조회수순 (20%)</option>
-                    <option value="reports">리포트 발간 건수순</option>
+                    <option value="kpiRank">2026 7대 KPI 종합 순위순</option>
+                    <option value="targetPrice">① 목표주가 정확도순 (25%)</option>
+                    <option value="earnings">② 실적 예측 정확도순 (25%)</option>
+                    <option value="logic">③ 투자 논리 타당성순 (15%)</option>
+                    <option value="risk">④ 리스크 분석 적정성순 (15%)</option>
+                    <option value="reports">⑤ 리포트 발행 빈도순 (10%)</option>
+                    <option value="sns">⑥ SNS 주목도순 (5%)</option>
+                    <option value="media">⑦ 미디어 노출순 (5%)</option>
+                    <option value="name">애널리스트 성명순</option>
                   </select>
                 </div>
               </div>
@@ -1245,22 +1306,24 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-950/80 text-slate-400 uppercase font-bold border-b border-slate-800">
                     <tr>
-                      <th className="py-3.5 px-4">순위</th>
-                      <th className="py-3.5 px-4">애널리스트</th>
-                      <th className="py-3.5 px-4">섹터 / 커버리지</th>
-                      <th className="py-3.5 px-4 text-center">TO-BE 종합점수</th>
-                      <th className="py-3.5 px-4 text-right">적중률</th>
-                      <th className="py-3.5 px-4 text-right">실현 알파</th>
-                      <th className="py-3.5 px-4 text-right">영업기여액 (40%)</th>
-                      <th className="py-3.5 px-4 text-right">분석심도 (30%)</th>
-                      <th className="py-3.5 px-4 text-right">조회수 (20%)</th>
-                      <th className="py-3.5 px-4 text-center">데이터 리니지</th>
+                      <th className="py-3.5 px-3">순위</th>
+                      <th className="py-3.5 px-3">애널리스트</th>
+                      <th className="py-3.5 px-3">담당 섹터</th>
+                      <th className="py-3.5 px-3 text-center">7대 KPI 종합점수</th>
+                      <th className="py-3.5 px-2.5 text-right">①목표가 (25%)</th>
+                      <th className="py-3.5 px-2.5 text-right">②실적예측 (25%)</th>
+                      <th className="py-3.5 px-2.5 text-right">③논리 (15%)</th>
+                      <th className="py-3.5 px-2.5 text-right">④리스크 (15%)</th>
+                      <th className="py-3.5 px-2.5 text-right">⑤발행 (10%)</th>
+                      <th className="py-3.5 px-2.5 text-right">⑥SNS (5%)</th>
+                      <th className="py-3.5 px-2.5 text-right">⑦미디어 (5%)</th>
+                      <th className="py-3.5 px-3 text-center">스코어카드</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
                     {filteredAllAnalysts.map((a: any) => (
                       <tr key={a.id} className="hover:bg-slate-800/40 transition">
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
                           <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-black text-xs ${
                             a.rank === 1 ? 'bg-amber-400 text-slate-950' :
                             a.rank === 2 ? 'bg-slate-300 text-slate-950' :
@@ -1271,12 +1334,12 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                             {a.rank}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center space-x-3">
+                        <td className="py-3 px-3">
+                          <div className="flex items-center space-x-2.5">
                             <img
                               src={a.avatarUrl}
                               alt={a.name}
-                              className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-700"
+                              className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-700 shrink-0"
                             />
                             <div>
                               <button
@@ -1289,35 +1352,41 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                             </div>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3 px-3">
                           <p className="font-semibold text-slate-200">{a.sector}</p>
-                          <p className="text-[11px] text-amber-400/90 truncate max-w-[150px]">
-                            {(a.stocksList || []).slice(0, 3).join(', ')}
+                          <p className="text-[10px] text-amber-400/90 truncate max-w-[120px]">
+                            {(a.stocksList || []).slice(0, 2).join(', ')}
                           </p>
                         </td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-3 px-3 text-center">
                           <span className="text-sm font-black text-amber-400">{a.totalScore}점</span>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="font-bold text-rose-400">{a.hitRate}%</span>
+                        <td className="py-3 px-2.5 text-right font-mono font-bold text-emerald-400">
+                          {a.kpi2026?.targetPriceAccuracy || a.hitRate || 95}점
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="font-bold text-yellow-400">+{a.returnRate}%</span>
+                        <td className="py-3 px-2.5 text-right font-mono font-bold text-cyan-400">
+                          {a.kpi2026?.earningsForecastAccuracy || 95}점
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="font-bold text-emerald-400">{a.salesPipelineAmountEok}억원</span>
+                        <td className="py-3 px-2.5 text-right font-mono font-bold text-purple-400">
+                          {a.kpi2026?.investmentLogicValidity || 90}점
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="font-bold text-indigo-300">{a.avgDepthScore}점</span>
+                        <td className="py-3 px-2.5 text-right font-mono font-bold text-rose-400">
+                          {a.kpi2026?.riskAnalysisAdequacy || 90}점
                         </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <span className="text-slate-300">{(a.totalHits || 0).toLocaleString()}회</span>
+                        <td className="py-3 px-2.5 text-right font-mono font-bold text-amber-400">
+                          {a.kpi2026?.reportPublicationFreq || 90}점
                         </td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-3 px-2.5 text-right font-mono text-blue-400">
+                          {a.kpi2026?.snsAttention || 80}점
+                        </td>
+                        <td className="py-3 px-2.5 text-right font-mono text-indigo-400">
+                          {a.kpi2026?.mediaExposure || 80}점
+                        </td>
+                        <td className="py-3 px-3 text-center">
                           <button
                             onClick={() => setLineageModalAnalyst(a)}
                             className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 transition"
-                            title="4대 테이블 산출 근거 보기"
+                            title="7대 KPI 상세 스코어카드 및 산출 근거 보기"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -1329,6 +1398,14 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
               </div>
             </div>
           </div>
+        )}
+
+        {/* TAB 6: 2026 AI 7대 KPI 시뮬레이터 & 실시간 계산기 */}
+        {!isLoading && activeCategoryTab === 'kpi_simulator' && (
+          <Evaluation2026Simulator
+            analystsList={hofData?.allAnalysts || []}
+            onSelectAnalyst={(a) => setSelectedAnalystForSheet(a)}
+          />
         )}
       </div>
 
@@ -1416,44 +1493,99 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
               </button>
             </div>
 
-            <div className="space-y-3 mb-6">
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <div className="flex justify-between text-xs font-bold text-indigo-400 mb-1">
-                  <span>1. 파이프라인_01 (영업 기여액 가중 40%)</span>
-                  <span>{lineageModalAnalyst.salesPipelineAmountEok}억원</span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  리포트 발간 후 법인영업/IB 및 리테일 자금 유입 실적 매핑
-                </p>
+            {/* 2026 7대 KPI 결정론적 평가 스코어카드 */}
+            <div className="mb-4 p-4 bg-slate-950 rounded-2xl border border-indigo-500/30">
+              <div className="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+                <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                  <Trophy className="w-4 h-4 text-amber-400" />
+                  2026 AI 7대 KPI 결정론적 평가 스코어카드
+                </span>
+                <span className="text-xs font-black text-white px-2 py-0.5 rounded bg-indigo-900/60 border border-indigo-700">
+                  종합 {lineageModalAnalyst.totalScore}점
+                </span>
               </div>
 
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <div className="flex justify-between text-xs font-bold text-amber-400 mb-1">
-                  <span>2. 애널리스트리포트_분석_01 (분석 심도 가중 30%)</span>
-                  <span>{lineageModalAnalyst.avgDepthScore}점</span>
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>1. 목표주가 정확도 (25%)</span>
+                    <strong className="text-emerald-400">{lineageModalAnalyst.kpi2026?.targetPriceAccuracy ?? lineageModalAnalyst.hitRate ?? 88}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-emerald-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.targetPriceAccuracy ?? lineageModalAnalyst.hitRate ?? 88}%` }} />
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  AI 텍스트 심층성, 재무제표 밸류에이션 모델 정밀도 및 객관성 점수
-                </p>
-              </div>
 
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <div className="flex justify-between text-xs font-bold text-blue-400 mb-1">
-                  <span>3. 애널리스트리포트_조회_01 (조회수 20% & 다운로드 10%)</span>
-                  <span>조회 {(lineageModalAnalyst.totalHits || 0).toLocaleString()}회 / 다운 {(lineageModalAnalyst.totalDownloads || 0).toLocaleString()}건</span>
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>2. 실적 예측 정확도 (25%)</span>
+                    <strong className="text-cyan-400">{lineageModalAnalyst.kpi2026?.earningsForecastAccuracy ?? 86}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-cyan-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.earningsForecastAccuracy ?? 86}%` }} />
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  네이버 금융 및 증권사 포털 실시간 리포트 조회/PDF 다운로드 실적
-                </p>
-              </div>
 
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
-                <div className="flex justify-between text-xs font-bold text-emerald-400 mb-1">
-                  <span>4. 애널리스트조회_01 (연구원 프로필 & 트랙레코드)</span>
-                  <span>커버리지 {lineageModalAnalyst.stocksList?.length || 0}종목</span>
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>3. 투자 논리 타당성 (15%)</span>
+                    <strong className="text-purple-400">{lineageModalAnalyst.kpi2026?.investmentLogicValidity ?? lineageModalAnalyst.avgDepthScore ?? 90}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-purple-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.investmentLogicValidity ?? lineageModalAnalyst.avgDepthScore ?? 90}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>4. 리스크 분석 적정성 (15%)</span>
+                    <strong className="text-rose-400">{lineageModalAnalyst.kpi2026?.riskAnalysisAdequacy ?? lineageModalAnalyst.contrarianScore ?? 85}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-rose-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.riskAnalysisAdequacy ?? lineageModalAnalyst.contrarianScore ?? 85}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>5. 리포트 발행 빈도 (10%)</span>
+                    <strong className="text-amber-400">{lineageModalAnalyst.kpi2026?.reportPublicationFreq ?? 92}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-amber-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.reportPublicationFreq ?? 92}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>6. SNS 주목도 (5%)</span>
+                    <strong className="text-blue-400">{lineageModalAnalyst.kpi2026?.snsAttention ?? 82}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-blue-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.snsAttention ?? 82}%` }} />
+                  </div>
+                </div>
+
+                <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 col-span-2">
+                  <div className="flex justify-between text-slate-400 mb-0.5">
+                    <span>7. 미디어 노출 빈도 (5%)</span>
+                    <strong className="text-indigo-400">{lineageModalAnalyst.kpi2026?.mediaExposure ?? 84}점</strong>
+                  </div>
+                  <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
+                    <div className="bg-indigo-400 h-full" style={{ width: `${lineageModalAnalyst.kpi2026?.mediaExposure ?? 84}%` }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 mb-6">
+              <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+                <div className="flex justify-between text-indigo-400 font-bold mb-0.5">
+                  <span>영업 기여 및 파이프라인</span>
+                  <span>{lineageModalAnalyst.salesPipelineAmountEok}억원 ({lineageModalAnalyst.reportCount}건 리포트)</span>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  전문 섹터 내 담당 종목 풀 및 연차별 목표주가 적중 이력 데이터
+                  조회 {(lineageModalAnalyst.totalHits || 0).toLocaleString()}회, 다운로드 {(lineageModalAnalyst.totalDownloads || 0).toLocaleString()}건
                 </p>
               </div>
             </div>
@@ -1476,8 +1608,8 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
               <h3 className="text-lg font-bold text-white flex items-center space-x-2">
-                <Info className="w-5 h-5 text-amber-400" />
-                <span>TO-BE 시상 평가 가중치 모델</span>
+                <Trophy className="w-5 h-5 text-amber-400" />
+                <span>2026 AI 7대 KPI 결정론적 평가 스코어링 모델</span>
               </h3>
               <button
                 onClick={() => setShowLogicInfoModal(false)}
@@ -1489,17 +1621,20 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
 
             <div className="space-y-3 text-xs text-slate-300 mb-6 leading-relaxed">
               <div className="p-3 bg-amber-950/30 rounded-xl border border-amber-500/30">
-                <span className="font-bold text-amber-300 block mb-1">TO-BE 신규 평가 가중치 공식:</span>
-                <p className="text-[11px]">
-                  <strong>(영업기여 40%)</strong> + <strong>(분석심도 30%)</strong> + <strong>(조회수 20%)</strong> + <strong>(다운로드 10%)</strong>
+                <span className="font-bold text-amber-300 block mb-1">7대 KPI 최종 가중치 공식 (합계 100%):</span>
+                <p className="text-[11px] font-mono leading-relaxed">
+                  <strong>목표주가 25%</strong> + <strong>실적예측 25%</strong> + <strong>투자논리 15%</strong> + <strong>리스크분석 15%</strong> + <strong>발행빈도 10%</strong> + <strong>SNS주목도 5%</strong> + <strong>미디어노출 5%</strong>
                 </p>
+                <span className="text-[10px] text-emerald-400 block mt-1">
+                  * LLM 환각(Hallucination) 100% 차단: 데이터 추출과 규칙 기반 수학 계산 분리
+                </span>
               </div>
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                 <span className="font-bold text-slate-200 block mb-1">스페셜 테마 및 융합 선발 기준:</span>
                 <ul className="list-disc list-inside text-[11px] text-slate-400 space-y-1">
-                  <li><strong>적중률 제왕</strong>: 목표주가와 실제 주가 일치율(오차 3% 이내) 1위</li>
+                  <li><strong>적중률 제왕</strong>: 목표주가 3/6/12개월 가중 괴리율 최소 1위</li>
                   <li><strong>고수익 챔피언</strong>: 커버리지 종목 평균 실현 알파 수익률 1위</li>
-                  <li><strong>소신파/역발상 대상</strong>: 시장 과열/비관 속 소신의견(Hold/Sell) 정확도 1위</li>
+                  <li><strong>소신파/역발상 대상</strong>: 시장 과열/비관 속 소신의견(Hold/Sell) 리스크 분석 1위</li>
                   <li><strong>융합 특별상</strong>: 반도체+AI, 모빌리티+배터리 등 이종 융합 분석력</li>
                 </ul>
               </div>

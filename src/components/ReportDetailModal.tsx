@@ -10,12 +10,14 @@ interface ReportDetailModalProps {
   report: Report | null;
   onClose: () => void;
   onOpenAnalystProfile?: (analystName: string, brokerName: string) => void;
+  onExportGoogleDocs?: (report: any) => void;
 }
 
 export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   report,
   onClose,
   onOpenAnalystProfile,
+  onExportGoogleDocs,
 }) => {
   const [activeTab, setActiveTab] = useState<'ANALYSIS' | 'DART'>('ANALYSIS');
   if (!report) return null;
@@ -500,6 +502,16 @@ export const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                 네이버 개별 리포트 원문 보기
               </span>
             </a>
+            {onExportGoogleDocs && (
+              <button
+                onClick={() => onExportGoogleDocs(report)}
+                className="px-3.5 py-2 bg-blue-950 hover:bg-blue-900 border border-blue-700/80 text-blue-200 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-md hover:scale-105"
+                title="이 리포트를 Google Docs 문서로 자동 정리 및 생성"
+              >
+                <FileText className="w-4 h-4 text-cyan-300" />
+                <span>Google Docs로 정리</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 const params = new URLSearchParams({

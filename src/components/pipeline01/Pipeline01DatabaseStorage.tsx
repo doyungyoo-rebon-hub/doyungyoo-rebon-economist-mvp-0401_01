@@ -41,6 +41,8 @@ import {
   DbStorageStats,
   DbSyncStatus
 } from '../../types';
+import { getNaverReportUrl } from '../../utils/naverHelper';
+import { downloadBlobFile } from '../../utils/downloadHelper';
 
 interface Pipeline01DatabaseStorageProps {
   currentReports?: Pipeline01NaverReport[];
@@ -138,12 +140,13 @@ export const Pipeline01DatabaseStorage: React.FC<Pipeline01DatabaseStorageProps>
     }
   };
 
-  const handleDownloadPdf = (r: ReportDbRecord) => {
+  const handleDownloadPdf = async (r: ReportDbRecord) => {
     const rep = toReport(r);
     if (onDownloadPdf) {
       onDownloadPdf(rep);
     } else {
-      const url = `/api/pipeline-01/download-single-pdf?${new URLSearchParams({
+      const yymmdd = rep.yymmdd || (rep.publishDate ? rep.publishDate.replace(/[-.]/g, '').slice(2) : '260102');
+      const url = `/api/pipeline-01/download-pdf-stream?${new URLSearchParams({
         nid: rep.nid,
         pdfUrl: rep.pdfUrl || '',
         fileName: rep.standardFileName || '',
@@ -151,14 +154,20 @@ export const Pipeline01DatabaseStorage: React.FC<Pipeline01DatabaseStorageProps>
         stockCode: rep.stockCode || '',
         brokerName: rep.brokerName || '',
         title: rep.reportTitle || '',
-        date: rep.publishDate || ''
+        date: rep.publishDate || '',
+        yymmdd,
+        targetPrice: String(rep.targetPrice || 0),
+        currentPrice: String(rep.currentPrice || 0),
+        rating: rep.investmentOpinion || '',
+        sector: rep.sector || '',
+        analystName: rep.analystName || ''
       }).toString()}`;
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = rep.standardFileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+
+      const fileName = rep.standardFileName || `${rep.stockName}_${rep.brokerName}_리포트.pdf`;
+      const res = await downloadBlobFile(url, fileName);
+      if (!res.success) {
+        alert(res.error || 'PDF 파일 다운로드 중 오류가 발생했습니다.');
+      }
     }
   };
 
@@ -182,7 +191,7 @@ export const Pipeline01DatabaseStorage: React.FC<Pipeline01DatabaseStorageProps>
   };
 
   const handleOpenNaverUrl = (r: ReportDbRecord) => {
-    const url = r.reportUrl || `https://finance.naver.com/research/company_read.naver?nid=${r.nid || r.id.replace('rep_', '')}`;
+    const url = getNaverReportUrl(r);
     if (onOpenExternalUrl) {
       onOpenExternalUrl(url);
     } else {

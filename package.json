@@ -1,18 +1,21 @@
 {
   "name": "ai-studio-applet",
   "private": true,
-  "version": "1.6.0",
+  "version": "1.7.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
+    "gcp-build": "vite build",
     "start": "node server.ts",
+    "backup:full": "node scripts/backup-full.cjs",
+    "restore:v1.6": "node scripts/restore-v1.6.cjs",
     "restore:v1.5": "node scripts/restore-v1.5.cjs",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": "22.x"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -34,6 +37,7 @@
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "pdf-lib": "^1.17.1",
+    "pdf-parse": "1.1.1",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "recharts": "^3.10.1",
@@ -42,5 +46,7 @@
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/pdf-parse": "^1.1.5"
+  }
 }

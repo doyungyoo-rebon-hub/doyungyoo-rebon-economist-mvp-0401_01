@@ -178,6 +178,17 @@ export interface Analyst {
   sectorRank: number;  // 부문별 순위
   overallScore: number; // 0 - 100
   
+  // 2026 AI 7대 KPI 결정론적 평가 지표 (v1.7)
+  kpi2026?: {
+    targetPriceAccuracy: number;     // ① 25% (0-100)
+    earningsForecastAccuracy: number;// ② 25% (0-100)
+    investmentLogicValidity: number; // ③ 15% (0-100)
+    riskAnalysisAdequacy: number;    // ④ 15% (0-100)
+    reportPublicationFreq: number;   // ⑤ 10% (0-100)
+    snsAttention: number;            // ⑥ 5%  (0-100)
+    mediaExposure: number;           // ⑦ 5%  (0-100)
+  };
+
   returnRate: number; // 평균 수익률 %
   totalProfitAmount: number; // 가상 누적 수익금액 (억원)
   targetPriceHitRate: number; // 목표가 적중률 %
@@ -247,6 +258,9 @@ export interface Report {
   title: string;
   analystId: string;
   analystName: string;
+  analysts?: string[]; // 전체 저자 목록 (공동 저자 포함)
+  analystTitle?: string; // 직급 (수석연구원, 팀장 등)
+  metaSource?: 'PDF_PARSED' | 'NAVER_WEB' | 'VERIFIED_DIRECTORY';
   brokerName: string;
   brokerId?: string;
   sector: SectorCategory;
@@ -416,6 +430,9 @@ export interface Pipeline01NaverReport {
   reportTitle: string;
   brokerName: string;
   analystName?: string;
+  analysts?: string[];
+  analystTitle?: string;
+  metaSource?: 'PDF_PARSED' | 'NAVER_WEB' | 'VERIFIED_DIRECTORY';
   rawDate: string;
   publishDate: string;
   yymmdd: string;
@@ -461,6 +478,9 @@ export interface ReportDbRecord {
   reportTitle: string;
   brokerName: string;
   analystName: string;
+  analysts?: string[];
+  analystTitle?: string;
+  metaSource?: 'PDF_PARSED' | 'NAVER_WEB' | 'VERIFIED_DIRECTORY';
   publishDate: string;
   rawDate: string;
   yymmdd: string;

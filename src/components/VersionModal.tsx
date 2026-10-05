@@ -83,7 +83,7 @@ export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) =
                 <div className="flex items-center justify-between w-full mb-1.5">
                   <span className="font-bold text-xs text-emerald-200 group-hover:text-white flex items-center">
                     <Download className="w-3.5 h-3.5 mr-1.5 text-emerald-400" />
-                    v1.6 온프레미스 (권장)
+                    v1.7 온프레미스 (권장)
                   </span>
                   <span className="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-800">
                     약 12MB
@@ -109,7 +109,7 @@ export const VersionModal: React.FC<VersionModalProps> = ({ isOpen, onClose }) =
                 <div className="flex items-center justify-between w-full mb-1.5">
                   <span className="font-bold text-xs text-slate-200 group-hover:text-cyan-300 flex items-center">
                     <HardDrive className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
-                    v1.6 전체 풀백업 (PDF 포함)
+                    v1.7 전체 풀백업 (PDF 포함)
                   </span>
                   <span className="text-[10px] bg-slate-900 text-cyan-300 px-1.5 py-0.5 rounded border border-slate-700">
                     약 30~50MB

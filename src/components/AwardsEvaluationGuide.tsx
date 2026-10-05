@@ -57,7 +57,7 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
           }`}
         >
           <Scale className="w-4 h-4 text-amber-400" />
-          <span>4대 핵심 평가 기준 & 가중치</span>
+          <span>2026 AI 7대 KPI 평가 기준 & 가중치</span>
         </button>
 
         <button
@@ -97,7 +97,7 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
         </button>
       </div>
 
-      {/* TAB 1: 4대 핵심 평가 기준 & 가중치 */}
+      {/* TAB 1: 2026 AI 7대 KPI 평가 기준 & 가중치 */}
       {activeTab === 'CRITERIA' && (
         <div className="space-y-6 animate-fadeIn">
           {/* Top Formula Banner */}
@@ -106,28 +106,29 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
               <div className="flex items-center space-x-2.5">
                 <Trophy className="w-5 h-5 text-amber-400 shrink-0" />
                 <h4 className="text-base font-bold text-white">
-                  종합 평가 스코어(Overall Score) 산출 공식 (100점 만점)
+                  2026 AI 애널리스트 7대 KPI 결정론적 스코어링 공식 (100점 만점)
                 </h4>
               </div>
-              <span className="text-xs font-semibold text-cyan-300 bg-cyan-950/80 border border-cyan-800/80 px-2.5 py-1 rounded-full self-start md:self-auto">
-                이코노미스트 독자 평가 모델 + AI 객관성 검증
+              <span className="text-xs font-semibold text-emerald-300 bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded-full self-start md:self-auto flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                환각 100% 차단 결정론적 규칙 기반 엔진 (Rule-based Engine)
               </span>
             </div>
 
             {/* Formula display */}
             <div className="bg-slate-900/90 p-4 rounded-xl border border-slate-800 font-mono text-xs md:text-sm text-slate-200 overflow-x-auto space-y-2">
-              <div className="text-amber-300 font-bold">
-                Overall Score = (평균 주가 수익률 점수 × 0.35) + (목표주가 적중률 × 0.30) + (AI 객관성/공정성 점수 × 0.20) + (논리 정밀도 & 혁신성 × 0.15)
+              <div className="text-amber-300 font-bold leading-relaxed">
+                Total Score = (목표주가 정확도 × 0.25) + (실적 예측 정확도 × 0.25) + (투자 논리 타당성 × 0.15) + (리스크 분석 적정성 × 0.15) + (리포트 발행 빈도 × 0.10) + (SNS 주목도 × 0.05) + (미디어 노출 빈도 × 0.05)
               </div>
               <p className="text-[11px] text-slate-400 font-sans">
-                * 각 지표는 0~100점 척도로 정규화(Normalization)된 후 위 가중치에 따라 합산되어 최종 베스트 애널리스트 랭킹이 결정됩니다.
+                * LLM(Gemini/Claude)의 수학 연산 환각을 완벽 차단하기 위해 <strong>[데이터 추출(AI)]</strong>과 <strong>[점수 산출(수학 규칙 엔진)]</strong>을 분리하여 기계적으로 0~100점 정규화 합산합니다.
               </p>
             </div>
           </div>
 
-          {/* 4 Cards Grid */}
+          {/* 7 Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* 1. 평균 수익률 (35%) */}
+            {/* 1. 목표주가 정확도 (25%) */}
             <div className="bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -137,40 +138,40 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
                     </div>
                     <div>
                       <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
-                        <TrendingUp className="w-4 h-4 text-emerald-400" />
-                        <span>평균 주가 수익률</span>
+                        <Target className="w-4 h-4 text-emerald-400" />
+                        <span>목표주가 정확도 (Target Price Accuracy)</span>
                       </h5>
-                      <span className="text-[11px] text-slate-400">Average Return Rate</span>
+                      <span className="text-[11px] text-slate-400">시점별 가중 괴리율 + 시총/수익률 보정</span>
                     </div>
                   </div>
                   <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-xs px-2.5 py-1 rounded-full">
-                    가중치 35%
+                    가중치 25% (정량)
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  애널리스트가 목표가를 제시한 발간일 기준 3개월~6개월 내 실제 시장에서 기록한 최고 주가의 수익률을 산출합니다.
+                  발간일 기준 3개월(50%), 6개월(30%), 12개월(20%) 경과 시점의 실제 주가와 목표주가 사이의 절대 괴리율을 산출하고, 시총 규모(Cap/Floor: 0.90~1.10) 및 12개월 실현 수익률을 가점으로 합산합니다.
                 </p>
 
                 <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs">
                   <div className="flex items-center justify-between text-slate-400">
-                    <span>산출 공식:</span>
-                    <strong className="text-emerald-300 font-mono">((달성 최고가 - 발간일 종가) / 발간일 종가) × 100%</strong>
+                    <span>괴리율 산식:</span>
+                    <strong className="text-emerald-300 font-mono">avg_d = 0.5×d_3 + 0.3×d_6 + 0.2×d_12</strong>
                   </div>
                   <div className="flex items-center justify-between text-slate-400 border-t border-slate-800/60 pt-1">
-                    <span>가상 누적 수익금:</span>
-                    <span className="text-slate-300 font-semibold">1억원 기준 리포트 비중 분산 포트폴리오 가상 복리 환산</span>
+                    <span>최종 점수:</span>
+                    <span className="text-slate-300 font-mono font-semibold">(100 - avg_d×100)×w_mc + 수익률 가점</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2 text-[11px] text-emerald-400 bg-emerald-950/40 p-2 rounded-lg border border-emerald-900/50">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>단기 테마성 왜곡을 배제하고 실질적인 투자 수익 기여도를 가장 높은 비중으로 평가합니다.</span>
+                <span>단기/중기/장기 주가 목표 달성도를 공정하게 평가하여 비현실적인 고평가 남발을 방지합니다.</span>
               </div>
             </div>
 
-            {/* 2. 목표주가 적중률 (30%) */}
+            {/* 2. 실적 예측 정확도 (25%) */}
             <div className="bg-slate-950/90 border border-cyan-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -180,40 +181,40 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
                     </div>
                     <div>
                       <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
-                        <Target className="w-4 h-4 text-cyan-400" />
-                        <span>목표주가 적중률</span>
+                        <TrendingUp className="w-4 h-4 text-cyan-400" />
+                        <span>실적 예측 정확도 (Earnings Forecast Accuracy)</span>
                       </h5>
-                      <span className="text-[11px] text-slate-400">Target Price Hit Rate</span>
+                      <span className="text-[11px] text-slate-400">분기별/지표별 9개 복합 가중 오차율</span>
                     </div>
                   </div>
                   <span className="bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-bold text-xs px-2.5 py-1 rounded-full">
-                    가중치 30%
+                    가중치 25% (정량)
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  제시된 목표주가에 실제 주가가 도달했는지 여부를 엄격하게 검증합니다. (허용 오차 밴드 ±5% 적용)
+                  애널리스트 추정치와 DART 공시 실적 간의 오차율을 계산하되, 기간 가중치(1Q: 20%, 2Q: 30%, 3Q: 50%)와 재무 지표 가중치(영업이익: 60%, 매출: 20%, 순익: 20%)를 복합 적용하여 100점 만점으로 역환산합니다.
                 </p>
 
                 <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs">
                   <div className="flex items-center justify-between text-slate-400">
-                    <span>달성 기준:</span>
-                    <strong className="text-cyan-300">실제 최고가 ≥ (목표주가 × 0.95)</strong>
+                    <span>복합 가중치:</span>
+                    <strong className="text-cyan-300 font-mono">W_i = TIME_W[quarter] × METRIC_W[metric]</strong>
                   </div>
                   <div className="flex items-center justify-between text-slate-400 border-t border-slate-800/60 pt-1">
-                    <span>과도한 고평가 페널티:</span>
-                    <span className="text-amber-300 font-semibold">목표가 대비 30% 이상 괴리 지속 시 감점</span>
+                    <span>최종 점수:</span>
+                    <span className="text-slate-300 font-mono font-semibold">100 - (TotalErrorRate × 100)</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2 text-[11px] text-cyan-300 bg-cyan-950/40 p-2 rounded-lg border border-cyan-900/50">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>터무니없는 목표가 인플레이션을 방지하고 예측의 정밀성을 확보합니다.</span>
+                <span>영업이익 및 가까운 미래 실적 추정치에 더 높은 가중치를 부여해 실전 밸류에이션 역량을 측정합니다.</span>
               </div>
             </div>
 
-            {/* 3. AI 객관성 / 공정성 스코어 (20%) */}
+            {/* 3. 투자 논리 타당성 (15%) */}
             <div className="bg-slate-950/90 border border-purple-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
@@ -223,79 +224,198 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
                     </div>
                     <div>
                       <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
-                        <ShieldCheck className="w-4 h-4 text-purple-400" />
-                        <span>AI 객관성 / 공정성 점수</span>
+                        <Sparkles className="w-4 h-4 text-purple-400" />
+                        <span>투자 논리 타당성 (Logic Validity)</span>
                       </h5>
-                      <span className="text-[11px] text-slate-400">LLM Objectivity & Bias Verification</span>
+                      <span className="text-[11px] text-slate-400">Claude/Gemini AI 정성 분석 1:1 매핑</span>
                     </div>
                   </div>
                   <span className="bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold text-xs px-2.5 py-1 rounded-full">
-                    가중치 20%
+                    가중치 15% (정성)
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  Gemini LLM 엔진이 리포트 원문을 정밀 분석하여 셀사이드(Sell-side) 편향과 근거 없는 매수 권고를 필터링합니다.
+                  리포트 본문의 서술 논리, 밸류체인 진단, 목표주가 도출 근거의 타당성을 AI가 심층 분석하여 S, A, B, C, D 등급으로 판정하고, 스코어링 엔진이 절대 점수로 1:1 매핑합니다.
                 </p>
 
-                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs">
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>리스크 요인 분석:</span>
-                    <strong className="text-purple-300">하방 리스크(Bearish Factor) 기술 충실도</strong>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-400 border-t border-slate-800/60 pt-1">
-                    <span>재무제표 근거:</span>
-                    <span className="text-slate-300 font-semibold">매출/영업이익 추정 및 밸류에이션 수치 제시</span>
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
+                  <div className="flex items-center justify-between text-slate-300 font-mono">
+                    <span>S: 100점</span>
+                    <span>A: 90점</span>
+                    <span>B: 80점</span>
+                    <span>C: 70점</span>
+                    <span>D: 60점</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2 text-[11px] text-purple-300 bg-purple-950/40 p-2 rounded-lg border border-purple-900/50">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>증권사 관행적인 '무조건 매수' 편향을 배제하고 투자자 관점의 객관성을 보장합니다.</span>
+                <span>데이터에 근거한 치밀한 서술과 밸류체인 분석 깊이를 심사합니다.</span>
               </div>
             </div>
 
-            {/* 4. 논리 정밀도 & 혁신성 (15%) */}
+            {/* 4. 리스크 분석 적정성 (15%) */}
+            <div className="bg-slate-950/90 border border-rose-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 font-bold text-xs">
+                      4
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-rose-400" />
+                        <span>리스크 분석 적정성 (Risk Analysis)</span>
+                      </h5>
+                      <span className="text-[11px] text-slate-400">다운사이드 위험 요인 식별 및 타당성</span>
+                    </div>
+                  </div>
+                  <span className="bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold text-xs px-2.5 py-1 rounded-full">
+                    가중치 15% (정성)
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                  단순 매수 일변도 관행을 지양하고, 산업 및 기업의 다운사이드 리스크 요인을 객관적으로 짚어냈는지를 AI가 분석하여 S/A/B/C/D 등급을 판정하고 절대 점수로 매핑합니다.
+                </p>
+
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
+                  <div className="flex items-center justify-between text-slate-300 font-mono">
+                    <span>S: 100점</span>
+                    <span>A: 90점</span>
+                    <span>B: 80점</span>
+                    <span>C: 70점</span>
+                    <span>D: 60점</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 text-[11px] text-rose-300 bg-rose-950/40 p-2 rounded-lg border border-rose-900/50">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>무조건적 매수 편향을 걸러내고 하방 리스크를 솔직하게 경고한 소신 리서치를 우대합니다.</span>
+              </div>
+            </div>
+
+            {/* 5. 리포트 발행 빈도 (10%) */}
             <div className="bg-slate-950/90 border border-amber-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xs">
-                      4
+                      5
                     </div>
                     <div>
                       <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span>논리 정밀도 & 혁신성</span>
+                        <FileText className="w-4 h-4 text-amber-400" />
+                        <span>리포트 발행 빈도 (Publication Frequency)</span>
                       </h5>
-                      <span className="text-[11px] text-slate-400">Logic Integrity & Innovation</span>
+                      <span className="text-[11px] text-slate-400">발간 건수(최소 10건) + 담당 기업 가점</span>
                     </div>
                   </div>
                   <span className="bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs px-2.5 py-1 rounded-full">
-                    가중치 15%
+                    가중치 10% (활동성)
                   </span>
                 </div>
 
                 <p className="text-xs text-slate-300 leading-relaxed mb-3">
-                  산업 사이클 분석의 정교함, 독창적인 가치평가 모델(SOTP, DCF 등) 적용, 시장 최초 종목 발굴 선도성을 평가합니다.
+                  애널리스트의 성실성과 커버리지 범위를 반영합니다. 연간 10건 미만 발간 시 최소 요건 미달로 0점 처리되며, 30건 기준 기본 만점(100점)에 커버 종목당 1.5점 가점을 부여합니다.
                 </p>
 
                 <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs">
                   <div className="flex items-center justify-between text-slate-400">
-                    <span>퍼스트 무버(First Mover):</span>
-                    <strong className="text-amber-300">신규 성장 섹터 최초 리포트 발간 가산점</strong>
+                    <span>최소 기준:</span>
+                    <strong className="text-rose-400 font-mono">10건 미만 0점 탈락</strong>
                   </div>
                   <div className="flex items-center justify-between text-slate-400 border-t border-slate-800/60 pt-1">
-                    <span>사이클 분석:</span>
-                    <span className="text-slate-300 font-semibold">업황 턴어라운드 및 모멘텀 예측 정확도</span>
+                    <span>산출 공식:</span>
+                    <span className="text-slate-300 font-mono font-semibold">min((n_rep/30)×100 + n_cov×1.5, 100)</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2 text-[11px] text-amber-300 bg-amber-950/40 p-2 rounded-lg border border-amber-900/50">
                 <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>남들보다 한발 앞서 신성장 동력을 발굴하고 깊이 있는 논리를 제공한 연구원을 우대합니다.</span>
+                <span>꾸준한 리서치 발간 활동과 폭넓은 유니버스 커버리지 노력을 기계적으로 우대합니다.</span>
+              </div>
+            </div>
+
+            {/* 6. SNS 주목도 (5%) */}
+            <div className="bg-slate-950/90 border border-blue-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold text-xs">
+                      6
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-blue-400" />
+                        <span>SNS 주목도 (SNS Attention)</span>
+                      </h5>
+                      <span className="text-[11px] text-slate-400">블로그/텔레그램/커뮤니티 언급량 정규화</span>
+                    </div>
+                  </div>
+                  <span className="bg-blue-500/10 border border-blue-500/30 text-blue-300 font-bold text-xs px-2.5 py-1 rounded-full">
+                    가중치 5% (파급력)
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                  Perplexity AI 및 크롤러가 수집한 투자 커뮤니티, 텔레그램, 주식 블로그 내 애널리스트 언급량을 전체 대상자 중 1위(Max) 기준으로 100분위 정규화 스케일링합니다.
+                </p>
+
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span>정규화 산식:</span>
+                    <strong className="text-blue-300 font-mono">(대상자 언급수 / 1위 언급수) × 100</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 text-[11px] text-blue-300 bg-blue-950/40 p-2 rounded-lg border border-blue-900/50">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>개인 및 기관 투자자 사이에서의 실질적 시장 반향과 화제성을 평가합니다.</span>
+              </div>
+            </div>
+
+            {/* 7. 미디어 노출 빈도 (5%) */}
+            <div className="bg-slate-950/90 border border-indigo-500/30 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3 md:col-span-2">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                      7
+                    </div>
+                    <div>
+                      <h5 className="text-sm font-bold text-white flex items-center gap-1.5">
+                        <Building2 className="w-4 h-4 text-indigo-400" />
+                        <span>미디어 노출 빈도 (Media Exposure)</span>
+                      </h5>
+                      <span className="text-[11px] text-slate-400">주요 경제지/방송/포털 언론 보도량 정규화</span>
+                    </div>
+                  </div>
+                  <span className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-bold text-xs px-2.5 py-1 rounded-full">
+                    가중치 5% (파급력)
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                  국내 주요 경제지, 일간지, 증권 방송 인터뷰 및 인용 보도 건수를 전수 집계하여 섹터 및 전체 1위 기준 100분위 상대 평가로 환산하여 최종 가산합니다.
+                </p>
+
+                <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span>정규화 산식:</span>
+                    <strong className="text-indigo-300 font-mono">(대상자 언론보도수 / 1위 보도수) × 100</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 text-[11px] text-indigo-300 bg-indigo-950/40 p-2 rounded-lg border border-indigo-900/50">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>언론사 및 방송 미디어가 인정한 대외 신뢰도와 분석 전문성을 객관적으로 측정합니다.</span>
               </div>
             </div>
           </div>
@@ -606,7 +726,7 @@ export const AwardsEvaluationGuide: React.FC<AwardsEvaluationGuideProps> = ({
               </span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              주가 수익률(35%), 목표가 적중률(30%), AI 객관성 스코어(20%), 논리 정밀도(15%)의 산출 방식과 네이버 증권 32개사 리포트 수집 프로세스를 안내합니다.
+              2026 AI 7대 KPI 결정론적 평가 체계(목표주가 25%, 실적예측 25%, 투자논리 15%, 리스크 15%, 발행빈도 10%, SNS 5%, 미디어 5%)와 네이버 증권 32개사 리포트 수집 프로세스를 안내합니다.
             </p>
           </div>
         </div>

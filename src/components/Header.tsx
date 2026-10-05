@@ -1,11 +1,11 @@
 import React from 'react';
-import { Award, FileText, Search, Cpu, BarChart3, Bell, Activity, Sparkles, Tag, Database, UserCheck, HardDrive } from 'lucide-react';
+import { Award, FileText, Search, Cpu, BarChart3, Bell, Activity, Sparkles, Tag, Database, UserCheck, HardDrive, Sliders } from 'lucide-react';
 import { PipelineMetrics } from '../types';
 import { CURRENT_VERSION } from '../data/versions';
 
 interface HeaderProps {
-  activeTab: 'awards' | 'annual_analysts_01' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files';
-  setActiveTab: (tab: 'awards' | 'annual_analysts_01' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files') => void;
+  activeTab: 'awards' | 'annual_analysts_01' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files';
+  setActiveTab: (tab: 'awards' | 'annual_analysts_01' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files') => void;
   metrics: PipelineMetrics;
   unreadNotificationCount: number;
   reportCount?: number;
@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={onOpenVersionModal}
               className="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/70 text-emerald-300 hover:text-emerald-100 px-2.5 py-0.5 rounded text-[11px] font-bold transition-all flex items-center space-x-1 cursor-pointer shadow-sm"
-              title="사내 서버 온프레미스 배포용 전체 소스코드 및 4,868건 마스터 DB 풀백업 다운로드"
+              title="사내 서버 온프레미스 배포용 전체 소스코드 및 국내 전 종목(680개사 / 10,195건) 마스터 DB 풀백업 다운로드"
             >
               <HardDrive className="w-3 h-3 text-emerald-400" />
               <span>💾 온프레미스 풀백업</span>
@@ -100,9 +100,19 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-2 shrink-0">
             <button
               type="button"
+              onClick={() => setActiveTab('kpi_simulator')}
+              className="flex items-center space-x-1.5 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-cyan-900/40 border border-cyan-400/40 cursor-pointer transition-all hover:scale-105"
+              title="2026 AI 7대 KPI 결정론적 평가 시뮬레이터 & 실시간 계산기"
+            >
+              <Sliders className="w-4 h-4 text-cyan-200" />
+              <span className="tracking-tight">⚡ 7대 KPI 시뮬레이터</span>
+            </button>
+
+            <button
+              type="button"
               onClick={onOpenVersionModal}
               className="flex items-center space-x-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-900/40 border border-emerald-400/40 cursor-pointer transition-all hover:scale-105"
-              title="사내 서버 온프레미스 배포용 전체 소스코드 및 4,868건 마스터 DB 풀백업 다운로드"
+              title="사내 서버 온프레미스 배포용 전체 소스코드 및 국내 전 종목(680개사 / 10,195건) 마스터 DB 풀백업 다운로드"
             >
               <HardDrive className="w-4 h-4 text-emerald-100" />
               <span className="tracking-tight">💾 온프레미스 풀백업</span>
@@ -146,6 +156,21 @@ export const Header: React.FC<HeaderProps> = ({
               <span>올해의 애널리스트_01</span>
               <span className="bg-amber-950/90 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-amber-600/60">
                 신규로직
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('kpi_simulator')}
+              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === 'kpi_simulator'
+                  ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-md shadow-cyan-600/40 ring-1 ring-cyan-400'
+                  : 'text-cyan-300 hover:text-white bg-cyan-950/50 border border-cyan-800/50 hover:bg-cyan-900/60'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5 text-cyan-300" />
+              <span>⚡ 7대 KPI 시뮬레이터</span>
+              <span className="bg-cyan-950 text-cyan-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-cyan-500/60 animate-pulse">
+                NEW
               </span>
             </button>
 

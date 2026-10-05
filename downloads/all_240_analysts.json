@@ -1,0 +1,1682 @@
+[
+  {
+    "name": "한유정",
+    "reportCount": 95,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "KB증권, 교보증권, IBK투자증권, 하나증권, 다올투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "박상준",
+    "reportCount": 83,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "IBK투자증권, 현대차증권, 다올투자증권, 메리츠증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "김현용",
+    "reportCount": 82,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "IBK투자증권, 하나증권, 교보증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "김도하",
+    "reportCount": 79,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "KB증권, 메리츠증권, IBK투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "이해니",
+    "reportCount": 77,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "IBK투자증권, NH투자증권, 삼성증권, 다올투자증권, 교보증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이용욱",
+    "reportCount": 77,
+    "primaryBroker": "IBK투자증권",
+    "otherBrokers": "한화투자증권, 신한투자증권, KB증권, 삼성증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "김인",
+    "reportCount": 75,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "현대차증권, 교보증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "김은갑",
+    "reportCount": 75,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "교보증권, 다올투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "이선화",
+    "reportCount": 73,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "한화투자증권, IBK투자증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "오동환",
+    "reportCount": 71,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "한국투자증권, 교보증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "이기훈",
+    "reportCount": 71,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "교보증권, IBK투자증권, 미래에셋증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "이효진",
+    "reportCount": 70,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "교보증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "주영훈",
+    "reportCount": 68,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "다올투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "장정훈",
+    "reportCount": 67,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "교보증권, 한국투자증권, 하나증권, 메리츠증권, 미래에셋증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "지인해",
+    "reportCount": 65,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "IBK투자증권, 메리츠증권, 교보증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "최민하",
+    "reportCount": 64,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "NH투자증권, 교보증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "김명주",
+    "reportCount": 63,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "교보증권, 메리츠증권, IBK투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이지은",
+    "reportCount": 63,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "IBK투자증권, 키움증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "김하정",
+    "reportCount": 63,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "하희지",
+    "reportCount": 62,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "다올투자증권, 교보증권, KB증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "조상훈",
+    "reportCount": 62,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "교보증권, 다올투자증권, IBK투자증권, KB증권, 현대차증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이안나",
+    "reportCount": 60,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "한국투자증권, 다올투자증권, 메리츠증권, 삼성증권, 대신증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "임희석",
+    "reportCount": 59,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "NH투자증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "고영민",
+    "reportCount": 58,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "현대차증권, NH투자증권, 삼성증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "강석오",
+    "reportCount": 56,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "교보증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "김영건",
+    "reportCount": 53,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "정호윤",
+    "reportCount": 53,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "유진투자증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "배송이",
+    "reportCount": 51,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "하나증권, KB증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "정용진",
+    "reportCount": 50,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "유진투자증권, 한화투자증권, 키움증권, 메리츠증권, 다올투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "강성진",
+    "reportCount": 48,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "IBK투자증권, 메리츠증권, 한화투자증권, 키움증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "김혜미",
+    "reportCount": 47,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "KB증권, 교보증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이태환",
+    "reportCount": 47,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "메리츠증권, 한화투자증권, NH투자증권, 다올투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "이남수",
+    "reportCount": 47,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "IBK투자증권, KB증권, 교보증권, 메리츠증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "한병화",
+    "reportCount": 47,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "다올투자증권, IBK투자증권, 키움증권, 한국투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "은경완",
+    "reportCount": 46,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "교보증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "노근창",
+    "reportCount": 46,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "한화투자증권, 신한투자증권, 한국투자증권, NH투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "임수진",
+    "reportCount": 45,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "교보증권, IBK투자증권, 메리츠증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "노우호",
+    "reportCount": 44,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "신한투자증권, 미래에셋증권, 삼성증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "백두산",
+    "reportCount": 44,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "유진투자증권, 삼성증권, 한화투자증권, 하나증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "심은주",
+    "reportCount": 44,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "하나증권, 교보증권, KB증권, 현대차증권, IBK투자증권, 삼성증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "최보영",
+    "reportCount": 44,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "신한투자증권, 현대차증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "이한결",
+    "reportCount": 44,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "키움증권, 한국투자증권, NH투자증권, 미래에셋증권, IBK투자증권, KB증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "오진원",
+    "reportCount": 43,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "다올투자증권, IBK투자증권, 미래에셋증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "전창현",
+    "reportCount": 42,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "안회수",
+    "reportCount": 41,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "한화투자증권, 하나증권, 교보증권, NH투자증권",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "이홍표",
+    "reportCount": 41,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "삼성증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "박은정",
+    "reportCount": 41,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "교보증권, 다올투자증권, IBK투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이창민",
+    "reportCount": 40,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "한국투자증권, 대신증권, 교보증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "김동양",
+    "reportCount": 40,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "하나증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "박연주",
+    "reportCount": 39,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "한국투자증권, 신한투자증권, 메리츠증권, KB증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "문용권",
+    "reportCount": 38,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "다올투자증권, 미래에셋증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "윤예지",
+    "reportCount": 38,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "교보증권, IBK투자증권, 미래에셋증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "김록호",
+    "reportCount": 38,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "한화투자증권, 현대차증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "유정현",
+    "reportCount": 37,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "IBK투자증권, 유진투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "도현우",
+    "reportCount": 37,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "한국투자증권, 삼성증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "강승건",
+    "reportCount": 36,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "장문수",
+    "reportCount": 36,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "미래에셋증권, NH투자증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "김선우",
+    "reportCount": 36,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "다올투자증권, 한화투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김철중",
+    "reportCount": 36,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "하나증권, 삼성증권, 대신증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "채민숙",
+    "reportCount": 35,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "KB증권, 한화투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "이승우",
+    "reportCount": 35,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김소혜",
+    "reportCount": 35,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "IBK투자증권, 교보증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "강동진",
+    "reportCount": 33,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "유진투자증권, 메리츠증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "주민우",
+    "reportCount": 33,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "삼성증권, 신한투자증권, 교보증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "안재민",
+    "reportCount": 32,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "IBK투자증권, 교보증권, 하나증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "김아람",
+    "reportCount": 31,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "신한투자증권, KB증권, 키움증권, 미래에셋증권, 유진투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "정준섭",
+    "reportCount": 31,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "박혜진",
+    "reportCount": 31,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "김동원",
+    "reportCount": 31,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "한화투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김용호",
+    "reportCount": 31,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "IBK투자증권, 신한투자증권, 미래에셋증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "유민기",
+    "reportCount": 31,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "삼성증권, 교보증권, 유진투자증권, 미래에셋증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "김준성",
+    "reportCount": 30,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "교보증권, 미래에셋증권, IBK투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "김재우",
+    "reportCount": 30,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "IBK투자증권, 다올투자증권, 교보증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "윤재성",
+    "reportCount": 30,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "류제현",
+    "reportCount": 30,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "IBK투자증권, 한국투자증권, 대신증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "황성현",
+    "reportCount": 30,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "권준수",
+    "reportCount": 29,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "KB증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "정연승",
+    "reportCount": 28,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "IBK투자증권, 미래에셋증권, KB증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "박경근",
+    "reportCount": 28,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "현대차증권, 하나증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "위경재",
+    "reportCount": 28,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "신한투자증권, 현대차증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "신윤철",
+    "reportCount": 28,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "한화투자증권, 삼성증권, 유진투자증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "박강호",
+    "reportCount": 28,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "메리츠증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "윤용식",
+    "reportCount": 27,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "메리츠증권, 한화투자증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "정민기",
+    "reportCount": 25,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "미래에셋증권, 유진투자증권, 교보증권, 삼성증권",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "조아해",
+    "reportCount": 25,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "한국투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "조철희",
+    "reportCount": 25,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "정지수",
+    "reportCount": 25,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "최정욱",
+    "reportCount": 25,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "미래에셋증권, IBK투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "정의훈",
+    "reportCount": 25,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "이건재",
+    "reportCount": 24,
+    "primaryBroker": "IBK투자증권",
+    "otherBrokers": "미래에셋증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "배현기",
+    "reportCount": 24,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "조현렬",
+    "reportCount": 24,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "신한투자증권, 교보증권, 하나증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "박종대",
+    "reportCount": 24,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "키움증권, 메리츠증권, 현대차증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "조소정",
+    "reportCount": 24,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "메리츠증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이재일",
+    "reportCount": 23,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "IBK투자증권, 하나증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "한동희",
+    "reportCount": 23,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김형태",
+    "reportCount": 22,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "박상욱",
+    "reportCount": 21,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "NH투자증권, 현대차증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김귀연",
+    "reportCount": 21,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "한화투자증권, 한국투자증권, IBK투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "안영준",
+    "reportCount": 21,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "정소연",
+    "reportCount": 20,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "NH투자증권, 미래에셋증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "황민성",
+    "reportCount": 20,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "한국투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "이유진",
+    "reportCount": 19,
+    "primaryBroker": "IBK투자증권",
+    "otherBrokers": "삼성증권, 메리츠증권, NH투자증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "박진수",
+    "reportCount": 19,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "NH투자증권, 하나증권, 키움증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "강은지",
+    "reportCount": 19,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "김진구",
+    "reportCount": 19,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "류영호",
+    "reportCount": 19,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "키움증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "오현진",
+    "reportCount": 19,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "교보증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "최관순",
+    "reportCount": 19,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "유진투자증권, 삼성증권, 한화투자증권",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "박유악",
+    "reportCount": 19,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "NH투자증권, 현대차증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "한영수",
+    "reportCount": 19,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "IBK투자증권, 한국투자증권, 교보증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "정태준",
+    "reportCount": 18,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "대신증권, 다올투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "박성봉",
+    "reportCount": 18,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "IBK투자증권, KB증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "전혜영",
+    "reportCount": 18,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "서현정",
+    "reportCount": 18,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "KB증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "이종욱",
+    "reportCount": 18,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "송선재",
+    "reportCount": 18,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "한화투자증권, 미래에셋증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "신석환",
+    "reportCount": 18,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "허지수",
+    "reportCount": 18,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "키움증권, 다올투자증권",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "배성조",
+    "reportCount": 18,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "메리츠증권",
+    "primarySector": "자동차/모빌리티"
+  },
+  {
+    "name": "남대우",
+    "reportCount": 18,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "정동익",
+    "reportCount": 18,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "NH투자증권, 다올투자증권, 삼성증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "김수연",
+    "reportCount": 16,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "이동헌",
+    "reportCount": 16,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "키움증권, 대신증권, 유진투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "안도영",
+    "reportCount": 16,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "미래에셋증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "이화정",
+    "reportCount": 16,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "유진투자증권",
+    "primarySector": "플랫폼/게임/엔터"
+  },
+  {
+    "name": "정원석",
+    "reportCount": 16,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "IBK투자증권, 신한투자증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "김민철",
+    "reportCount": 15,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "신민수",
+    "reportCount": 15,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "한국투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "임은영",
+    "reportCount": 15,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "IBK투자증권, 키움증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "박상현",
+    "reportCount": 14,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김현수",
+    "reportCount": 14,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "삼성증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "김형수",
+    "reportCount": 13,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "대신증권, 하나증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이병근",
+    "reportCount": 13,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "한국투자증권, IBK투자증권",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "김진석",
+    "reportCount": 13,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "한국투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "정민규",
+    "reportCount": 13,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "임희연",
+    "reportCount": 13,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "교보증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "한민성",
+    "reportCount": 13,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "신한투자증권, 대신증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "박광래",
+    "reportCount": 13,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "하나증권, 신한투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "한송협",
+    "reportCount": 13,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "신한투자증권, 다올투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이재윤",
+    "reportCount": 13,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "현대차증권, IBK투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "신동현",
+    "reportCount": 12,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "키움증권",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "심현수",
+    "reportCount": 12,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "KB증권",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "백재승",
+    "reportCount": 12,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "다올투자증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "김찬우",
+    "reportCount": 12,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "메리츠증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "전배승",
+    "reportCount": 12,
+    "primaryBroker": "IBK투자증권",
+    "otherBrokers": "현대차증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "서재호",
+    "reportCount": 12,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "원재웅",
+    "reportCount": 12,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "현대차증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "김회재",
+    "reportCount": 12,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "키움증권",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "김용구",
+    "reportCount": 12,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "강신우",
+    "reportCount": 12,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "미래에셋증권",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "양지환",
+    "reportCount": 12,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "유진투자증권",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "조은애",
+    "reportCount": 12,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "교보증권, 한화투자증권",
+    "primarySector": "소비재/유통/음식료"
+  },
+  {
+    "name": "조수홍",
+    "reportCount": 12,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "미래에셋증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "한승연",
+    "reportCount": 12,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "신한투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "최광식",
+    "reportCount": 11,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "박찬호",
+    "reportCount": 11,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "유진투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "유재훈",
+    "reportCount": 11,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "한국투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "장효선",
+    "reportCount": 10,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "IBK투자증권, 다올투자증권",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "서승연",
+    "reportCount": 9,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "한화투자증권",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "이종형",
+    "reportCount": 8,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "IBK투자증권, KB증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "백영찬",
+    "reportCount": 7,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "IBK투자증권",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "명지운",
+    "reportCount": 7,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "유진투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "박희철",
+    "reportCount": 7,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이승호",
+    "reportCount": 7,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "한국투자증권",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "변운지",
+    "reportCount": 7,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김민혁",
+    "reportCount": 7,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "대신증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "황지현",
+    "reportCount": 7,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "류은애",
+    "reportCount": 7,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "정재헌",
+    "reportCount": 7,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "교보증권",
+    "primarySector": "2차전지/배터리/소재"
+  },
+  {
+    "name": "김운호",
+    "reportCount": 6,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "박병국",
+    "reportCount": 6,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "하태기",
+    "reportCount": 6,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이민희",
+    "reportCount": 6,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "최재호",
+    "reportCount": 6,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "",
+    "primarySector": "건설/물류/기타"
+  },
+  {
+    "name": "김동하",
+    "reportCount": 6,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "남효지",
+    "reportCount": 6,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "황성진",
+    "reportCount": 6,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "임소정",
+    "reportCount": 6,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "강동원",
+    "reportCount": 6,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "김두현",
+    "reportCount": 6,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "양해정",
+    "reportCount": 6,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "구경회",
+    "reportCount": 6,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "최고운",
+    "reportCount": 6,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "백길현",
+    "reportCount": 6,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "김홍식",
+    "reportCount": 6,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이희영",
+    "reportCount": 6,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이경민",
+    "reportCount": 6,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "설용진",
+    "reportCount": 6,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "김승민",
+    "reportCount": 6,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "박재경",
+    "reportCount": 6,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "박형우",
+    "reportCount": 6,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "김기룡",
+    "reportCount": 6,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "윤유동",
+    "reportCount": 6,
+    "primaryBroker": "IBK투자증권",
+    "otherBrokers": "",
+    "primarySector": "금융/지주"
+  },
+  {
+    "name": "성현도",
+    "reportCount": 6,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "오강호",
+    "reportCount": 6,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "김양팽",
+    "reportCount": 6,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "배기달",
+    "reportCount": 6,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "박애란",
+    "reportCount": 6,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "최승호",
+    "reportCount": 6,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이진호",
+    "reportCount": 6,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "",
+    "primarySector": "조선/중공업/방산"
+  },
+  {
+    "name": "권해순",
+    "reportCount": 6,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "박세라",
+    "reportCount": 6,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "선민정",
+    "reportCount": 6,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "건설/물류/기타"
+  },
+  {
+    "name": "이호섭",
+    "reportCount": 6,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "신민석",
+    "reportCount": 6,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "우도형",
+    "reportCount": 6,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이상우",
+    "reportCount": 6,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "어규진",
+    "reportCount": 6,
+    "primaryBroker": "IBK투자증권",
+    "otherBrokers": "",
+    "primarySector": "건설/물류/기타"
+  },
+  {
+    "name": "윤태호",
+    "reportCount": 6,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "배세호",
+    "reportCount": 6,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "정인호",
+    "reportCount": 6,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이경신",
+    "reportCount": 6,
+    "primaryBroker": "NH투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이명선",
+    "reportCount": 6,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "신한결",
+    "reportCount": 6,
+    "primaryBroker": "하나증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이은택",
+    "reportCount": 6,
+    "primaryBroker": "키움증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "문경록",
+    "reportCount": 6,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "위해주",
+    "reportCount": 6,
+    "primaryBroker": "유진투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "이선경",
+    "reportCount": 6,
+    "primaryBroker": "교보증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "문경원",
+    "reportCount": 6,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "송유림",
+    "reportCount": 6,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "문준호",
+    "reportCount": 6,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "남성현",
+    "reportCount": 6,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "장민환",
+    "reportCount": 6,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이수빈",
+    "reportCount": 6,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "장하은",
+    "reportCount": 5,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "진선미",
+    "reportCount": 5,
+    "primaryBroker": "KB증권",
+    "otherBrokers": "",
+    "primarySector": "건설/물류/기타"
+  },
+  {
+    "name": "엄경아",
+    "reportCount": 5,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "양승수",
+    "reportCount": 5,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "한화투자증권",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "허혜민",
+    "reportCount": 3,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "이강원",
+    "reportCount": 3,
+    "primaryBroker": "한국투자증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "하헌형",
+    "reportCount": 2,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "미래에셋증권",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "김승준",
+    "reportCount": 1,
+    "primaryBroker": "대신증권",
+    "otherBrokers": "",
+    "primarySector": "IT/모바일/전자"
+  },
+  {
+    "name": "김지산",
+    "reportCount": 1,
+    "primaryBroker": "신한투자증권",
+    "otherBrokers": "",
+    "primarySector": "건설/물류/기타"
+  },
+  {
+    "name": "김평모",
+    "reportCount": 1,
+    "primaryBroker": "미래에셋증권",
+    "otherBrokers": "",
+    "primarySector": "철강/금속/소재"
+  },
+  {
+    "name": "정혜원",
+    "reportCount": 1,
+    "primaryBroker": "메리츠증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  },
+  {
+    "name": "변종만",
+    "reportCount": 1,
+    "primaryBroker": "삼성증권",
+    "otherBrokers": "",
+    "primarySector": "건설/물류/기타"
+  },
+  {
+    "name": "오홍석",
+    "reportCount": 1,
+    "primaryBroker": "다올투자증권",
+    "otherBrokers": "",
+    "primarySector": "화학/정유/에너지"
+  },
+  {
+    "name": "곽민정",
+    "reportCount": 1,
+    "primaryBroker": "현대차증권",
+    "otherBrokers": "",
+    "primarySector": "반도체/디스플레이"
+  },
+  {
+    "name": "이병건",
+    "reportCount": 1,
+    "primaryBroker": "한화투자증권",
+    "otherBrokers": "",
+    "primarySector": "바이오/제약/헬스케어"
+  }
+]

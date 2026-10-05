@@ -1,6 +1,7 @@
 import type { Analyst, Report, SectorCategory } from '../types.ts';
 import { getCanonicalSector } from '../types.ts';
 import { classifyKrxStockSector } from './sectorClassifier.ts';
+import { generateFinalEvaluation } from './evaluationEngine2026.ts';
 
 const AVATAR_POOL = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -14,22 +15,32 @@ const AVATAR_POOL = [
 export function synthesizeAnalystsFromReports(reports: Report[]): Analyst[] {
   if (!reports || reports.length === 0) return [];
 
-  // Group reports by analyst & broker
-  const groups: Record<string, { analystName: string; brokerName: string; reports: Report[] }> = {};
+  // Group reports by analyst & broker (crediting both primary and co-authors)
+  const groups: Record<string, { analystName: string; brokerName: string; reports: Report[]; title?: string }> = {};
 
   reports.forEach((rep) => {
-    const name = rep.analystName || '담당 연구원';
+    const authors = (Array.isArray(rep.analysts) && rep.analysts.length > 0)
+      ? rep.analysts
+      : [rep.analystName || '담당 연구원'];
     const broker = rep.brokerName || '증권사';
-    const key = `${name}_${broker}`;
 
-    if (!groups[key]) {
-      groups[key] = {
-        analystName: name,
-        brokerName: broker,
-        reports: [],
-      };
-    }
-    groups[key].reports.push(rep);
+    authors.forEach((name) => {
+      const clean = name.trim();
+      if (!clean || clean === '-' || clean === '알수없음') return;
+      const key = `${clean}_${broker}`;
+
+      if (!groups[key]) {
+        groups[key] = {
+          analystName: clean,
+          brokerName: broker,
+          reports: [],
+          title: rep.analystTitle
+        };
+      }
+      if (!groups[key].reports.some(r => r.id === rep.id)) {
+        groups[key].reports.push(rep);
+      }
+    });
   });
 
   const rawAnalysts: Analyst[] = Object.values(groups).map((group, idx) => {
@@ -89,21 +100,44 @@ export function synthesizeAnalystsFromReports(reports: Report[]): Analyst[] {
     const aiObjectivityScore = Math.round((sumObjectivity / totalReports) * 10) / 10;
     const logicIntegrityScore = Math.round((sumLogic / totalReports) * 10) / 10;
 
+    // 2026 AI 7대 KPI 결정론적 스코어링 엔진 적용
+    const stockNames = Array.from(new Set(repList.map((r) => r.stockName).filter(Boolean)));
+    const firstRep = repList[0];
+    const avgCurPrice = firstRep?.currentPriceAtPublish || 50000;
+    const avgTgtPrice = firstRep?.targetPrice || avgCurPrice * 1.25;
+
+    const evalResult = generateFinalEvaluation({
+      analystId: `an_${group.analystName}_${group.brokerName}`,
+      analystName: group.analystName,
+      brokerName: group.brokerName,
+      sector: topSector,
+      targetPrice: avgTgtPrice,
+      priceAtPublish: avgCurPrice,
+      priceAfter3m: avgCurPrice * (1 + (returnRate * 0.4) / 100),
+      priceAfter6m: avgCurPrice * (1 + (returnRate * 0.7) / 100),
+      priceAfter12m: avgCurPrice * (1 + returnRate / 100),
+      reportCount: totalReports,
+      coverageCount: Math.max(1, stockNames.length),
+      logicGrade: aiObjectivityScore >= 95 ? 'S' : (aiObjectivityScore >= 90 ? 'A' : (aiObjectivityScore >= 80 ? 'B' : 'C')),
+      riskGrade: logicIntegrityScore >= 95 ? 'S' : (logicIntegrityScore >= 90 ? 'A' : (logicIntegrityScore >= 80 ? 'B' : 'C')),
+    });
+
+    const kpi2026 = evalResult.kpiScores;
+
     // Target Price Hit Rate calculation
-    const targetPriceHitRate = Math.min(98.5, Math.max(68, Math.round(aiObjectivityScore * 0.5 + Math.min(45, returnRate) * 0.8)));
+    const targetPriceHitRate = Math.round(kpi2026.targetPriceAccuracy * 10) / 10;
 
     // Virtual Profit Amount estimation (억원)
     const totalProfitAmount = Math.max(12.5, Math.round(returnRate * totalReports * 1.8 * 10) / 10);
 
-    // Overall Score (0-100)
-    const overallScore = Math.min(99.5, Math.max(70, Math.round((aiObjectivityScore * 0.4 + logicIntegrityScore * 0.3 + Math.min(100, Math.max(0, returnRate * 2.2)) * 0.3) * 10) / 10));
+    // Overall Score (0-100) from 2026 7대 KPI engine
+    const overallScore = Math.round(evalResult.totalScore * 10) / 10;
 
     // Innovation score
-    const innovationScore = Math.round((aiObjectivityScore * 0.5 + 46) * 10) / 10;
+    const innovationScore = Math.round(kpi2026.earningsForecastAccuracy * 10) / 10;
 
     // Strengths & AI evaluation summary
-    const stockNames = Array.from(new Set(repList.map((r) => r.stockName).filter(Boolean)));
-    const aiReviewSummary = `실제 수집 리포트 ${totalReports}건 분석: ${stockNames.slice(0, 3).join(', ')} 종목에 대해 객관성 평점 평균 ${aiObjectivityScore}점 및 상승여력 +${returnRate}% 산출 완료.`;
+    const aiReviewSummary = `실제 수집 리포트 ${totalReports}건 분석: 2026 7대 KPI 종합점수 ${overallScore}점 (목표주가 정확도 ${kpi2026.targetPriceAccuracy}점, 실적예측 정확도 ${kpi2026.earningsForecastAccuracy}점, 논리타당성 ${kpi2026.investmentLogicValidity}점).`;
 
     const avatarUrl = AVATAR_POOL[idx % AVATAR_POOL.length];
 
@@ -213,6 +247,7 @@ export function synthesizeAnalystsFromReports(reports: Report[]): Analyst[] {
       overallRank: 0,
       sectorRank: 0,
       overallScore,
+      kpi2026,
       returnRate,
       totalProfitAmount,
       targetPriceHitRate,

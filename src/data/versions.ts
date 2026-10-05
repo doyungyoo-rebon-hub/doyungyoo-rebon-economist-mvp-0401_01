@@ -2,11 +2,25 @@ import type { VersionInfo } from '../types.ts';
 
 export const APP_VERSIONS: VersionInfo[] = [
   {
-    version: 'VERSION 1.6',
+    version: 'VERSION 1.7',
+    releaseDate: '2026-10-05',
+    title: '차세대 실시간 인텔리전스 & AI 리포트 분석 파이프라인 (VERSION 1.7)',
+    summary: 'VERSION 1.6 전체 시스템 무손실 풀백업(v1.6-current-full-backup) 보존 완료 기반, 차세대 신규 기능 확장을 위한 최신 활성 버전',
+    isCurrent: true,
+    highlights: [
+      'VERSION 1.6 전체 프로젝트 무손실 풀백업(backups/v1.6-current-full-backup 및 backup_v1.6_current_full.tar.gz, 1클릭 복원 지원)',
+      '언제든지 1클릭 복구 가능한 v1.6 복원 엔진(npm run restore:v1.6) 및 복구 스크립트(scripts/restore-v1.6.cjs) 체계 구축',
+      'Google Cloud Run 배포 최적화 및 단일 포트 바인딩 안정화',
+      '32개 증권사 리포트 실시간 수집 및 DART 전자공시 팩트체크 엔진 1.7 기반 유지',
+      'AI 증권 리포트 정밀 분석 및 이코노미스트 독자 평가 지표 체계 가동'
+    ]
+  },
+  {
+    version: 'VERSION 1.6 (안정화 완료본)',
     releaseDate: '2026-09-18',
     title: '차세대 실시간 인텔리전스 & AI 리포트 분석 파이프라인 (VERSION 1.6)',
-    summary: 'VERSION 1.5 전체 프로젝트 무손실 풀 백업 완료 기반, Cloud Run 프로덕션 배포 파이프라인 최적화 및 차세대 실시간 리포트 평가 인텔리전스가 적용된 최신 활성 버전',
-    isCurrent: true,
+    summary: 'VERSION 1.5 전체 프로젝트 무손실 풀 백업 완료 기반, Cloud Run 프로덕션 배포 파이프라인 최적화 및 차세대 실시간 리포트 평가 인텔리전스가 적용된 안정화 버전',
+    isCurrent: false,
     highlights: [
       'VERSION 1.5 전체 프로젝트 무손실 풀 백업 완료 (backups/v1.5-final/ 및 v1.5-final-backup.tar.gz, 1클릭 복원 지원)',
       '언제든지 1클릭 복구 가능한 v1.5 복원 엔진(npm run restore:v1.5) 및 복구 스크립트(scripts/restore-v1.5.cjs) 구축',

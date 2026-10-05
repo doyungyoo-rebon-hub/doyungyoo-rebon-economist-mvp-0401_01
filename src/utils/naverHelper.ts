@@ -21,9 +21,9 @@ export interface NaverLinkableItem {
  * to resolve the exact individual company_read page.
  */
 export function getNaverReportUrl(item: NaverLinkableItem | null | undefined): string {
-  if (!item) return 'https://finance.naver.com/research/company_list.naver';
+  if (!item) return 'https://stock.naver.com/research/company';
 
-  // If item has a verified nid and stockCode is known, we can construct direct URL or redirect with verification
+  // Build query params for 4-Factor Matching (StockCode + PublishDate + BrokerName + Title)
   const title = item.title || item.reportTitle || '';
   const params = new URLSearchParams();
   if (item.stockCode) params.set('stockCode', item.stockCode);
@@ -34,34 +34,26 @@ export function getNaverReportUrl(item: NaverLinkableItem | null | undefined): s
   if (title) params.set('title', title);
   if (item.nid) params.set('nid', String(item.nid));
 
-  // If all key factors (stockCode and brokerName or publishDate) are present, use the 4-factor resolver
-  if (item.stockCode && (item.brokerName || item.publishDate)) {
+  // If stockCode or stockName is present, always route through the server-side validator
+  // to ensure the user lands on the EXACT stock's verified report or the stock's official research page
+  if (item.stockCode || item.stockName) {
     return `/api/naver-report-redirect?${params.toString()}`;
   }
 
-  // Direct NID if available and no conflicting stockCode
-  if (item.nid && String(item.nid).trim().length > 0) {
-    return `https://finance.naver.com/research/company_read.naver?nid=${item.nid}`;
+  // Fallback to stock research page if stockCode is known
+  if (item.stockCode) {
+    return `https://stock.naver.com/domestic/stock/${item.stockCode}/research`;
   }
 
-  // Direct read URL already in reportUrl
-  if (item.reportUrl && item.reportUrl.includes('company_read.naver')) {
-    return item.reportUrl;
-  }
-
-  if (params.toString().length > 0) {
-    return `/api/naver-report-redirect?${params.toString()}`;
-  }
-
-  return 'https://finance.naver.com/research/company_list.naver';
+  return 'https://stock.naver.com/research/company';
 }
 
 /**
- * Returns the overall company research list URL for a stock code (if user explicitly wants the whole list)
+ * Returns the overall company research list URL for a stock code (Modern responsive Naver page)
  */
 export function getNaverCompanyListUrl(stockCode?: string): string {
   if (stockCode && stockCode.trim().length > 0) {
-    return `https://finance.naver.com/research/company_list.naver?searchType=itemCode&itemCode=${stockCode.trim()}`;
+    return `https://stock.naver.com/domestic/stock/${stockCode.trim()}/research`;
   }
-  return 'https://finance.naver.com/research/company_list.naver';
+  return 'https://stock.naver.com/research/company';
 }

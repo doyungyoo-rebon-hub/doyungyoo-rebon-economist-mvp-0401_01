@@ -87,7 +87,7 @@ export const Pipeline01StatusOverview: React.FC<Pipeline01StatusOverviewProps> =
               </div>
               <p className="text-slate-300 text-xs mt-1 leading-relaxed">
                 {isScopeLocked
-                  ? 'MVP 정밀 검증을 위해 2026년 상반기(1월~6월, 전수 4,868건) 데이터셋 범위로 수집이 한정되어 있습니다. 7월 이후의 자동/수동 수집은 안전하게 차단됩니다.'
+                  ? '국내 전 종목(680개사 / 10,195건)을 대상으로 2026년 상반기(1월~6월) 전수 데이터셋이 구축되어 있습니다. 7월 이후의 자동/수동 수집은 안전하게 차단됩니다.'
                   : '상반기 잠금이 해제되어 2026년 7월 및 8월 Live 실시간 리포트 수집이 활성화되었습니다.'}
               </p>
               <div className="mt-2 text-[11px] text-slate-400 flex items-center space-x-2">

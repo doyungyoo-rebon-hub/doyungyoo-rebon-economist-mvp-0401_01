@@ -903,8 +903,13 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
                         {/* Broker Name & Analyst */}
                         <td className="py-3 px-4">
                           <div className="font-semibold text-slate-200 truncate">{report.brokerName}</div>
-                          <div className="text-[11px] text-teal-400/90 font-medium truncate flex items-center gap-1">
-                            <span>{report.analystName || '리서치센터'}</span>
+                          <div className="text-[11px] text-teal-400/90 font-medium truncate flex items-center gap-1 flex-wrap">
+                            <span>{report.analystName || '리서치센터'} {report.analystTitle || ''}</span>
+                            {Array.isArray(report.analysts) && report.analysts.length > 1 && (
+                              <span className="text-[10px] text-amber-300 bg-amber-950/70 border border-amber-800/40 px-1 rounded font-normal" title={`공동 저자: ${report.analysts.join(', ')}`}>
+                                공동: {report.analysts.slice(1).join(', ')}
+                              </span>
+                            )}
                             {report.sector && (
                               <span className="text-[10px] text-slate-500 bg-slate-900 px-1 py-0.2 rounded border border-slate-800">
                                 {report.sector.split('/')[0].trim()}
@@ -1031,7 +1036,7 @@ ${report.bodyText || (report.paragraphs ? report.paragraphs.join('\n\n') : '본�
                                     [수집 완료] {report.stockName} 리서치 본문 전문 ({paragraphsList.length || 5}개 분석 문단)
                                   </span>
                                   <span className="text-[11px] text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
-                                    담당: {report.analystName || '리서치센터'} 애널리스트 ({report.sector || '종목분석'})
+                                    담당: {Array.isArray(report.analysts) && report.analysts.length > 0 ? report.analysts.join(', ') : (report.analystName || '리서치센터')} {report.analystTitle || '애널리스트'} ({report.sector || '종목분석'})
                                   </span>
                                 </div>
 

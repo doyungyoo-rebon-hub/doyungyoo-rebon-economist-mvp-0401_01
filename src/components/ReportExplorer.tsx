@@ -17,15 +17,18 @@ import {
   LayoutGrid,
   List,
   ChevronRight,
+  ChevronLeft,
   ShieldCheck,
   ExternalLink,
   FileDown,
   AlertCircle,
   BarChart2,
-  RefreshCw
+  RefreshCw,
+  Globe
 } from 'lucide-react';
 import { Report, SectorCategory, isSectorMatch } from '../types';
 import { triggerPdfDownload } from '../utils/downloadHelper';
+import { KOREAN_TOP_STOCKS } from '../data/koreanStocks';
 
 interface ReportExplorerProps {
   reports?: Report[];
@@ -48,6 +51,9 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
   const [selectedRating, setSelectedRating] = useState<string>('ALL');
   const [onlyWithPdf, setOnlyWithPdf] = useState<boolean>(false);
   const [onlyHighObjectivity, setOnlyHighObjectivity] = useState<boolean>(false);
+  const [universeMode, setUniverseMode] = useState<'ALL_680' | 'TOP_100'>('ALL_680');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 36;
   const [datePreset, setDatePreset] = useState<string>('ALL'); // ALL, 2026_1H, 1M, 3M
   const [viewMode, setViewMode] = useState<'CARD' | 'TABLE' | 'BY_ANALYST' | 'BY_SECTOR'>('CARD');
 
@@ -79,8 +85,17 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
   }, [safeReports]);
 
   const uniqueAnalysts = useMemo(() => {
-    const list = Array.from(new Set(safeReports.map(r => r.analystName).filter(Boolean)));
-    return list.sort();
+    const set = new Set<string>();
+    safeReports.forEach(r => {
+      if (Array.isArray(r.analysts) && r.analysts.length > 0) {
+        r.analysts.forEach(a => {
+          if (a && a.trim() && a !== '-') set.add(a.trim());
+        });
+      } else if (r.analystName && r.analystName.trim() && r.analystName !== '-') {
+        set.add(r.analystName.trim());
+      }
+    });
+    return Array.from(set).sort();
   }, [safeReports]);
 
   // Extract all AI keywords across reports for quick tag filtering
@@ -122,7 +137,8 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
         const titleMatch = repTitle.includes(q);
         const stockNameMatch = (report.stockName || '').toLowerCase().includes(q);
         const stockCodeMatch = (report.stockCode || '').toLowerCase().includes(q) || (q.includes('삼성') && report.stockCode === '005930');
-        const analystMatch = (report.analystName || '').toLowerCase().includes(q);
+        const analystMatch = (report.analystName || '').toLowerCase().includes(q) ||
+          (report.analysts || []).some(a => a.toLowerCase().includes(q));
         const brokerMatch = (report.brokerName || '').toLowerCase().includes(q);
         const summaryText = typeof (report.aiSummary as any) === 'string'
           ? (report.aiSummary as any)
@@ -163,7 +179,9 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
 
       // 5. Analyst Filter
       if (selectedAnalyst !== 'ALL') {
-        if (report.analystName !== selectedAnalyst) {
+        const matchesAnalyst = report.analystName === selectedAnalyst ||
+          (Array.isArray(report.analysts) && report.analysts.includes(selectedAnalyst));
+        if (!matchesAnalyst) {
           return false;
         }
       }
@@ -210,9 +228,25 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
         }
       }
 
+      // 10. Universe Mode Filter
+      if (universeMode === 'TOP_100') {
+        const top100Codes = new Set(KOREAN_TOP_STOCKS.map(s => s.stockCode));
+        if (report.stockCode && !top100Codes.has(report.stockCode)) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [reports, searchQuery, activeKeywordFilter, selectedSector, selectedBroker, selectedAnalyst, selectedRating, onlyWithPdf, onlyHighObjectivity, datePreset]);
+  }, [reports, searchQuery, activeKeywordFilter, selectedSector, selectedBroker, selectedAnalyst, selectedRating, onlyWithPdf, onlyHighObjectivity, datePreset, universeMode]);
+
+  // Pagination calculation
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / itemsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedReports = useMemo(() => {
+    const start = (safeCurrentPage - 1) * itemsPerPage;
+    return filteredReports.slice(start, start + itemsPerPage);
+  }, [filteredReports, safeCurrentPage, itemsPerPage]);
 
   // Grouped by Analyst data
   const reportsByAnalyst = useMemo(() => {
@@ -239,6 +273,63 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
     });
     return Array.from(map.entries()).sort((a, b) => b[1].length - a[1].length);
   }, [filteredReports]);
+
+  // Pagination helper component
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-800 text-xs">
+        <div className="text-slate-400 font-medium">
+          전체 <strong className="text-white font-mono">{filteredReports.length.toLocaleString()}</strong>건 중{' '}
+          <strong className="text-cyan-300 font-mono">
+            {(safeCurrentPage - 1) * itemsPerPage + 1}~{Math.min(safeCurrentPage * itemsPerPage, filteredReports.length).toLocaleString()}
+          </strong>건 표시 (페이지 <span className="text-indigo-400 font-bold">{safeCurrentPage}</span> / {totalPages})
+        </div>
+
+        <div className="flex items-center space-x-1.5">
+          <button
+            type="button"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={safeCurrentPage <= 1}
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold transition-all flex items-center space-x-1 cursor-pointer"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            <span>이전</span>
+          </button>
+
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum = safeCurrentPage - 2 + i;
+            if (pageNum < 1) pageNum = i + 1;
+            if (pageNum > totalPages) return null;
+            return (
+              <button
+                key={pageNum}
+                type="button"
+                onClick={() => setCurrentPage(pageNum)}
+                className={`w-8 h-8 rounded-lg font-bold font-mono transition-all cursor-pointer ${
+                  safeCurrentPage === pageNum
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/50'
+                    : 'bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800'
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={safeCurrentPage >= totalPages}
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-white font-bold transition-all flex items-center space-x-1 cursor-pointer"
+          >
+            <span>다음</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   // KPI Metrics for active search result
   const pdfCount = useMemo(() => {
@@ -372,6 +463,34 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
         {/* Top Search Input & Quick Filters Row */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          {/* Stock Universe Selector Tabs */}
+          <div className="flex items-center space-x-1 p-1 bg-slate-950 border border-slate-800 rounded-xl shrink-0">
+            <button
+              type="button"
+              onClick={() => { setUniverseMode('ALL_680'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
+                universeMode === 'ALL_680'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5 text-cyan-300" />
+              <span>국내 전체 종목 (680개사)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUniverseMode('TOP_100'); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center space-x-1.5 ${
+                universeMode === 'TOP_100'
+                  ? 'bg-indigo-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-indigo-300" />
+              <span>핵심 100대 대형주</span>
+            </button>
+          </div>
+
           {/* Main Integrated Search Bar */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -672,8 +791,9 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
 
       {/* 1. CARD VIEW MODE */}
       {viewMode === 'CARD' && filteredReports.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredReports.map(report => {
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedReports.map(report => {
             const potentialGain = Math.round(
               ((report.targetPrice - (report.currentPriceAtPublish || 1000)) / (report.currentPriceAtPublish || 1000)) * 100
             );
@@ -691,9 +811,14 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
                       <span className="bg-slate-950 border border-slate-800 text-indigo-300 font-bold px-2 py-0.5 rounded text-[11px]">
                         {report.brokerName}
                       </span>
-                      <span className="text-slate-300 font-semibold text-[11px] flex items-center space-x-1">
-                        <User className="w-3 h-3 text-purple-400" />
-                        <span>{report.analystName} 연구원</span>
+                      <span className="text-slate-300 font-semibold text-[11px] flex items-center space-x-1.5 flex-wrap">
+                        <User className="w-3 h-3 text-purple-400 shrink-0" />
+                        <span>{report.analystName} {report.analystTitle || '연구원'}</span>
+                        {Array.isArray(report.analysts) && report.analysts.length > 1 && (
+                          <span className="text-[10px] text-amber-300 bg-amber-950/60 border border-amber-800/50 px-1 py-0.2 rounded font-normal" title={`공동 저자: ${report.analysts.join(', ')}`}>
+                            공동: {report.analysts.slice(1).join(', ')}
+                          </span>
+                        )}
                       </span>
                     </div>
 
@@ -787,28 +912,31 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
               </div>
             );
           })}
+          </div>
+          {renderPagination()}
         </div>
       )}
 
       {/* 2. TABLE VIEW MODE */}
       {viewMode === 'TABLE' && filteredReports.length > 0 && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
-                  <th className="py-3 px-3">발행일</th>
-                  <th className="py-3 px-3">종목명 (코드)</th>
-                  <th className="py-3 px-3">리포트 제목</th>
-                  <th className="py-3 px-3">카테고리</th>
-                  <th className="py-3 px-3">증권사 / 연구원</th>
-                  <th className="py-3 px-3 text-right">목표가 (상승여력)</th>
-                  <th className="py-3 px-3 text-center">AI 객관성</th>
-                  <th className="py-3 px-3 text-center">첨부 PDF</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filteredReports.map(report => {
+        <div className="space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+                    <th className="py-3 px-3">발행일</th>
+                    <th className="py-3 px-3">종목명 (코드)</th>
+                    <th className="py-3 px-3">리포트 제목</th>
+                    <th className="py-3 px-3">카테고리</th>
+                    <th className="py-3 px-3">증권사 / 연구원</th>
+                    <th className="py-3 px-3 text-right">목표가 (상승여력)</th>
+                    <th className="py-3 px-3 text-center">AI 객관성</th>
+                    <th className="py-3 px-3 text-center">첨부 PDF</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {paginatedReports.map(report => {
                   const potentialGain = Math.round(
                     ((report.targetPrice - (report.currentPriceAtPublish || 1000)) / (report.currentPriceAtPublish || 1000)) * 100
                   );
@@ -845,7 +973,14 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
 
                       <td className="py-3 px-3 whitespace-nowrap">
                         <div className="text-slate-300 font-semibold">{report.brokerName}</div>
-                        <div className="text-[10px] text-purple-300">{report.analystName} 연구원</div>
+                        <div className="text-[10px] text-purple-300 flex items-center gap-1 flex-wrap">
+                          <span>{report.analystName} {report.analystTitle || '연구원'}</span>
+                          {Array.isArray(report.analysts) && report.analysts.length > 1 && (
+                            <span className="text-[9px] text-amber-300 bg-amber-950/70 border border-amber-800/40 px-1 rounded font-normal">
+                              +{report.analysts.length - 1}인
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="py-3 px-3 text-right font-mono whitespace-nowrap">
@@ -876,6 +1011,8 @@ export const ReportExplorer: React.FC<ReportExplorerProps> = ({
             </table>
           </div>
         </div>
+        {renderPagination()}
+      </div>
       )}
 
       {/* 3. GROUPED BY ANALYST VIEW MODE */}

@@ -122,6 +122,50 @@ export const AnalystDetailModal: React.FC<AnalystDetailModalProps> = ({
             </div>
           </div>
 
+          {/* 2026 AI 7대 KPI 결정론적 평가 스코어카드 */}
+          <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-5 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <h4 className="text-sm font-bold text-white flex items-center space-x-2">
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <span>2026 AI 7대 KPI 결정론적 평가 지표</span>
+              </h4>
+              <span className="text-xs font-black text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2.5 py-0.5 rounded-full">
+                종합 {analyst.overallScore}점 (100점 만점)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-400 mb-0.5">① 목표주가 정확도 (25%)</div>
+                <div className="text-sm font-bold text-emerald-400">{analyst.kpi2026?.targetPriceAccuracy ?? analyst.targetPriceHitRate ?? 88}점</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-400 mb-0.5">② 실적 예측 정확도 (25%)</div>
+                <div className="text-sm font-bold text-cyan-400">{analyst.kpi2026?.earningsForecastAccuracy ?? 86}점</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-400 mb-0.5">③ 투자 논리 타당성 (15%)</div>
+                <div className="text-sm font-bold text-purple-400">{analyst.kpi2026?.investmentLogicValidity ?? analyst.aiObjectivityScore ?? 90}점</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-400 mb-0.5">④ 리스크 분석 적정성 (15%)</div>
+                <div className="text-sm font-bold text-rose-400">{analyst.kpi2026?.riskAnalysisAdequacy ?? analyst.logicIntegrityScore ?? 85}점</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-400 mb-0.5">⑤ 발행 빈도/활동성 (10%)</div>
+                <div className="text-sm font-bold text-amber-400">{analyst.kpi2026?.reportPublicationFreq ?? 92}점</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                <div className="text-[10px] text-slate-400 mb-0.5">⑥ SNS 주목도 (5%)</div>
+                <div className="text-sm font-bold text-blue-400">{analyst.kpi2026?.snsAttention ?? 80}점</div>
+              </div>
+              <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 sm:col-span-2">
+                <div className="text-[10px] text-slate-400 mb-0.5">⑦ 미디어 노출 빈도 (5%)</div>
+                <div className="text-sm font-bold text-indigo-400">{analyst.kpi2026?.mediaExposure ?? 82}점</div>
+              </div>
+            </div>
+          </div>
+
           {/* AI Evaluation Review Summary */}
           <div className="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-2">
             <h4 className="text-sm font-bold text-white flex items-center space-x-2">
