@@ -4,8 +4,8 @@ import { PipelineMetrics } from '../types';
 import { CURRENT_VERSION } from '../data/versions';
 
 interface HeaderProps {
-  activeTab: 'awards' | 'annual_analysts_01' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files';
-  setActiveTab: (tab: 'awards' | 'annual_analysts_01' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files') => void;
+  activeTab: 'awards' | 'annual_analysts_01' | 'annual_analysts_01_reviews' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files';
+  setActiveTab: (tab: 'awards' | 'annual_analysts_01' | 'annual_analysts_01_reviews' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files') => void;
   metrics: PipelineMetrics;
   unreadNotificationCount: number;
   reportCount?: number;
@@ -156,6 +156,21 @@ export const Header: React.FC<HeaderProps> = ({
               <span>올해의 애널리스트_01</span>
               <span className="bg-amber-950/90 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-amber-600/60">
                 신규로직
+              </span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('annual_analysts_01_reviews')}
+              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                activeTab === 'annual_analysts_01_reviews'
+                  ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 text-white shadow-md shadow-amber-600/40 ring-1 ring-amber-400'
+                  : 'text-amber-300 hover:text-white bg-amber-950/40 border border-amber-700/50 hover:bg-amber-900/50'
+              }`}
+            >
+              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <span>올해의 애널리스트_01 심사평</span>
+              <span className="bg-amber-950 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-amber-500/60 animate-pulse">
+                AI 심사평
               </span>
             </button>
 

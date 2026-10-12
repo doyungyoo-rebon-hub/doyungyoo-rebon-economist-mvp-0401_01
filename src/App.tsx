@@ -14,6 +14,7 @@ import { AnalystDetailModal } from './components/AnalystDetailModal';
 import { AnalystBottomSheet } from './components/AnalystBottomSheet';
 import { AnalystLookup01 } from './components/AnalystLookup01';
 import { AnnualAnalystAwards01 } from './components/AnnualAnalystAwards01';
+import { AnnualAnalystAwardsReview01 } from './components/AnnualAnalystAwardsReview01';
 import { ReportDetailModal } from './components/ReportDetailModal';
 import { VersionModal } from './components/VersionModal';
 import { Evaluation2026Simulator } from './components/Evaluation2026Simulator';
@@ -41,7 +42,7 @@ function safeSetLocalStorage(key: string, value: any) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'awards' | 'annual_analysts_01' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files'>('annual_analysts_01');
+  const [activeTab, setActiveTab] = useState<'awards' | 'annual_analysts_01' | 'annual_analysts_01_reviews' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files'>('annual_analysts_01_reviews');
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Application Data States - Loads from localStorage if present (for persistent real data collection)
@@ -696,6 +697,10 @@ export default function App() {
             }}
             onViewReportDetail={(r) => setSelectedReport(r)}
           />
+        )}
+
+        {activeTab === 'annual_analysts_01_reviews' && (
+          <AnnualAnalystAwardsReview01 />
         )}
 
         {activeTab === 'kpi_simulator' && (

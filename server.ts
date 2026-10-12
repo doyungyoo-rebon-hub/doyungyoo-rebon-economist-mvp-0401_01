@@ -373,10 +373,10 @@ function sanitizeStockNameAndCode(rawStockName: string, rawText: string = ''): {
 }
 
 export const app = express();
-// In AI Studio dev sandbox, Nginx listens on PORT (8080) and reverse-proxies to DEFAULT_APP_PORT (3000).
-// In deployed Cloud Run (and standard production containers), the server MUST listen on process.env.PORT (8080).
-const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
-const PORT = isDevSandbox ? 3000 : (Number(process.env.PORT) || 8080);
+const isCloudRun = Boolean(process.env.K_SERVICE || process.env.K_REVISION);
+const isProductionEnv = process.env.NODE_ENV === "production" || isCloudRun || (!process.env.CONTROL_PLANE_PORT && !process.env.DEFAULT_APP_PORT);
+const isDevSandbox = !isProductionEnv && Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
+const PORT = isDevSandbox ? (Number(process.env.DEFAULT_APP_PORT) || 3000) : (Number(process.env.PORT) || 8080);
 
 app.use(express.json({ limit: "10mb" }));
 
@@ -6227,16 +6227,12 @@ ${promptContext}
 
     const sectorAwards: Record<string, any[]> = {};
     majorSectors.forEach(secName => {
-      // Find analyst matching sector keyword
-      const secKeywords = secName.split('/');
-      let matched = rawAnalysts.filter(a => {
-        return secKeywords.some(kw => (a.sector || '').toLowerCase().includes(kw.toLowerCase()) || a.stocksList.some((s: string) => s.includes(kw)));
-      });
-
+      // Prioritize analysts whose assigned sector is exactly secName
+      let matched = rawAnalysts.filter(a => a.sector === secName || getCanonicalSector(a.sector) === secName);
       if (matched.length < 5) {
-        // Fill from analysts who covered relevant stocks
-        const otherPool = rawAnalysts.filter(a => !matched.includes(a));
-        matched = [...matched, ...otherPool.slice(0, 5 - matched.length)];
+        const secKeywords = secName.split('/');
+        const fallback = rawAnalysts.filter(a => !matched.includes(a) && secKeywords.some(kw => (a.sector || '').includes(kw) || a.stocksList.some((s: string) => s.includes(kw))));
+        matched = [...matched, ...fallback];
       }
 
       const secTop5 = matched.slice(0, 5).map((a, sIdx) => ({
@@ -6453,6 +6449,62 @@ ${promptContext}
       res.json(result);
     } catch (err: any) {
       console.error('Hall of Fame re-evaluate error:', err);
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Route: Generate or retrieve AI Award Review Report
+  app.post('/api/pipeline-01/analyst-award-review/generate', async (req, res) => {
+    try {
+      const {
+        analystName,
+        brokerName,
+        sector,
+        awardCategory,
+        score,
+        keyReports,
+        customPrompt
+      } = req.body;
+
+      let generatedMarkdown = '';
+      if (ai) {
+        try {
+          const prompt = customPrompt || `당신은 '리본인텔리전스'와 '이코노미스트'가 공동 주관하는 「2026 올해의 애널리스트 어워즈」의 독립 공인 AI 수석 심사위원입니다.
+수상 부문: ${awardCategory}
+애널리스트 성명: ${analystName} (${brokerName})
+전문 섹터: ${sector}
+종합 평가 점수: ${score}점 (100점 만점)
+주요 분석 기업 및 리포트: ${Array.isArray(keyReports) ? keyReports.join(', ') : ''}
+
+아래 5단계 구조에 맞춰 격조 높고 분석적인 문체로 [AI 공식 평가 리포트]를 작성해 주세요.
+# [리본-이코노미스트 2026 어워즈] AI 평가 리포트: ${analystName} 연구원 (${brokerName})
+## 1. 수상 총평 (Executive Summary)
+## 2. 4대 핵심 지표 정밀 평가 (Quantitative & Qualitative Analysis)
+## 3. 대표 발간 리포트 하이라이트
+## 4. 2026년 하반기 전망 및 투자자 제언
+## 5. 최종 심사위원단 수여사 (Honor Citation)`;
+
+          const aiRes = await ai.models.generateContent({
+            model: "gemini-3.8-flash",
+            contents: prompt
+          });
+          generatedMarkdown = aiRes.text || '';
+        } catch (gemErr: any) {
+          console.warn('[Gemini Review Gen Warning]', gemErr?.message);
+        }
+      }
+
+      res.json({
+        success: true,
+        analystName,
+        brokerName,
+        sector,
+        score,
+        generatedMarkdown,
+        generatedAt: new Date().toISOString()
+      });
+    } catch (err: any) {
+      console.error('Award review generate error:', err);
       res.status(500).json({ success: false, error: err.message });
     }
   });
@@ -10139,7 +10191,10 @@ export async function startServer() {
   app.get(["/healthz", "/api/health", "/livez", "/readyz", "/_ah/health"], healthResponse);
 
   // Search candidate dist locations for static frontend bundle
-  const isDevSandbox = Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
+  const isCloudRun = Boolean(process.env.K_SERVICE || process.env.K_REVISION);
+  const isProduction = process.env.NODE_ENV === "production" || isCloudRun || (!process.env.CONTROL_PLANE_PORT && !process.env.DEFAULT_APP_PORT);
+  const isDevSandbox = !isProduction && Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
+
   const candidateDistDirs = [
     path.join(process.cwd(), "dist"),
     path.join("/workspace", "dist"),
@@ -10153,7 +10208,6 @@ export async function startServer() {
     || candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) 
     || path.join(process.cwd(), "dist");
   const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
-  const isProduction = process.env.NODE_ENV === "production" || !isDevSandbox || hasStaticDist;
 
   if (isProduction && hasStaticDist) {
     app.use(express.static(distPath));
@@ -10198,14 +10252,22 @@ export async function startServer() {
   });
 
   // Cloud Run and container port binding architecture:
-  // In AI Studio multi-container Cloud Run: app-container listens on 3000 (probed by Cloud Run on 3000), while nginx-container listens on 8080.
-  // In single-container Cloud Run: container listens on PORT (typically 8080).
+  // Ensures both Cloud Run (8080) and AI Studio container (3000) or custom process.env.PORT are actively listening.
   const host = "0.0.0.0";
-  const primaryPort = isDevSandbox
-    ? (Number(process.env.DEFAULT_APP_PORT) || 3000)
-    : (Number(process.env.PORT) || 3000);
+  const portsToListen = new Set<number>();
+  
+  if (process.env.PORT) {
+    const p = Number(process.env.PORT);
+    if (!isNaN(p) && p > 0) portsToListen.add(p);
+  }
+  if (process.env.DEFAULT_APP_PORT) {
+    const p = Number(process.env.DEFAULT_APP_PORT);
+    if (!isNaN(p) && p > 0) portsToListen.add(p);
+  }
+  portsToListen.add(8080);
+  portsToListen.add(3000);
 
-  const startListener = (port: number, isPrimary: boolean = true) => {
+  const startListener = (port: number) => {
     try {
       const server = app.listen(port, host, () => {
         console.log(`[Server] Core app listening on http://${host}:${port} (mode: ${isProduction ? 'production' : 'development'})`);
@@ -10214,29 +10276,17 @@ export async function startServer() {
         if (err.code === "EADDRINUSE") {
           console.log(`[Server] Port ${port} is in use / handled.`);
         } else {
-          console.error(`[Server] Port ${port} error:`, err);
-          if (isPrimary && !isDevSandbox) {
-            process.exit(1);
-          }
+          console.warn(`[Server] Port ${port} notice:`, err.message || err);
         }
       });
       return server;
     } catch (err: any) {
-      console.error(`[Server] Failed to bind port ${port}:`, err);
-      if (isPrimary && !isDevSandbox) {
-        process.exit(1);
-      }
+      console.warn(`[Server] Failed to bind port ${port}:`, err.message || err);
     }
   };
 
-  startListener(primaryPort, true);
-
-  // In production, also attempt binding the secondary port (e.g. 8080 if primary is 3000, or 3000 if primary is 8080)
-  if (!isDevSandbox) {
-    const secondaryPort = primaryPort === 8080 ? 3000 : (Number(process.env.PORT) || 8080);
-    if (secondaryPort !== primaryPort) {
-      startListener(secondaryPort, false);
-    }
+  for (const port of portsToListen) {
+    startListener(port);
   }
 }
 
