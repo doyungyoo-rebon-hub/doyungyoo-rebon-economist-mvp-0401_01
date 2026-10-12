@@ -29,7 +29,7 @@ import {
   Info
 } from 'lucide-react';
 import { safeResponseJson } from '../utils/apiClient';
-import { Analyst, Report, STANDARD_12_SECTORS } from '../types';
+import { Analyst, Report, STANDARD_10_SECTORS } from '../types';
 import { AnalystBottomSheet } from './AnalystBottomSheet';
 
 interface AnalystLookup01Props {
@@ -173,7 +173,7 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
               <span>국내 증권사 애널리스트 전체 현황 & 다차원 트랙레코드</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-              증권사별 · 12대 섹터별 · 종목별 · 기간별 4대 다차원 필터링을 통해 국내 증권사 소속 공인 연구원의 발간 활동성, 목표가 적중률, 투자의견 성향을 실시간으로 추적·비교합니다.
+              증권사별 · 10대 섹터별 · 종목별 · 기간별 4대 다차원 필터링을 통해 국내 증권사 소속 공인 연구원의 발간 활동성, 목표가 적중률, 투자의견 성향을 실시간으로 추적·비교합니다.
             </p>
           </div>
 
@@ -390,7 +390,7 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
           </div>
         </div>
 
-        {/* 3열: 12대 표준 섹터 칩스 */}
+        {/* 3열: 10대 표준 섹터 칩스 */}
         <div className="pt-3 border-t border-slate-800/80">
           <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-thin">
             <span className="text-[11px] font-bold text-slate-400 flex items-center space-x-1 mr-1 shrink-0">
@@ -407,10 +407,10 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
                   : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
               }`}
             >
-              전체 12개 섹터
+              전체 10개 섹터
             </button>
 
-            {STANDARD_12_SECTORS.map((sec) => {
+            {STANDARD_10_SECTORS.map((sec) => {
               const secMeta = filterOptions?.sectors.find((s) => s.name.includes(sec) || sec.includes(s.name));
               const count = secMeta?.count || 0;
               const isSelected = selectedSector === sec || (selectedSector !== 'ALL' && selectedSector.includes(sec));
@@ -523,15 +523,8 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-3.5">
                     <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <img
-                          src={analyst.avatarUrl}
-                          alt={analyst.name}
-                          className="w-12 h-12 rounded-full object-cover ring-2 ring-blue-500/30 shadow-md bg-slate-800"
-                        />
-                        <span className="absolute -bottom-1 -right-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-[10px] font-black text-white px-1.5 py-0.2 rounded-full border border-slate-900 shadow">
-                          #{analyst.overallRank || index + 1}
-                        </span>
+                      <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-500/40 text-blue-300 font-black text-xs shadow shrink-0">
+                        #{analyst.overallRank || index + 1}
                       </div>
 
                       <div>
@@ -720,16 +713,9 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
                         </span>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2.5">
-                          <img
-                            src={analyst.avatarUrl}
-                            alt={analyst.name}
-                            className="w-8 h-8 rounded-full object-cover bg-slate-800 ring-1 ring-slate-700"
-                          />
-                          <div>
-                            <div className="font-bold text-white text-xs">{analyst.name}</div>
-                            <div className="text-[10px] text-slate-500">{analyst.jobTitle}</div>
-                          </div>
+                        <div>
+                          <div className="font-bold text-white text-xs">{analyst.name}</div>
+                          <div className="text-[10px] text-slate-500">{analyst.jobTitle}</div>
                         </div>
                       </td>
                       <td className="py-3 px-4 font-semibold text-blue-400">{analyst.brokerName}</td>
@@ -816,24 +802,17 @@ export const AnalystLookup01: React.FC<AnalystLookup01Props> = ({
           <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95">
             {/* Modal Header */}
             <div className="p-5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <img
-                  src={reportHistoryModalAnalyst.avatarUrl}
-                  alt={reportHistoryModalAnalyst.name}
-                  className="w-11 h-11 rounded-full object-cover bg-slate-800 ring-2 ring-blue-500/40"
-                />
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h3 className="text-base font-bold text-white">{reportHistoryModalAnalyst.name}</h3>
-                    <span className="text-xs text-slate-400">{reportHistoryModalAnalyst.jobTitle}</span>
-                    <span className="bg-blue-950 text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-800">
-                      {reportHistoryModalAnalyst.brokerName}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    2026 상반기 발간 리포트 히스토리 전수 ({reportHistoryModalAnalyst.recentReports?.length || 0}건)
-                  </p>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-base font-bold text-white">{reportHistoryModalAnalyst.name}</h3>
+                  <span className="text-xs text-slate-400">{reportHistoryModalAnalyst.jobTitle}</span>
+                  <span className="bg-blue-950 text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-800">
+                    {reportHistoryModalAnalyst.brokerName}
+                  </span>
                 </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  2026 상반기 발간 리포트 히스토리 전수 ({reportHistoryModalAnalyst.recentReports?.length || 0}건)
+                </p>
               </div>
               <button
                 type="button"

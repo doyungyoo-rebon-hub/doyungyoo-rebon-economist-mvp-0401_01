@@ -483,23 +483,16 @@ export const AwardsDashboard: React.FC<AwardsDashboardProps> = ({
                     </div>
 
                     {/* Profile Header */}
-                    <div className="flex items-center space-x-4 mb-4">
-                      <img
-                        src={analyst.avatarUrl}
-                        alt={analyst.name}
-                        className="w-14 h-14 rounded-full object-cover ring-2 ring-blue-500/40 shadow-lg"
-                      />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
-                            {analyst.name} <span className="text-xs font-normal text-slate-400">연구원</span>
-                          </h4>
-                        </div>
-                        <p className="text-xs text-slate-400 font-medium">{analyst.brokerName}</p>
-                        <div className="mt-1 flex items-center space-x-1 text-[11px] text-amber-300">
-                          <span>종합 평가 스코어</span>
-                          <strong className="text-sm font-bold ml-1">{analyst.overallScore}점</strong>
-                        </div>
+                    <div className="mb-4">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                          {analyst.name} <span className="text-xs font-normal text-slate-400">연구원</span>
+                        </h4>
+                      </div>
+                      <p className="text-xs text-slate-400 font-medium">{analyst.brokerName}</p>
+                      <div className="mt-1 flex items-center space-x-1 text-[11px] text-amber-300">
+                        <span>종합 평가 스코어</span>
+                        <strong className="text-sm font-bold ml-1">{analyst.overallScore}점</strong>
                       </div>
                     </div>
 
@@ -748,19 +741,12 @@ export const AwardsDashboard: React.FC<AwardsDashboardProps> = ({
                     </td>
 
                     <td className="px-4 py-4">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={analyst.avatarUrl}
-                          alt={analyst.name}
-                          className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-700"
-                        />
-                        <div>
-                          <div className="font-bold text-white hover:text-cyan-300 flex items-center space-x-1.5">
-                            <span>{analyst.name}</span>
-                            <span className="text-xs text-slate-400 font-normal">연구원</span>
-                          </div>
-                          <div className="text-xs text-slate-400">{analyst.brokerName}</div>
+                      <div>
+                        <div className="font-bold text-white hover:text-cyan-300 flex items-center space-x-1.5">
+                          <span>{analyst.name}</span>
+                          <span className="text-xs text-slate-400 font-normal">연구원</span>
                         </div>
+                        <div className="text-xs text-slate-400">{analyst.brokerName}</div>
                       </div>
                     </td>
 

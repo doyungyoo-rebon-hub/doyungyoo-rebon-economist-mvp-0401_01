@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import { AnalystBottomSheet } from './AnalystBottomSheet';
 import { Evaluation2026Simulator } from './Evaluation2026Simulator';
-import { STANDARD_12_SECTORS } from '../types';
+import { STANDARD_10_SECTORS } from '../types';
 import { safeResponseJson } from '../utils/apiClient';
 
 interface AnnualAnalystAwards01Props {
@@ -594,24 +594,19 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-4 mb-4">
-                        <img
-                          src={hofData.top10[1].avatarUrl}
-                          alt={hofData.top10[1].name}
-                          className="w-16 h-16 rounded-2xl object-cover ring-2 ring-slate-400 shadow-md"
-                        />
-                        <div>
+                      <div className="mb-4 p-3 bg-slate-950/60 rounded-2xl border border-slate-800/80">
+                        <div className="flex items-center justify-between">
                           <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             {hofData.top10[1].name}
                             <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
                               {hofData.top10[1].brokerName}
                             </span>
                           </h3>
-                          <p className="text-xs text-slate-400 mt-0.5">{hofData.top10[1].sector} 전문</p>
-                          <p className="text-xs text-amber-400 font-semibold mt-1">
-                            대표 커버리지: {hofData.top10[1].keyStock}
-                          </p>
                         </div>
+                        <p className="text-xs text-slate-400 mt-1">{hofData.top10[1].sector} 전문</p>
+                        <p className="text-xs text-amber-400 font-semibold mt-0.5">
+                          대표 커버리지: {hofData.top10[1].keyStock}
+                        </p>
                       </div>
 
                       {/* AI Review Quote */}
@@ -680,24 +675,17 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-4 mb-4">
-                        <img
-                          src={hofData.top10[0].avatarUrl}
-                          alt={hofData.top10[0].name}
-                          className="w-20 h-20 rounded-2xl object-cover ring-4 ring-amber-400 shadow-xl"
-                        />
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h3 className="text-2xl font-black text-white">{hofData.top10[0].name}</h3>
-                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
-                              {hofData.top10[0].brokerName}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-300 font-medium mt-1">{hofData.top10[0].sector} 부문 수석</p>
-                          <p className="text-xs text-amber-300 font-bold mt-1">
-                            핵심 성과주: {hofData.top10[0].keyStock}
-                          </p>
+                      <div className="mb-4 p-3.5 bg-amber-950/30 rounded-2xl border border-amber-500/30">
+                        <div className="flex items-center space-x-2">
+                          <h3 className="text-2xl font-black text-white">{hofData.top10[0].name}</h3>
+                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40">
+                            {hofData.top10[0].brokerName}
+                          </span>
                         </div>
+                        <p className="text-xs text-slate-300 font-medium mt-1">{hofData.top10[0].sector} 부문 수석</p>
+                        <p className="text-xs text-amber-300 font-bold mt-0.5">
+                          핵심 성과주: {hofData.top10[0].keyStock}
+                        </p>
                       </div>
 
                       {/* AI Review Quote */}
@@ -769,24 +757,19 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         </span>
                       </div>
 
-                      <div className="flex items-center space-x-4 mb-4">
-                        <img
-                          src={hofData.top10[2].avatarUrl}
-                          alt={hofData.top10[2].name}
-                          className="w-16 h-16 rounded-2xl object-cover ring-2 ring-amber-700 shadow-md"
-                        />
-                        <div>
+                      <div className="mb-4 p-3 bg-slate-950/60 rounded-2xl border border-slate-800/80">
+                        <div className="flex items-center justify-between">
                           <h3 className="text-xl font-bold text-white flex items-center gap-2">
                             {hofData.top10[2].name}
                             <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
                               {hofData.top10[2].brokerName}
                             </span>
                           </h3>
-                          <p className="text-xs text-slate-400 mt-0.5">{hofData.top10[2].sector} 전문</p>
-                          <p className="text-xs text-amber-400 font-semibold mt-1">
-                            대표 커버리지: {hofData.top10[2].keyStock}
-                          </p>
                         </div>
+                        <p className="text-xs text-slate-400 mt-1">{hofData.top10[2].sector} 전문</p>
+                        <p className="text-xs text-amber-400 font-semibold mt-0.5">
+                          대표 커버리지: {hofData.top10[2].keyStock}
+                        </p>
                       </div>
 
                       {/* AI Review Quote */}
@@ -863,21 +846,14 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                         <span className="text-sm font-bold text-white">{a.totalScore}점</span>
                       </div>
 
-                      <div className="flex items-center space-x-3 mb-3">
-                        <img
-                          src={a.avatarUrl}
-                          alt={a.name}
-                          className="w-12 h-12 rounded-xl object-cover ring-1 ring-slate-700"
-                        />
-                        <div>
-                          <h4 className="text-base font-bold text-white flex items-center gap-1.5">
-                            {a.name}
-                            <span className="text-xs px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
-                              {a.brokerName}
-                            </span>
-                          </h4>
-                          <p className="text-xs text-slate-400">{a.sector}</p>
-                        </div>
+                      <div className="mb-3">
+                        <h4 className="text-base font-bold text-white flex items-center gap-1.5">
+                          {a.name}
+                          <span className="text-xs px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                            {a.brokerName}
+                          </span>
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-0.5">{a.sector}</p>
                       </div>
 
                       <p className="text-xs text-slate-400 line-clamp-2 mb-3 leading-relaxed">
@@ -982,16 +958,10 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                           <span className="text-sm font-black text-white">{a.totalScore}점</span>
                         </div>
 
-                        <div className="flex flex-col items-center text-center my-3">
-                          <img
-                            src={a.avatarUrl}
-                            alt={a.name}
-                            className={`w-16 h-16 rounded-2xl object-cover mb-2 ${
-                              is1st ? 'ring-2 ring-blue-400 shadow-md' : 'ring-1 ring-slate-700'
-                            }`}
-                          />
+                        <div className="flex flex-col items-center text-center my-3 p-3 bg-slate-950/60 rounded-2xl border border-slate-800/60">
                           <h4 className="text-base font-bold text-white">{a.name}</h4>
-                          <span className="text-xs text-blue-400 font-semibold">{a.brokerName}</span>
+                          <span className="text-xs text-blue-400 font-semibold mt-0.5">{a.brokerName}</span>
+                          <span className="text-[11px] text-slate-400 mt-0.5">{a.stocksList?.[0] || '주요 커버리지'}</span>
                         </div>
 
                         <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800/80 mb-3 text-[11px] text-slate-300 leading-relaxed">
@@ -1069,24 +1039,17 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
 
                     <p className="text-xs text-slate-400 font-medium mb-4">{conv.subtitle}</p>
 
-                    <div className="flex items-center space-x-4 p-4 bg-slate-950/70 rounded-2xl border border-slate-800/80 mb-4">
-                      <img
-                        src={conv.winner.avatarUrl}
-                        alt={conv.winner.name}
-                        className="w-16 h-16 rounded-2xl object-cover ring-2 ring-purple-400 shadow-md"
-                      />
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <h4 className="text-lg font-black text-white">{conv.winner.name}</h4>
-                          <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-purple-300 font-semibold">
-                            {conv.winner.brokerName}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-400 mt-0.5">{conv.winner.sector}</p>
-                        <p className="text-xs text-pink-400 font-bold mt-1">
-                          융합 테마: {conv.keyTheme}
-                        </p>
+                    <div className="p-4 bg-slate-950/70 rounded-2xl border border-slate-800/80 mb-4">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="text-lg font-black text-white">{conv.winner.name}</h4>
+                        <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-purple-300 font-semibold">
+                          {conv.winner.brokerName}
+                        </span>
                       </div>
+                      <p className="text-xs text-slate-400 mt-0.5">{conv.winner.sector}</p>
+                      <p className="text-xs text-pink-400 font-bold mt-1">
+                        융합 테마: {conv.keyTheme}
+                      </p>
                     </div>
 
                     <div className="p-3.5 bg-purple-950/30 rounded-2xl border border-purple-500/30 mb-4 text-xs text-purple-100 leading-relaxed">
@@ -1166,24 +1129,17 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
 
                       <h4 className="text-base font-black text-white mb-3">{sp.title}</h4>
 
-                      <div className="flex items-center space-x-4 p-4 bg-slate-950/80 rounded-2xl border border-slate-800 mb-4">
-                        <img
-                          src={sp.winner.avatarUrl}
-                          alt={sp.winner.name}
-                          className="w-16 h-16 rounded-2xl object-cover ring-2 ring-emerald-400 shadow-md"
-                        />
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h5 className="text-lg font-black text-white">{sp.winner.name}</h5>
-                            <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">
-                              {sp.winner.brokerName}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-400 mt-0.5">{sp.winner.sector} 연구원</p>
-                          <p className="text-xs text-emerald-400 font-semibold mt-1">
-                            영업기여액: {sp.winner.salesPipelineAmountEok}억원
-                          </p>
+                      <div className="p-4 bg-slate-950/80 rounded-2xl border border-slate-800 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <h5 className="text-lg font-black text-white">{sp.winner.name}</h5>
+                          <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold">
+                            {sp.winner.brokerName}
+                          </span>
                         </div>
+                        <p className="text-xs text-slate-400 mt-0.5">{sp.winner.sector} 연구원</p>
+                        <p className="text-xs text-emerald-400 font-semibold mt-1">
+                          영업기여액: {sp.winner.salesPipelineAmountEok}억원
+                        </p>
                       </div>
 
                       {/* Contrarian specific calls view */}
@@ -1272,8 +1228,8 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                     onChange={(e) => setSelectedSectorFilter(e.target.value)}
                     className="w-full bg-slate-950 text-white text-xs px-3 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-amber-500 transition"
                   >
-                    <option value="ALL">전체 섹터</option>
-                    {STANDARD_12_SECTORS.map(s => (
+                    <option value="ALL">전체 10대 섹터</option>
+                    {STANDARD_10_SECTORS.map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
@@ -1335,21 +1291,14 @@ export const AnnualAnalystAwards01: React.FC<AnnualAnalystAwards01Props> = ({
                           </span>
                         </td>
                         <td className="py-3 px-3">
-                          <div className="flex items-center space-x-2.5">
-                            <img
-                              src={a.avatarUrl}
-                              alt={a.name}
-                              className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-700 shrink-0"
-                            />
-                            <div>
-                              <button
-                                onClick={() => setSelectedAnalystForSheet(a)}
-                                className="font-bold text-white hover:text-amber-400 transition"
-                              >
-                                {a.name}
-                              </button>
-                              <p className="text-[11px] text-slate-400">{a.brokerName}</p>
-                            </div>
+                          <div>
+                            <button
+                              onClick={() => setSelectedAnalystForSheet(a)}
+                              className="font-bold text-white hover:text-amber-400 transition"
+                            >
+                              {a.name}
+                            </button>
+                            <p className="text-[11px] text-slate-400">{a.brokerName}</p>
                           </div>
                         </td>
                         <td className="py-3 px-3">

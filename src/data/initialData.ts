@@ -55,7 +55,7 @@ export const INITIAL_NOTIFICATION_SETTINGS: NotificationSetting = {
   targetPriceChangeThresholdPercent: 10,
   notifyRatingChanges: true,
   notifyLowObjectivityAlert: true,
-  subscribedSectors: ['반도체/디스플레이', '2차전지/배터리/소재', '바이오/제약/헬스케어', '자동차/모빌리티', '조선/중공업/방산'],
+  subscribedSectors: ['반도체/IT/전자', '2차전지/배터리/소재', '바이오/제약/헬스케어', '자동차/모빌리티', '조선/중공업/방산'],
   followedAnalystIds: [],
   emailDigestFrequency: 'DAILY',
 };

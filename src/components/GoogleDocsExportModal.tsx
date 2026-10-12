@@ -303,7 +303,7 @@ export const GoogleDocsExportModal: React.FC<GoogleDocsExportModalProps> = ({
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-400 line-clamp-2">
-                    2026 베스트 애널리스트 순위, 평가 지표 및 12개 섹터별 통계 종합본
+                    2026 베스트 애널리스트 순위, 평가 지표 및 10개 섹터별 통계 종합본
                   </p>
                 </div>
                 <span className="text-[10px] text-blue-400 font-semibold mt-2.5">

@@ -27,7 +27,7 @@ import {
   Clock,
   Zap,
 } from 'lucide-react';
-import { Report, SectorCategory, STANDARD_12_SECTORS, getCanonicalSector } from '../types';
+import { Report, SectorCategory, STANDARD_10_SECTORS, getCanonicalSector } from '../types';
 import { classifyKrxStockSector } from '../utils/sectorClassifier';
 import { safeResponseJson } from '../utils/apiClient';
 
@@ -49,6 +49,8 @@ const MONTHS_2026 = [
 ];
 
 const SECTOR_THEMES: Record<string, { color: string; bg: string; border: string; desc: string }> = {
+  '반도체/IT/전자': { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', desc: '메모리/파운드리, IT하드웨어, 모바일, 전자기기, 통신장비' },
+  '화학/철강/소재': { color: 'text-orange-400', bg: 'bg-orange-500/10', border: 'border-orange-500/30', desc: '석유화학, 정유, 신재생에너지, 철강, 비철금속, 산업소재' },
   '반도체/디스플레이': { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', desc: '메모리/비메모리, 웨이퍼, 소부장, 패널' },
   '2차전지/배터리/소재': { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', desc: '셀, 양극재, 음극재, 전해액, 분리막' },
   '바이오/제약/헬스케어': { color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/30', desc: '신약개발, CDMO, 바이오시밀러, 의료기기' },
@@ -61,7 +63,7 @@ const SECTOR_THEMES: Record<string, { color: string; bg: string; border: string;
   '철강/금속/소재': { color: 'text-teal-400', bg: 'bg-teal-500/10', border: 'border-teal-500/30', desc: '포스코, 제철, 비철금속, 특수강' },
   '소비재/유통/음식료': { color: 'text-lime-400', bg: 'bg-lime-500/10', border: 'border-lime-500/30', desc: 'K-뷰티 화장품, 식품, 유통, 백화점, 패션' },
   '건설/물류/기타': { color: 'text-stone-400', bg: 'bg-stone-500/10', border: 'border-stone-500/30', desc: '건설사, 해운, 항공, 육상물류, 인프라' },
-  '섹터 구분 필요': { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/40', desc: '12대 표준 대분류 미지정 또는 매핑 대기 상태' },
+  '섹터 구분 필요': { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/40', desc: '10대 표준 대분류 미지정 또는 매핑 대기 상태' },
 };
 
 export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
@@ -159,7 +161,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
       reports: Report[];
     }> = {};
 
-    STANDARD_12_SECTORS.forEach(sec => {
+    STANDARD_10_SECTORS.forEach(sec => {
       map[sec] = { collected: 0, analyzed: 0, stocks: new Set(), reports: [] };
     });
     map['섹터 구분 필요'] = { collected: 0, analyzed: 0, stocks: new Set(), reports: [] };
@@ -237,7 +239,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
       if (data && data.success) {
         setLastClassificationResult(data);
         setClassificationProgress(100);
-        setClassificationStatusMsg(data.message || '12대 표준 대분류가 성공적으로 적용되었습니다.');
+        setClassificationStatusMsg(data.message || '10대 표준 대분류가 성공적으로 적용되었습니다.');
         // Refresh data
         await fetchServerDbReports();
         onRefreshReports?.();
@@ -325,13 +327,13 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
           <div>
             <div className="inline-flex items-center space-x-2 bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs font-bold px-3 py-1 rounded-full mb-3">
               <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-              <span>데이터 파이프라인 수집 & KRX 12대 표준 대분류 통계 모니터</span>
+              <span>데이터 파이프라인 수집 & KRX 10대 표준 대분류 통계 모니터</span>
             </div>
             <h2 className="text-2xl lg:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
               <span>{selectedYear}년 상반기(1H) 월별 리포트 수집 & 섹터 분류 현황</span>
             </h2>
             <p className="text-slate-400 text-sm mt-2 max-w-3xl leading-relaxed">
-              한국거래소(KRX) 상장 종목 데이터베이스를 기반으로 상반기(1월~6월) 월별 리포트 수집 현황, 12대 표준 대분류 섹터별 매핑 현황, 
+              한국거래소(KRX) 상장 종목 데이터베이스를 기반으로 상반기(1월~6월) 월별 리포트 수집 현황, 10대 표준 대분류 섹터별 매핑 현황, 
               3단계 상태(수집 완료 / AI 분석 완료 / 미수집 추정)를 실시간으로 집계 및 일괄 분류합니다.
             </p>
           </div>
@@ -457,7 +459,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
             </div>
           </div>
 
-          {/* Card 4: 12대 표준 섹터 분류율 */}
+          {/* Card 4: 10대 표준 섹터 분류율 */}
           <div className="bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-4 relative overflow-hidden group hover:border-emerald-400/60 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
@@ -513,7 +515,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-300 mt-1">
-                한국거래소(KRX) 12대 표준 대분류 AI 분류 엔진을 가동하여 종목명과 종목코드를 분석하고, 원클릭으로 일괄 매핑할 수 있습니다.
+                한국거래소(KRX) 10대 표준 대분류 AI 분류 엔진을 가동하여 종목명과 종목코드를 분석하고, 원클릭으로 일괄 매핑할 수 있습니다.
               </p>
             </div>
           </div>
@@ -525,7 +527,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
               className="flex-1 md:flex-none px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
             >
               <Cpu className={`w-4 h-4 ${isClassifying ? 'animate-spin' : ''}`} />
-              <span>{isClassifying ? 'AI 일괄 분류 엔진 가동 중...' : '지금 12대 표준 섹터 일괄 적용'}</span>
+              <span>{isClassifying ? 'AI 일괄 분류 엔진 가동 중...' : '지금 10대 표준 섹터 일괄 적용'}</span>
             </button>
             <button
               onClick={() => setSelectedSectorFilter('섹터 구분 필요')}
@@ -656,16 +658,16 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
         </div>
       </div>
 
-      {/* 5. Sector Collection Status (12대 표준 대분류 섹터별 수집 현황) */}
+      {/* 5. Sector Collection Status (10대 표준 대분류 섹터별 수집 현황) */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 lg:p-8 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
             <div className="inline-flex items-center space-x-2 text-xs text-emerald-400 font-bold mb-1">
               <Layers className="w-3.5 h-3.5" />
-              <span>KRX 12 STANDARD SECTOR TAXONOMY</span>
+              <span>KRX 10 STANDARD SECTOR TAXONOMY</span>
             </div>
             <h3 className="text-xl font-extrabold text-white flex items-center gap-2">
-              <span>12대 표준 대분류 섹터별 수집 & 분석 현황</span>
+              <span>10대 표준 대분류 섹터별 수집 & 분석 현황</span>
               <span className="text-xs font-normal text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-0.5 rounded-full">
                 AI 분류 엔진 연동
               </span>
@@ -684,9 +686,9 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
           </div>
         </div>
 
-        {/* 12 Standard Sectors Grid + 1 Warning Card for Unclassified */}
+        {/* 10 Standard Sectors Grid + 1 Warning Card for Unclassified */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
-          {STANDARD_12_SECTORS.map((sectorName) => {
+          {STANDARD_10_SECTORS.map((sectorName) => {
             const data = sectorCountsMap[sectorName] || { collected: 0, analyzed: 0, stocks: new Set(), reports: [] };
             const theme = SECTOR_THEMES[sectorName] || { color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/30', desc: '' };
             const isSelected = selectedSectorFilter === sectorName;
@@ -777,7 +779,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
                     <AlertTriangle className="w-4 h-4 text-rose-400" />
                     <span>섹터 구분 필요 (미분류)</span>
                   </h4>
-                  <p className="text-[11px] text-slate-400 mt-1">12대 표준 대분류 미지정 리포트</p>
+                  <p className="text-[11px] text-slate-400 mt-1">10대 표준 대분류 미지정 리포트</p>
                 </div>
                 <span className={`text-xs font-black px-2 py-0.5 rounded-lg border ${
                   unclassifiedCount > 0 
@@ -794,7 +796,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
                   <span>{unclassifiedCount}건</span>
                 </div>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  종목명/코드를 분석하여 12대 표준 대분류로 원클릭 변환할 수 있습니다.
+                  종목명/코드를 분석하여 10대 표준 대분류로 원클릭 변환할 수 있습니다.
                 </p>
               </div>
             </div>
@@ -872,7 +874,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
                 <th className="py-3 px-4">종목명 / 코드</th>
                 <th className="py-3 px-4">증권사</th>
                 <th className="py-3 px-4">리포트 제목</th>
-                <th className="py-3 px-4">12대 표준 섹터</th>
+                <th className="py-3 px-4">10대 표준 섹터</th>
                 <th className="py-3 px-4 text-center">원문 PDF</th>
                 <th className="py-3 px-4 text-center">AI 분석</th>
                 <th className="py-3 px-4 text-right">섹터 관리</th>
@@ -936,7 +938,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
                         <button
                           onClick={() => handleQuickClassifySingleReport(r.id, r.stockName, r.stockCode)}
                           className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 text-[11px] font-bold rounded-lg border border-amber-500/40 transition-all cursor-pointer"
-                          title="AI 12대 표준 섹터 추천 및 즉시 적용"
+                          title="AI 10대 표준 섹터 추천 및 즉시 적용"
                         >
                           AI 분류 적용
                         </button>
@@ -976,7 +978,7 @@ export const MonthlyDataStats: React.FC<MonthlyDataStatsProps> = ({
                   <Sparkles className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-white">KRX 12대 표준 대분류 AI 분류 엔진</h3>
+                  <h3 className="font-extrabold text-base text-white">KRX 10대 표준 대분류 AI 분류 엔진</h3>
                   <p className="text-xs text-slate-400">데이터 파이프라인 일괄 섹터 매핑 및 DB 업데이트</p>
                 </div>
               </div>

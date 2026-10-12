@@ -41,6 +41,7 @@ import {
   User
 } from 'lucide-react';
 import {
+  STANDARD_10_SECTORS,
   STANDARD_12_SECTORS,
   SectorCategory,
   getCanonicalSector,
@@ -52,18 +53,22 @@ import { getNaverReportUrl } from '../utils/naverHelper';
 import { DartDisclosureSection } from './DartDisclosureSection';
 
 export const SECTOR_STYLES: Record<string, { badge: string; border: string; dot: string; text: string; bg: string }> = {
-  '반도체/디스플레이': { badge: 'bg-blue-950/80 text-blue-300 border-blue-800/80 hover:bg-blue-900/80', border: 'border-blue-500/40', dot: 'bg-blue-400', text: 'text-blue-400', bg: 'bg-blue-500/10' },
+  // 10 Standard Sectors
+  '반도체/IT/전자': { badge: 'bg-blue-950/80 text-blue-300 border-blue-800/80 hover:bg-blue-900/80', border: 'border-blue-500/40', dot: 'bg-blue-400', text: 'text-blue-400', bg: 'bg-blue-500/10' },
   '2차전지/배터리/소재': { badge: 'bg-emerald-950/80 text-emerald-300 border-emerald-800/80 hover:bg-emerald-900/80', border: 'border-emerald-500/40', dot: 'bg-emerald-400', text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   '바이오/제약/헬스케어': { badge: 'bg-purple-950/80 text-purple-300 border-purple-800/80 hover:bg-purple-900/80', border: 'border-purple-500/40', dot: 'bg-purple-400', text: 'text-purple-400', bg: 'bg-purple-500/10' },
   '자동차/모빌리티': { badge: 'bg-amber-950/80 text-amber-300 border-amber-800/80 hover:bg-amber-900/80', border: 'border-amber-500/40', dot: 'bg-amber-400', text: 'text-amber-400', bg: 'bg-amber-500/10' },
   '조선/중공업/방산': { badge: 'bg-cyan-950/80 text-cyan-300 border-cyan-800/80 hover:bg-cyan-900/80', border: 'border-cyan-500/40', dot: 'bg-cyan-400', text: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-  'IT/모바일/전자': { badge: 'bg-sky-950/80 text-sky-300 border-sky-800/80 hover:bg-sky-900/80', border: 'border-sky-500/40', dot: 'bg-sky-400', text: 'text-sky-400', bg: 'bg-sky-500/10' },
   '플랫폼/게임/엔터': { badge: 'bg-rose-950/80 text-rose-300 border-rose-800/80 hover:bg-rose-900/80', border: 'border-rose-500/40', dot: 'bg-rose-400', text: 'text-rose-400', bg: 'bg-rose-500/10' },
   '금융/지주': { badge: 'bg-indigo-950/80 text-indigo-300 border-indigo-800/80 hover:bg-indigo-900/80', border: 'border-indigo-500/40', dot: 'bg-indigo-400', text: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-  '화학/정유/에너지': { badge: 'bg-orange-950/80 text-orange-300 border-orange-800/80 hover:bg-orange-900/80', border: 'border-orange-500/40', dot: 'bg-orange-400', text: 'text-orange-400', bg: 'bg-orange-500/10' },
-  '철강/금속/소재': { badge: 'bg-teal-950/80 text-teal-300 border-teal-800/80 hover:bg-teal-900/80', border: 'border-teal-500/40', dot: 'bg-teal-400', text: 'text-teal-400', bg: 'bg-teal-500/10' },
+  '화학/철강/소재': { badge: 'bg-orange-950/80 text-orange-300 border-orange-800/80 hover:bg-orange-900/80', border: 'border-orange-500/40', dot: 'bg-orange-400', text: 'text-orange-400', bg: 'bg-orange-500/10' },
   '소비재/유통/음식료': { badge: 'bg-lime-950/80 text-lime-300 border-lime-800/80 hover:bg-lime-900/80', border: 'border-lime-500/40', dot: 'bg-lime-400', text: 'text-lime-400', bg: 'bg-lime-500/10' },
   '건설/물류/기타': { badge: 'bg-stone-950/80 text-stone-300 border-stone-800/80 hover:bg-stone-900/80', border: 'border-stone-500/40', dot: 'bg-stone-400', text: 'text-stone-400', bg: 'bg-stone-500/10' },
+  // Backward compatibility alias keys
+  '반도체/디스플레이': { badge: 'bg-blue-950/80 text-blue-300 border-blue-800/80 hover:bg-blue-900/80', border: 'border-blue-500/40', dot: 'bg-blue-400', text: 'text-blue-400', bg: 'bg-blue-500/10' },
+  'IT/모바일/전자': { badge: 'bg-sky-950/80 text-sky-300 border-sky-800/80 hover:bg-sky-900/80', border: 'border-sky-500/40', dot: 'bg-sky-400', text: 'text-sky-400', bg: 'bg-sky-500/10' },
+  '화학/정유/에너지': { badge: 'bg-orange-950/80 text-orange-300 border-orange-800/80 hover:bg-orange-900/80', border: 'border-orange-500/40', dot: 'bg-orange-400', text: 'text-orange-400', bg: 'bg-orange-500/10' },
+  '철강/금속/소재': { badge: 'bg-teal-950/80 text-teal-300 border-teal-800/80 hover:bg-teal-900/80', border: 'border-teal-500/40', dot: 'bg-teal-400', text: 'text-teal-400', bg: 'bg-teal-500/10' },
   '섹터 구분 필요': { badge: 'bg-red-950/80 text-red-300 border-red-800/80 hover:bg-red-900/80', border: 'border-red-500/40', dot: 'bg-red-400', text: 'text-red-400', bg: 'bg-red-500/10' },
 };
 
@@ -524,7 +529,7 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
   // Sector Counts & Distribution calculation
   const sectorDistribution = useMemo(() => {
     const counts: Record<string, number> = {};
-    STANDARD_12_SECTORS.forEach(sec => {
+    STANDARD_10_SECTORS.forEach(sec => {
       counts[sec] = 0;
     });
     counts['섹터 구분 필요'] = 0;
@@ -553,7 +558,7 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
   const filteredReports = useMemo(() => {
     let result = [...reports];
 
-    // 1. Sector Filter (12대 표준 대분류 및 섹터 구분 필요)
+    // 1. Sector Filter (10대 표준 대분류 및 섹터 구분 필요)
     if (sectorFilter !== 'ALL') {
       result = result.filter(r => isSectorMatch(r.sector, sectorFilter));
     }
@@ -1101,10 +1106,10 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
               type="button"
               onClick={() => setShowSectorOverview(!showSectorOverview)}
               className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold cursor-pointer hover:border-slate-700 transition-all"
-              title="12대 표준 섹터 퀵 바 접기/펼치기"
+              title="10대 표준 섹터 퀵 바 접기/펼치기"
             >
               <PieChart className="w-3.5 h-3.5 text-amber-400" />
-              <span>12대 표준 섹터 퀵 바</span>
+              <span>10대 표준 섹터 퀵 바</span>
               {showSectorOverview ? (
                 <ChevronUp className="w-3 h-3 text-slate-400" />
               ) : (
@@ -1122,14 +1127,14 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
           </div>
         </div>
 
-        {/* 2. 12 KRX Standard Sector Quick Filter Ribbon */}
+        {/* 2. 10 KRX Standard Sector Quick Filter Ribbon */}
         {showSectorOverview && (
           <div className="pt-3 border-t border-slate-800/80">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
                 <Tag className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-xs font-bold text-slate-300">
-                  12대 표준 대분류 섹터 퀵 필터
+                  10대 표준 대분류 섹터 퀵 필터
                 </span>
                 {sectorFilter !== 'ALL' && (
                   <span className="px-2 py-0.5 rounded-md bg-amber-950 text-amber-300 border border-amber-800 text-[10px] font-bold flex items-center space-x-1">
@@ -1147,7 +1152,7 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
                 )}
               </div>
               <span className="text-[11px] text-slate-500 font-mono">
-                총 {STANDARD_12_SECTORS.length}개 표준 대분류
+                총 {STANDARD_10_SECTORS.length}개 표준 대분류
               </span>
             </div>
 
@@ -1171,8 +1176,8 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
                 </span>
               </button>
 
-              {/* 12 Standard Sector Chips */}
-              {STANDARD_12_SECTORS.map((sec) => {
+              {/* 10 Standard Sector Chips */}
+              {STANDARD_10_SECTORS.map((sec) => {
                 const count = sectorDistribution[sec] || 0;
                 const isSelected = sectorFilter === sec;
                 const style = SECTOR_STYLES[sec] || { badge: 'bg-slate-950 text-slate-300 border-slate-800', dot: 'bg-slate-400', text: 'text-slate-300', bg: 'bg-slate-900' };
@@ -1258,8 +1263,8 @@ export const AnalystReportLookup01: React.FC<AnalystReportLookup01Props> = ({
                   : 'border-slate-800 text-slate-200'
               }`}
             >
-              <option value="ALL">🏷️ 전체 12대 표준 섹터 ({reports.length}건)</option>
-              {STANDARD_12_SECTORS.map((sec) => (
+              <option value="ALL">🏷️ 전체 10대 표준 섹터 ({reports.length}건)</option>
+              {STANDARD_10_SECTORS.map((sec) => (
                 <option key={sec} value={sec}>
                   {sec} ({sectorDistribution[sec] || 0}건)
                 </option>

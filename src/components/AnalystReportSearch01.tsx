@@ -40,6 +40,7 @@ import {
   Quote
 } from 'lucide-react';
 import { safeResponseJson } from '../utils/apiClient';
+import { STANDARD_10_SECTORS } from '../types';
 
 interface AnalystReportSearch01Props {
   onGoToPipeline01?: () => void;
@@ -133,14 +134,7 @@ const MAJOR_BROKERS = [
 
 const SECTORS = [
   '전체 섹터',
-  '반도체 / IT하드웨어',
-  '2차전지 / 배터리',
-  '인터넷 / SW / 게임',
-  '자동차 / 모빌리티',
-  '바이오 / 헬스케어',
-  '금융 / 지주 / 밸류업',
-  '조선 / 방산 / 기계',
-  '화학 / 에너지'
+  ...STANDARD_10_SECTORS
 ];
 
 export const AnalystReportSearch01: React.FC<AnalystReportSearch01Props> = ({

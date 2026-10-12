@@ -47,28 +47,21 @@ export const AnalystDetailModal: React.FC<AnalystDetailModalProps> = ({
         <div className="p-6 overflow-y-auto space-y-6">
           {/* Top Profile Card */}
           <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/60 rounded-xl border border-slate-800 p-5 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center space-x-5">
-              <img
-                src={analyst.avatarUrl}
-                alt={analyst.name}
-                className="w-20 h-20 rounded-full object-cover ring-4 ring-blue-500/30 shadow-xl"
-              />
-              <div>
-                <div className="flex items-center space-x-3">
-                  <h4 className="text-2xl font-bold text-white">{analyst.name} <span className="text-sm text-slate-400 font-normal">팀장/연구원</span></h4>
-                  <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                    종합 {analyst.overallRank}위 (부문 {analyst.sectorRank}위)
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-1">{analyst.brokerName} | 총 발간 리포트 {analyst.totalReports}건</p>
-                <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                  <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-700">
-                    부문: <strong>{analyst.sector}</strong>
-                  </span>
-                  <span className="bg-slate-800 text-emerald-400 px-2.5 py-1 rounded border border-slate-700">
-                    평균 수익률: <strong>+{analyst.returnRate}%</strong>
-                  </span>
-                </div>
+            <div>
+              <div className="flex items-center space-x-3">
+                <h4 className="text-2xl font-bold text-white">{analyst.name} <span className="text-sm text-slate-400 font-normal">팀장/연구원</span></h4>
+                <span className="bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                  종합 {analyst.overallRank}위 (부문 {analyst.sectorRank}위)
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">{analyst.brokerName} | 총 발간 리포트 {analyst.totalReports}건</p>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-700">
+                  부문: <strong>{analyst.sector}</strong>
+                </span>
+                <span className="bg-slate-800 text-emerald-400 px-2.5 py-1 rounded border border-slate-700">
+                  평균 수익률: <strong>+{analyst.returnRate}%</strong>
+                </span>
               </div>
             </div>
 

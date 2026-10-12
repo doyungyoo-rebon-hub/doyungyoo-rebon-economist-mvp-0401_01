@@ -140,7 +140,7 @@ export async function safeFirestoreDeleteDoc(collectionName: string, docId: stri
 }
 import { synthesizeAnalystsFromReports } from './src/utils/analystSynthesizer.ts';
 import { KOREAN_TOP_STOCKS, KOREAN_ALL_STOCKS } from './src/data/koreanStocks.ts';
-import { STANDARD_12_SECTORS, classifyKrxStockSector } from './src/utils/sectorClassifier.ts';
+import { STANDARD_10_SECTORS, STANDARD_12_SECTORS, classifyKrxStockSector } from './src/utils/sectorClassifier.ts';
 import { getCanonicalSector } from './src/types.ts';
 import {
   getVectorDbConfig,
@@ -6222,18 +6222,8 @@ ${promptContext}
     });
     const top10 = top20; // Compatibility alias
 
-    // 7. Construct Major Sector Hall of Fame TOP 5
-    const majorSectors = [
-      '반도체/디스플레이',
-      '2차전지/배터리/소재',
-      '바이오/제약/헬스케어',
-      '자동차/모빌리티',
-      'IT플랫폼/게임/미디어',
-      '금융/지주/보험',
-      '조선/방산/우주항공',
-      '철강/화학/정유',
-      '소비재/유통/엔터'
-    ];
+    // 7. Construct Major Sector Hall of Fame TOP 5 (10대 표준 섹터)
+    const majorSectors = [...STANDARD_10_SECTORS];
 
     const sectorAwards: Record<string, any[]> = {};
     majorSectors.forEach(secName => {
@@ -8574,7 +8564,7 @@ ${promptContext}
       const newHash = calculateReportContentHash(item);
       const existing = masterDb.get(recordId);
 
-      // Determine canonical standard sector (12대 표준 대분류)
+      // Determine canonical standard sector (10대 표준 대분류)
       let resolvedSector = item.sector && item.sector !== '기업분석' && item.sector !== '기타'
         ? getCanonicalSector(item.sector)
         : classifyKrxStockSector(cleanStock, stockCode);
@@ -9568,21 +9558,19 @@ ${promptContext}
 당신은 한국거래소(KRX) 상장 종목 데이터베이스를 구축하고 업데이트하는 '데이터 파이프라인 섹터 분류 AI 엔진'입니다.
 
 Objective
-사용자가 입력한 여러 개의 종목 데이터 배열(Array)을 한 번에 분석하여, 사전 정의된 <12대 표준 대분류> 중 가장 정확한 1개의 섹터를 각각 매핑한 뒤, 동일한 형태의 JSON 배열(Array)로 일괄 반환하십시오.
+사용자가 입력한 여러 개의 종목 데이터 배열(Array)을 한 번에 분석하여, 사전 정의된 <10대 표준 대분류> 중 가장 정확한 1개의 섹터를 각각 매핑한 뒤, 동일한 형태의 JSON 배열(Array)로 일괄 반환하십시오.
 
-<12대 표준 대분류> (반드시 이 중 하나만 매핑할 것)
-1. 반도체/디스플레이
+<10대 표준 대분류> (반드시 이 중 하나만 매핑할 것)
+1. 반도체/IT/전자
 2. 2차전지/배터리/소재
 3. 바이오/제약/헬스케어
 4. 자동차/모빌리티
 5. 조선/중공업/방산
-6. IT/모바일/전자
-7. 플랫폼/게임/엔터
-8. 금융/지주
-9. 화학/정유/에너지
-10. 철강/금속/소재
-11. 소비재/유통/음식료
-12. 건설/물류/기타
+6. 플랫폼/게임/엔터
+7. 금융/지주
+8. 화학/철강/소재
+9. 소비재/유통/음식료
+10. 건설/물류/기타
 
 규칙(Rules):
 1. Batch Processing: 입력받은 배열의 길이(아이템 개수)와 동일한 개수의 결과를 반환해야 합니다. 누락되는 항목이 없어야 합니다.
@@ -9604,7 +9592,7 @@ Objective
       try {
         const prompt = `${SYSTEM_PROMPT_SECTOR_ENGINE}
 
-다음 종목 목록을 12대 표준 대분류로 분류하여 동일한 순서의 JSON 배열로 반환하세요:
+다음 종목 목록을 10대 표준 대분류로 분류하여 동일한 순서의 JSON 배열로 반환하세요:
 ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_code: it.stock_code || '' })), null, 2)}
 `;
         const aiRes = await aiClient.models.generateContent({
@@ -9648,7 +9636,7 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
         stock_code: item.stock_code,
         sector,
         confidence: sector === '섹터 구분 필요' ? 0.3 : 0.95,
-        reason: sector === '섹터 구분 필요' ? 'KRX 상장사 매핑 정보 추가 필요 (미분류)' : 'KRX 12대 표준 대분류 엔진 매핑',
+        reason: sector === '섹터 구분 필요' ? 'KRX 상장사 매핑 정보 추가 필요 (미분류)' : 'KRX 10대 표준 대분류 엔진 매핑',
         isAiGenerated: false,
       };
     });
@@ -9718,7 +9706,7 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
       if (unclassifiedRecords.length === 0) {
         return res.json({
           success: true,
-          message: '모든 리포트가 이미 12대 표준 대분류로 분류되어 있습니다.',
+          message: '모든 리포트가 이미 10대 표준 대분류로 분류되어 있습니다.',
           classifiedCount: 0,
           remainingUnclassifiedCount: 0,
         });
@@ -9758,7 +9746,7 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
 
       res.json({
         success: true,
-        message: `총 ${appliedCount}건의 리포트에 12대 표준 대분류가 일괄 적용되었습니다.`,
+        message: `총 ${appliedCount}건의 리포트에 10대 표준 대분류가 일괄 적용되었습니다.`,
         classifiedCount: appliedCount,
         results,
       });
@@ -10034,7 +10022,7 @@ ${JSON.stringify(items.map(it => ({ id: it.id, stock_name: it.stock_name, stock_
         sampleReports: Array<any>;
       }> = {};
 
-      STANDARD_12_SECTORS.forEach(sec => {
+      STANDARD_10_SECTORS.forEach(sec => {
         sectorMap[sec] = {
           collectedCount: 0,
           analyzedCount: 0,
@@ -10159,10 +10147,11 @@ export async function startServer() {
     serverDir ? path.join(serverDir, "..", "dist") : null,
     path.join("/app/applet", "dist"),
     path.join("/app", "dist"),
-    process.cwd(),
   ].filter(Boolean) as string[];
 
-  let distPath = candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) || path.join(process.cwd(), "dist");
+  let distPath = candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html")) && fs.existsSync(path.join(d, "assets"))) 
+    || candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) 
+    || path.join(process.cwd(), "dist");
   const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
   const isProduction = process.env.NODE_ENV === "production" || !isDevSandbox || hasStaticDist;
 
@@ -10209,28 +10198,45 @@ export async function startServer() {
   });
 
   // Cloud Run and container port binding architecture:
-  // In Cloud Run production: process.env.PORT is provided (typically 8080) and MUST be the sole listening port.
-  // In AI Studio dev sandbox: DEFAULT_APP_PORT (3000) is used by dev server, while Nginx handles 8080.
+  // In AI Studio multi-container Cloud Run: app-container listens on 3000 (probed by Cloud Run on 3000), while nginx-container listens on 8080.
+  // In single-container Cloud Run: container listens on PORT (typically 8080).
   const host = "0.0.0.0";
-  const listenPort = isDevSandbox
+  const primaryPort = isDevSandbox
     ? (Number(process.env.DEFAULT_APP_PORT) || 3000)
-    : (Number(process.env.PORT) || 8080);
+    : (Number(process.env.PORT) || 3000);
 
-  try {
-    const server = app.listen(listenPort, host, () => {
-      console.log(`[Server] Core app listening on http://${host}:${listenPort} (mode: ${isProduction ? 'production' : 'development'})`);
-    });
-    server.on("error", (err: any) => {
-      console.error(`[Server] Port ${listenPort} error:`, err);
-      if (isDevSandbox && err.code === "EADDRINUSE") {
-        console.log(`[Server] Dev port ${listenPort} is in use / handled.`);
-      } else {
+  const startListener = (port: number, isPrimary: boolean = true) => {
+    try {
+      const server = app.listen(port, host, () => {
+        console.log(`[Server] Core app listening on http://${host}:${port} (mode: ${isProduction ? 'production' : 'development'})`);
+      });
+      server.on("error", (err: any) => {
+        if (err.code === "EADDRINUSE") {
+          console.log(`[Server] Port ${port} is in use / handled.`);
+        } else {
+          console.error(`[Server] Port ${port} error:`, err);
+          if (isPrimary && !isDevSandbox) {
+            process.exit(1);
+          }
+        }
+      });
+      return server;
+    } catch (err: any) {
+      console.error(`[Server] Failed to bind port ${port}:`, err);
+      if (isPrimary && !isDevSandbox) {
         process.exit(1);
       }
-    });
-  } catch (err: any) {
-    console.error(`[Server] Failed to bind port ${listenPort}:`, err);
-    process.exit(1);
+    }
+  };
+
+  startListener(primaryPort, true);
+
+  // In production, also attempt binding the secondary port (e.g. 8080 if primary is 3000, or 3000 if primary is 8080)
+  if (!isDevSandbox) {
+    const secondaryPort = primaryPort === 8080 ? 3000 : (Number(process.env.PORT) || 8080);
+    if (secondaryPort !== primaryPort) {
+      startListener(secondaryPort, false);
+    }
   }
 }
 

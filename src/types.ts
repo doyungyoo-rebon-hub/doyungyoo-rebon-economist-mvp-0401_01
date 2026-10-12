@@ -1,22 +1,24 @@
-export const STANDARD_12_SECTORS = [
-  '반도체/디스플레이',
+export const STANDARD_10_SECTORS = [
+  '반도체/IT/전자',
   '2차전지/배터리/소재',
   '바이오/제약/헬스케어',
   '자동차/모빌리티',
   '조선/중공업/방산',
-  'IT/모바일/전자',
   '플랫폼/게임/엔터',
   '금융/지주',
-  '화학/정유/에너지',
-  '철강/금속/소재',
+  '화학/철강/소재',
   '소비재/유통/음식료',
   '건설/물류/기타',
 ] as const;
 
-export type Standard12Sector = typeof STANDARD_12_SECTORS[number];
+// Alias for complete backward compatibility across existing components
+export const STANDARD_12_SECTORS = STANDARD_10_SECTORS;
+
+export type Standard10Sector = typeof STANDARD_10_SECTORS[number];
+export type Standard12Sector = Standard10Sector;
 
 export type SectorCategory =
-  | Standard12Sector
+  | Standard10Sector
   | '섹터 구분 필요'
   | '미분류'
   | '기타';
@@ -27,51 +29,91 @@ export function getCanonicalSector(sector: string | undefined): SectorCategory {
   }
   const norm = sector.replace(/\s+/g, '').toLowerCase();
 
-  // 1. 반도체/디스플레이
-  if (norm.includes('반도체') || norm.includes('디스플레이') || norm.includes('hbm') || norm.includes('파운드리') || norm.includes('메모리') || norm.includes('oled') || norm.includes('웨이퍼') || norm.includes('fab')) {
-    return '반도체/디스플레이';
+  // 1. 반도체/IT/전자 (반도체/디스플레이 + IT/모바일/전자 통합)
+  if (
+    norm.includes('반도체') ||
+    norm.includes('디스플레이') ||
+    norm.includes('hbm') ||
+    norm.includes('파운드리') ||
+    norm.includes('메모리') ||
+    norm.includes('oled') ||
+    norm.includes('웨이퍼') ||
+    norm.includes('fab') ||
+    norm.includes('it/모바일') ||
+    norm.includes('it하드웨어') ||
+    norm.includes('모바일') ||
+    norm.includes('전자') ||
+    norm.includes('스마트폰') ||
+    norm.includes('pcb') ||
+    norm.includes('fpcb') ||
+    norm.includes('통신장비') ||
+    norm.includes('하드웨어') ||
+    norm.includes('네트워크') ||
+    norm.includes('ai서버')
+  ) {
+    return '반도체/IT/전자';
   }
+
   // 2. 2차전지/배터리/소재
   if (norm.includes('2차전지') || norm.includes('배터리') || norm.includes('양극재') || norm.includes('음극재') || norm.includes('리튬') || norm.includes('분리막') || norm.includes('전해액') || norm.includes('전고체')) {
     return '2차전지/배터리/소재';
   }
+
   // 3. 바이오/제약/헬스케어
   if (norm.includes('바이오') || norm.includes('제약') || norm.includes('헬스케어') || norm.includes('cdmo') || norm.includes('의료') || norm.includes('신약') || norm.includes('임상') || norm.includes('의약품') || norm.includes('진단')) {
     return '바이오/제약/헬스케어';
   }
+
   // 4. 자동차/모빌리티
   if (norm.includes('자동차') || norm.includes('모빌리티') || norm.includes('완성차') || norm.includes('전장') || norm.includes('자율주행') || norm.includes('현대차') || norm.includes('기아') || norm.includes('모비스') || norm.includes('타이어') || norm.includes('부품')) {
     return '자동차/모빌리티';
   }
+
   // 5. 조선/중공업/방산
-  if (norm.includes('조선') || norm.includes('중공업') || norm.includes('방산') || norm.includes('해양엔지니어링') || norm.includes('함정') || norm.includes('mro') || norm.includes('한화에어로') || norm.includes('한국항공우주') || norm.includes('lignex1') || norm.includes('현대로템') || norm.includes('hd현대')) {
+  if (norm.includes('조선') || norm.includes('중공업') || norm.includes('방산') || norm.includes('해양엔지니어링') || norm.includes('함정') || norm.includes('mro') || norm.includes('한화에어로') || norm.includes('한국항공우주') || norm.includes('lignex1') || norm.includes('현대로템') || norm.includes('hd현대') || norm.includes('기계')) {
     return '조선/중공업/방산';
   }
-  // 6. IT/모바일/전자
-  if (norm.includes('it/모바일') || norm.includes('모바일') || norm.includes('전자') || norm.includes('스마트폰') || norm.includes('pcb') || norm.includes('fpcb') || norm.includes('통신장비') || norm.includes('하드웨어') || norm.includes('네트워크') || norm.includes('ai서버')) {
-    return 'IT/모바일/전자';
-  }
-  // 7. 플랫폼/게임/엔터
-  if (norm.includes('플랫폼') || norm.includes('게임') || norm.includes('엔터') || norm.includes('미디어') || norm.includes('콘텐츠') || norm.includes('포털') || norm.includes('웹툰') || norm.includes('드라마') || norm.includes('음원') || norm.includes('소프트웨어') || norm.includes('sw')) {
+
+  // 6. 플랫폼/게임/엔터
+  if (norm.includes('플랫폼') || norm.includes('게임') || norm.includes('엔터') || norm.includes('미디어') || norm.includes('콘텐츠') || norm.includes('포털') || norm.includes('웹툰') || norm.includes('드라마') || norm.includes('음원') || norm.includes('소프트웨어') || norm.includes('sw') || norm.includes('인터넷')) {
     return '플랫폼/게임/엔터';
   }
-  // 8. 금융/지주
-  if (norm.includes('금융') || norm.includes('지주') || norm.includes('지주사') || norm.includes('은행') || norm.includes('증권') || norm.includes('보험') || norm.includes('카드') || norm.includes('캐피탈') || norm.includes('홀딩스')) {
+
+  // 7. 금융/지주
+  if (norm.includes('금융') || norm.includes('지주') || norm.includes('지주사') || norm.includes('은행') || norm.includes('증권') || norm.includes('보험') || norm.includes('카드') || norm.includes('캐피탈') || norm.includes('홀딩스') || norm.includes('밸류업')) {
     return '금융/지주';
   }
-  // 9. 화학/정유/에너지
-  if (norm.includes('화학') || norm.includes('정유') || norm.includes('석유화학') || norm.includes('에너지') || norm.includes('태양광') || norm.includes('풍력') || norm.includes('s-oil') || norm.includes('sk이노') || norm.includes('원자력')) {
-    return '화학/정유/에너지';
+
+  // 8. 화학/철강/소재 (화학/정유/에너지 + 철강/금속/소재 통합)
+  if (
+    norm.includes('화학') ||
+    norm.includes('정유') ||
+    norm.includes('석유화학') ||
+    norm.includes('에너지') ||
+    norm.includes('태양광') ||
+    norm.includes('풍력') ||
+    norm.includes('s-oil') ||
+    norm.includes('sk이노') ||
+    norm.includes('원자력') ||
+    norm.includes('철강') ||
+    norm.includes('금속') ||
+    norm.includes('제철') ||
+    norm.includes('알루미늄') ||
+    norm.includes('동박') ||
+    norm.includes('광물') ||
+    norm.includes('포스코') ||
+    norm.includes('고려아연') ||
+    norm.includes('세아')
+  ) {
+    return '화학/철강/소재';
   }
-  // 10. 철강/금속/소재
-  if (norm.includes('철강') || norm.includes('금속') || norm.includes('제철') || norm.includes('알루미늄') || norm.includes('동박') || norm.includes('광물') || norm.includes('포스코') || norm.includes('고려아연')) {
-    return '철강/금속/소재';
-  }
-  // 11. 소비재/유통/음식료
+
+  // 9. 소비재/유통/음식료
   if (norm.includes('소비재') || norm.includes('유통') || norm.includes('음식료') || norm.includes('식품') || norm.includes('화장품') || norm.includes('패션') || norm.includes('의류') || norm.includes('백화점') || norm.includes('면세점') || norm.includes('마트') || norm.includes('편의점') || norm.includes('면류') || norm.includes('라면')) {
     return '소비재/유통/음식료';
   }
-  // 12. 건설/물류/기타
+
+  // 10. 건설/물류/기타
   if (norm.includes('건설') || norm.includes('물류') || norm.includes('운송') || norm.includes('해운') || norm.includes('항공') || norm.includes('건자재') || norm.includes('시멘트') || norm.includes('인프라')) {
     return '건설/물류/기타';
   }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Bell, Check, ShieldCheck, Mail, Sliders, Sparkles, Filter, CheckCircle2, Trash2, Smartphone, Send, AlertTriangle } from 'lucide-react';
-import { Analyst, NotificationItem, NotificationSetting, SectorCategory } from '../types';
+import { Analyst, NotificationItem, NotificationSetting, SectorCategory, STANDARD_10_SECTORS } from '../types';
 
 interface NotificationCenterProps {
   settings: NotificationSetting;
@@ -26,14 +26,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const [activeTab, setActiveTab] = useState<'feed' | 'settings'>('feed');
   const [feedFilter, setFeedFilter] = useState<string>('ALL');
 
-  const allSectors: SectorCategory[] = [
-    '반도체/디스플레이',
-    '바이오/제약/헬스케어',
-    '2차전지/배터리/소재',
-    '자동차/모빌리티',
-    'IT/모바일/전자',
-    '금융/지주',
-  ];
+  const allSectors: SectorCategory[] = [...STANDARD_10_SECTORS];
 
   const handleToggleSector = (sector: SectorCategory) => {
     const isSubscribed = settings.subscribedSectors.includes(sector);
@@ -279,16 +272,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         : 'bg-slate-950 border-slate-800 text-slate-400'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={analyst.avatarUrl}
-                        alt={analyst.name}
-                        className="w-9 h-9 rounded-full object-cover ring-1 ring-slate-700"
-                      />
-                      <div>
-                        <div className="font-bold text-xs text-white">{analyst.name} 연구원</div>
-                        <div className="text-[10px] text-slate-400">{analyst.brokerName} | {analyst.sector}</div>
-                      </div>
+                    <div>
+                      <div className="font-bold text-xs text-white">{analyst.name} 연구원</div>
+                      <div className="text-[10px] text-slate-400">{analyst.brokerName} | {analyst.sector}</div>
                     </div>
 
                     <button

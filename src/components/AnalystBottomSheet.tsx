@@ -122,15 +122,8 @@ export const AnalystBottomSheet: React.FC<AnalystBottomSheetProps> = ({
         <div className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-5 sm:px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
-              <div className="relative shrink-0">
-                <img
-                  src={analyst.avatarUrl}
-                  alt={analyst.name}
-                  className="w-13 h-13 sm:w-16 sm:h-16 rounded-full object-cover ring-2 ring-blue-500/50 shadow-lg"
-                />
-                <span className="absolute -bottom-1 -right-1 bg-blue-600 text-[10px] font-bold text-white px-1.5 py-0.2 rounded-full border border-slate-900 shadow">
-                  #{analyst.overallRank || 1}
-                </span>
+              <div className="shrink-0 flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-900/60 to-indigo-950 border border-blue-500/40 text-blue-300 font-black text-sm shadow">
+                #{analyst.overallRank || 1}
               </div>
 
               <div className="min-w-0">
