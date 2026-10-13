@@ -5272,6 +5272,44 @@ app.get("/api/reports", async (req, res) => {
       }
     }
     let rawReports = Array.from(reportsMap.values());
+
+    const qMonth = String(req.query.month || "").trim();
+    const qSector = String(req.query.sector || "ALL").trim();
+    const qStock = String(req.query.stock || "ALL").trim();
+    const qBroker = String(req.query.broker || "ALL").trim();
+    const qSearch = String(req.query.search || "").trim().toLowerCase();
+    const qLimit = parseInt(req.query.limit, 10) || 1000;
+
+    if (qMonth && qMonth !== "ALL") {
+      rawReports = rawReports.filter(r => (r.publishDate || "").startsWith(qMonth) || (r.month || "") === qMonth);
+    }
+    if (qBroker && qBroker !== "ALL") {
+      rawReports = rawReports.filter(r => (r.brokerName || r.broker) === qBroker);
+    }
+    if (qSector && qSector !== "ALL") {
+      rawReports = rawReports.filter(r => {
+        const sec = String(r.sector || "");
+        return sec === qSector || sec.includes(qSector) || qSector.includes(sec);
+      });
+    }
+    if (qStock && qStock !== "ALL") {
+      rawReports = rawReports.filter(r => (r.stockName === qStock || r.stockCode === qStock));
+    }
+    if (qSearch) {
+      rawReports = rawReports.filter(r => {
+        const title = String(r.reportTitle || r.title || "").toLowerCase();
+        const sName = String(r.stockName || "").toLowerCase();
+        const sCode = String(r.stockCode || "");
+        const an = String(r.analystName || r.analyst || "").toLowerCase();
+        const br = String(r.brokerName || r.broker || "").toLowerCase();
+        return title.includes(qSearch) || sName.includes(qSearch) || sCode.includes(qSearch) || an.includes(qSearch) || br.includes(qSearch);
+      });
+    }
+
+    rawReports.sort((a, b) => (b.publishDate || "").localeCompare(a.publishDate || ""));
+    const totalMatchingCount = rawReports.length;
+    rawReports = rawReports.slice(0, qLimit);
+
     const normalizedReports = rawReports.map((r) => {
       const currentPrice =
         r.currentPriceAtPublish ||
@@ -5378,7 +5416,7 @@ app.get("/api/reports", async (req, res) => {
                 },
       };
     });
-    res.json({ success: true, reports: normalizedReports });
+    res.json({ success: true, totalCount: totalMatchingCount, count: normalizedReports.length, reports: normalizedReports });
   } catch (err) {
     console.error("Fetch reports error:", err);
     res.status(500).json({ success: false, error: "Database error" });

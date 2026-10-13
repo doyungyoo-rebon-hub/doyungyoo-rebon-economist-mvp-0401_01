@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '애널리스트리포트_조회_01',
       shortLabel: '리포트 조회',
       icon: FileText,
-      badge: '4,868건',
+      badge: '7,158건',
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
     },
     {

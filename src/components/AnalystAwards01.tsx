@@ -140,7 +140,7 @@ export const AnalystAwards01: React.FC<{ onNavigateToReview: () => void }> = ({ 
               2026 올해의 애널리스트 명예의 전당 <span className="text-amber-400">TOP 20 & 섹터 1위</span>
             </h1>
             <p className="text-slate-300 text-sm leading-relaxed">
-              DART 공시 교차검증과 7대 KPI 결정론적 알고리즘으로 엄선된 올해의 최고 애널리스트 순위 대시보드입니다. (1~9월 7,842건, 681명 전수 평가 완료)
+              DART 공시 교차검증과 7대 KPI 결정론적 알고리즘으로 엄선된 올해의 최고 애널리스트 순위 대시보드입니다. (전체 등록 연구원 681명 중 1~9월 정규 종목 리포트 발간 유효 평가자 430명 전수 산출 완료)
               독립 공인 AI 수석 심사위원단의 종합 및 섹터별 심사평은 상단 메뉴의 <strong>[올해의 애널리스트_01 심사평]</strong>에서 확인하실 수 있습니다.
             </p>
           </div>
@@ -160,18 +160,22 @@ export const AnalystAwards01: React.FC<{ onNavigateToReview: () => void }> = ({ 
           <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800">
             <span className="text-xs text-slate-400 block">검증 리포트 총수</span>
             <strong className="text-lg font-mono text-white font-bold">{stats.totalReports.toLocaleString()}건</strong>
+            <span className="text-[10px] text-slate-500 block mt-0.5">1~9월 누적 전수</span>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800">
-            <span className="text-xs text-slate-400 block">분석 대상 연구원</span>
+            <span className="text-xs text-slate-400 block">분석 대상 연구원 (유효 평가)</span>
             <strong className="text-lg font-mono text-indigo-300 font-bold">{stats.totalAnalysts.toLocaleString()}명</strong>
+            <span className="text-[10px] text-slate-500 block mt-0.5">전체 등록 풀 681명 중</span>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800">
             <span className="text-xs text-slate-400 block">평균 종합 점수</span>
             <strong className="text-lg font-mono text-emerald-300 font-bold">{stats.avgScore}점</strong>
+            <span className="text-[10px] text-slate-500 block mt-0.5">7대 KPI 가중 합산</span>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/50 border border-slate-800">
             <span className="text-xs text-slate-400 block">평균 목표가 도달률</span>
             <strong className="text-lg font-mono text-amber-300 font-bold">{stats.avgAccuracy}%</strong>
+            <span className="text-[10px] text-slate-500 block mt-0.5">DART 실적 교차검증</span>
           </div>
         </div>
       </div>
@@ -185,10 +189,10 @@ export const AnalystAwards01: React.FC<{ onNavigateToReview: () => void }> = ({ 
             onChange={(e) => setSelectedPeriod(e.target.value)}
             className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500"
           >
-            <option value="2026_9M">2026년 1~9월 누적 종합 (7,842건 / 681명 전수 평가)</option>
-            <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,842건)</option>
+            <option value="2026_9M">2026년 1~9월 누적 종합 (7,158건 / 유효 평가 430명)</option>
+            <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,158건)</option>
             <option value="2026_1H">2026년 상반기 (4,868건 / 407명)</option>
-            <option value="2026_3Q">2026년 3분기 (7~9월: 2,974건)</option>
+            <option value="2026_3Q">2026년 3분기 (7~9월: 2,290건)</option>
             <option value="2026_1Q">2026년 1분기 (1Q)</option>
             <option value="2026_2Q">2026년 2분기 (2Q)</option>
           </select>
