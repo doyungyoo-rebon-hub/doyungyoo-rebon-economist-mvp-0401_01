@@ -12907,21 +12907,14 @@ async function startServer() {
     candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) ||
     path.join(process.cwd(), "dist");
   const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
-  if (isProduction && hasStaticDist) {
+
+  // 1. Static file serving for built dist assets
+  if (hasStaticDist) {
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      const indexPath = path.join(distPath, "index.html");
-      if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
-      } else {
-        res
-          .status(200)
-          .send(
-            "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>\uB9AC\uBCF8-\uC774\uCF54\uB178\uBBF8\uC2A4\uD2B8 \uC560\uB110\uB9AC\uC2A4\uD2B8 \uC5B4\uC6CC\uC988</title></head><body style='font-family:sans-serif;background:#0b0f17;color:#fff;padding:40px;text-align:center;'><h1>\uB9AC\uBCF8-\uC774\uCF54\uB178\uBBF8\uC2A4\uD2B8 2026 \uC560\uB110\uB9AC\uC2A4\uD2B8 \uC5B4\uC6CC\uC988</h1><p>\uC571\uC774 \uC815\uC0C1 \uC2E4\uD589 \uC911\uC785\uB2C8\uB2E4. \uC7A0\uC2DC \uD6C4 \uC0C8\uB85C\uACE0\uCE68\uD574 \uC8FC\uC138\uC694.</p></body></html>",
-          );
-      }
-    });
-  } else if (!isProduction && isDevSandbox2) {
+  }
+
+  // 2. Vite middleware for development HMR
+  if (!isProduction) {
     try {
       const { createServer: createViteServer } = await import("vite").then(
         (s) => {
@@ -12937,20 +12930,23 @@ async function startServer() {
       });
       app.use(vite.middlewares);
     } catch (viteErr) {
-      console.warn("[Vite Middleware Warning]", viteErr);
-      if (hasStaticDist) {
-        app.use(express.static(distPath));
-      }
+      console.warn("[Vite Middleware Notice]", viteErr?.message || viteErr);
     }
-  } else {
-    app.get("*", (_req, res) => {
-      res
-        .status(200)
-        .send(
-          "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>\uB9AC\uBCF8-\uC774\uCF54\uB178\uBBF8\uC2A4\uD2B8 \uC560\uB110\uB9AC\uC2A4\uD2B8 \uC5B4\uC6CC\uC988</title></head><body style='font-family:sans-serif;background:#0b0f17;color:#fff;padding:40px;text-align:center;'><h1>\uB9AC\uBCF8-\uC774\uCF54\uB178\uBBF8\uC2A4\uD2B8 2026 \uC560\uB110\uB9AC\uC2A4\uD2B8 \uC5B4\uC6CC\uC988</h1><p>\uC11C\uBE44\uC2A4\uAC00 \uC815\uC0C1 \uAC00\uB3D9\uB418\uC5C8\uC2B5\uB2C8\uB2E4.</p></body></html>",
-        );
-    });
   }
+
+  // 3. Robust SPA route handler: ALWAYS serve real index.html, never dummy text
+  app.get("*", (req, res) => {
+    const indexPath = path.join(distPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
+    const rootIndexPath = path.join(process.cwd(), "index.html");
+    if (fs.existsSync(rootIndexPath)) {
+      return res.sendFile(rootIndexPath);
+    }
+    res.status(503).send("Application initializing, please refresh shortly.");
+  });
+
   process.on("SIGTERM", () => {
     console.log("[Server] SIGTERM signal received: closing HTTP server");
     process.exit(0);
