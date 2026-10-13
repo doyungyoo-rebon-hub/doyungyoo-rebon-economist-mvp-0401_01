@@ -1,16 +1,13 @@
 {
   "name": "ai-studio-applet",
   "private": true,
-  "version": "1.7.0",
+  "version": "1.8.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
     "gcp-build": "vite build",
     "start": "node server.ts",
-    "backup:full": "node scripts/backup-full.cjs",
-    "restore:v1.6": "node scripts/restore-v1.6.cjs",
-    "restore:v1.5": "node scripts/restore-v1.5.cjs",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
   },

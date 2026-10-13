@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased selection:bg-amber-500/30 selection:text-amber-200;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, Roboto, "Segoe UI", sans-serif;
+  }
+  
+  select {
+    color-scheme: dark;
+  }
+  
+  select option {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+  }
+}

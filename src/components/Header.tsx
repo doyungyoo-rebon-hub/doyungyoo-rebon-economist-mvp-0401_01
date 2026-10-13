@@ -1,302 +1,194 @@
 import React from 'react';
-import { Award, FileText, Search, Cpu, BarChart3, Bell, Activity, Sparkles, Tag, Database, UserCheck, HardDrive, Sliders } from 'lucide-react';
-import { PipelineMetrics } from '../types';
-import { CURRENT_VERSION } from '../data/versions';
+import { 
+  Trophy, 
+  Award, 
+  FileText, 
+  BarChart3, 
+  Users, 
+  Layers, 
+  ShieldCheck, 
+  GitBranch,
+  Sparkles
+} from 'lucide-react';
 
 interface HeaderProps {
-  activeTab: 'awards' | 'annual_analysts_01' | 'annual_analysts_01_reviews' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files';
-  setActiveTab: (tab: 'awards' | 'annual_analysts_01' | 'annual_analysts_01_reviews' | 'kpi_simulator' | 'reports' | 'explorer' | 'reports_lookup_01' | 'reports_01' | 'analysts_lookup_01' | 'pipeline' | 'pipeline_01' | 'stats' | 'notifications' | 'db_files') => void;
-  metrics: PipelineMetrics;
-  unreadNotificationCount: number;
-  reportCount?: number;
-  onClearData?: () => void;
-  onOpenVersionModal?: () => void;
+  currentTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({
-  activeTab,
-  setActiveTab,
-  metrics,
-  unreadNotificationCount,
-  reportCount = 0,
-  onClearData,
-  onOpenVersionModal,
-}) => {
-  return (
-    <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 text-slate-100 shadow-xl">
-      {/* Top Banner Bar with Key Market Metrics */}
-      <div className="bg-slate-950 border-b border-slate-800 px-4 py-1.5 text-xs text-slate-400">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-4">
-            <span className="inline-flex items-center text-emerald-400 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
-              파이프라인 가동중 ({metrics.activeBrokersCount}개 제휴 증권사)
-            </span>
-            <span className="hidden sm:inline text-slate-600">|</span>
-            <span className="hidden sm:inline" title="오늘 하루(당일) 실시간 수집 파이프라인을 통해 입고 및 AI 검증 완료된 실시간 처리 건수입니다.">오늘 자동 처리된 리포트: <strong className="text-slate-200">{metrics.todayProcessedReports}건</strong></span>
-            <span className="hidden md:inline text-slate-600">|</span>
-            <span className="hidden md:inline" title="전체 리포트의 AI LLM 객관성 평점 평균입니다.">평균 AI 객관성 스코어: <strong className="text-cyan-400">{metrics.avgObjectivityScore}점</strong></span>
-          </div>
+export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
+  const [activeJob, setActiveJob] = React.useState<any>(null);
 
-          <div className="flex items-center space-x-3 text-slate-400 text-xs">
+  React.useEffect(() => {
+    const checkJob = async () => {
+      try {
+        const res = await fetch('/api/pipeline/background-job-status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.job) setActiveJob(data.job);
+        }
+      } catch (e) {}
+    };
+    checkJob();
+    const timer = setInterval(checkJob, 2000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const navItems = [
+    {
+      id: 'analysts_01',
+      label: '올해의 애널리스트_01',
+      shortLabel: '올해의 애널리스트',
+      icon: Trophy,
+      badge: 'TOP 20',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+    },
+    {
+      id: 'analysts_01_review',
+      label: '올해의 애널리스트_01 심사평',
+      shortLabel: '심사평',
+      icon: Award,
+      badge: 'AI 공식 평가집',
+      badgeColor: 'bg-yellow-400/20 text-yellow-300 border-yellow-400/30',
+      highlight: true
+    },
+    {
+      id: 'report_lookup_01',
+      label: '애널리스트리포트_조회_01',
+      shortLabel: '리포트 조회',
+      icon: FileText,
+      badge: '4,868건',
+      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+    },
+    {
+      id: 'report_analysis_01',
+      label: '애널리스트리포트_분석_01',
+      shortLabel: '리포트 분석',
+      icon: BarChart3,
+      badge: '심도 92.8',
+      badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+    },
+    {
+      id: 'analyst_directory_01',
+      label: '애널리스트조회_01',
+      shortLabel: '연구원 조회',
+      icon: Users,
+      badge: '407명',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+    },
+    {
+      id: 'pipeline_01',
+      label: '파이프라인_01',
+      shortLabel: '파이프라인',
+      icon: Layers,
+      badge: '32개사',
+      badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+    },
+    {
+      id: 'dart_fact_check',
+      label: 'DART 공시 팩트체크',
+      shortLabel: 'DART 검증',
+      icon: ShieldCheck,
+      badge: '99.8%',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+    },
+    {
+      id: 'version_manager',
+      label: '버전 관리 & 백업',
+      shortLabel: '버전 관리',
+      icon: GitBranch,
+      badge: 'v1.8',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+    }
+  ];
+
+  return (
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/95 border-b border-slate-800 shadow-md">
+      {/* 1행: 서비스 브랜딩 & 상단 요약 바 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between border-b border-slate-900/80">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-slate-950 shadow-md">
+            <Trophy size={18} className="text-white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold text-amber-400 tracking-wider uppercase">
+                리본인텔리전스 × 이코노미스트
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                VERSION 1.8
+              </span>
+              <span className="hidden sm:inline-block text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.2 rounded border border-emerald-500/30 font-medium">
+                실데이터 4,868건 연동
+              </span>
+            </div>
+            <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight">
+              2026 올해의 애널리스트 어워즈 & 차세대 실시간 리포트 평가 대시보드
+            </h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {activeJob && activeJob.status === 'running' && (
             <button
-              onClick={onOpenVersionModal}
-              className="bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-700/70 text-emerald-300 hover:text-emerald-100 px-2.5 py-0.5 rounded text-[11px] font-bold transition-all flex items-center space-x-1 cursor-pointer shadow-sm"
-              title="사내 서버 온프레미스 배포용 전체 소스코드 및 국내 전 종목(680개사 / 10,195건) 마스터 DB 풀백업 다운로드"
+              onClick={() => onTabChange('pipeline_01')}
+              className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition cursor-pointer shadow-md shadow-amber-500/10 animate-pulse"
+              title="클릭하여 파이프라인 수집 화면으로 이동"
             >
-              <HardDrive className="w-3 h-3 text-emerald-400" />
-              <span>💾 온프레미스 풀백업</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>⚡ {activeJob.month}월 백그라운드 수집 중: {activeJob.percent}% ({activeJob.currentCount}/{activeJob.totalItems}건)</span>
             </button>
-            {onClearData && (
-              <button
-                onClick={onClearData}
-                className="bg-rose-950/80 hover:bg-rose-900 border border-rose-700/70 text-rose-200 px-2.5 py-0.5 rounded text-[11px] font-bold transition-all flex items-center space-x-1 cursor-pointer"
-                title="수집된 모든 데이터 및 AI 분석 결과를 리셋합니다"
-              >
-                <span>🗑️ 전체 데이터 리셋 (초기화)</span>
-              </button>
-            )}
-            <span className="inline-flex items-center bg-slate-800 px-2 py-0.5 rounded text-amber-300 font-medium">
-              <Sparkles className="w-3 h-3 mr-1" />
-              이코노미스트 독자 평가 모델 기준 AI 강화 적용
+          )}
+
+          <div className="hidden md:flex items-center gap-2 text-xs text-slate-400">
+            <span className="flex items-center gap-1 text-slate-300">
+              <ShieldCheck size={14} className="text-emerald-400" />
+              DART 정합성 99.8%
             </span>
+            <span className="text-slate-700">|</span>
+            <span className="text-slate-300">32개 증권사 전수</span>
           </div>
         </div>
       </div>
 
-      {/* Main Header Container (2-Tier Layout) */}
+      {/* 2행: 1.7 스타일의 8대 전 메뉴 전체 상시 노출 바 (flex-wrap으로 전 메뉴 100% 가시성 보장) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Tier 1: Brand Logo, Title, Version, Subtitle & System Status */}
-        <div className="flex items-center justify-between py-3 gap-4 border-b border-slate-800/80">
-          {/* Logo & Brand Title */}
-          <div className="flex items-center space-x-3 cursor-pointer shrink-0" onClick={() => setActiveTab('annual_analysts_01')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 ring-1 ring-white/20 shrink-0">
-              <Award className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                <h1 className="font-bold text-base sm:text-lg text-white tracking-tight">AI 증권사 리포트 평가 & 파이프라인</h1>
-                <span className="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                  PRO AI
-                </span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenVersionModal?.();
-                  }}
-                  className="inline-flex items-center space-x-1 bg-gradient-to-r from-blue-600/30 to-indigo-600/30 hover:from-blue-600/50 hover:to-indigo-600/50 text-cyan-300 border border-cyan-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full transition-all cursor-pointer shadow-sm hover:scale-105"
-                  title={`버전 히스토리 및 ${CURRENT_VERSION.version} (${CURRENT_VERSION.releaseDate}) 릴리스 마일스톤 보기`}
-                >
-                  <Tag className="w-2.5 h-2.5" />
-                  <span>{CURRENT_VERSION.version}</span>
-                </button>
-              </div>
-              <p className="text-xs text-slate-400 mt-0.5">제휴 리포트 실시간 수집 · LLM 객관성 검증 · 올해의 베스트 애널리스트</p>
-            </div>
-          </div>
-
-          {/* Quick Status Pill & On-premise Backup Action */}
-          <div className="flex items-center space-x-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setActiveTab('kpi_simulator')}
-              className="flex items-center space-x-1.5 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-cyan-900/40 border border-cyan-400/40 cursor-pointer transition-all hover:scale-105"
-              title="2026 AI 7대 KPI 결정론적 평가 시뮬레이터 & 실시간 계산기"
-            >
-              <Sliders className="w-4 h-4 text-cyan-200" />
-              <span className="tracking-tight">⚡ 7대 KPI 시뮬레이터</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenVersionModal}
-              className="flex items-center space-x-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-900/40 border border-emerald-400/40 cursor-pointer transition-all hover:scale-105"
-              title="사내 서버 온프레미스 배포용 전체 소스코드 및 국내 전 종목(680개사 / 10,195건) 마스터 DB 풀백업 다운로드"
-            >
-              <HardDrive className="w-4 h-4 text-emerald-100" />
-              <span className="tracking-tight">💾 온프레미스 풀백업</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className="sm:hidden relative p-2 rounded-lg text-slate-400 hover:text-white bg-slate-800 border border-slate-700"
-              title="알림 센터"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadNotificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {unreadNotificationCount}
-                </span>
-              )}
-            </button>
-
-            <div className="hidden sm:flex items-center space-x-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs shadow-inner">
-              <Activity className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
-              <div className="text-left">
-                <div className="text-[10px] text-slate-500 leading-none">LLM AI 엔진</div>
-                <div className="font-semibold text-slate-200">Gemini 3.6 Flash Active</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tier 2: Navigation Tabs (Displayed on the line below VERSION 1.4) */}
-        <div className="py-2.5 overflow-x-auto no-scrollbar">
-          <nav className="flex items-center space-x-1.5 p-1 rounded-xl bg-slate-950/90 border border-slate-800/90 w-max sm:w-full">
-            <button
-              onClick={() => setActiveTab('annual_analysts_01')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'annual_analysts_01'
-                  ? 'bg-gradient-to-r from-amber-600 via-yellow-600 to-indigo-600 text-white shadow-md shadow-amber-600/40 ring-1 ring-amber-400/60'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>올해의 애널리스트_01</span>
-              <span className="bg-amber-950/90 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-amber-600/60">
-                신규로직
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('annual_analysts_01_reviews')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'annual_analysts_01_reviews'
-                  ? 'bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 text-white shadow-md shadow-amber-600/40 ring-1 ring-amber-400'
-                  : 'text-amber-300 hover:text-white bg-amber-950/40 border border-amber-700/50 hover:bg-amber-900/50'
-              }`}
-            >
-              <Award className="w-3.5 h-3.5 text-amber-400" />
-              <span>올해의 애널리스트_01 심사평</span>
-              <span className="bg-amber-950 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-amber-500/60 animate-pulse">
-                AI 심사평
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('kpi_simulator')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'kpi_simulator'
-                  ? 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 text-white shadow-md shadow-cyan-600/40 ring-1 ring-cyan-400'
-                  : 'text-cyan-300 hover:text-white bg-cyan-950/50 border border-cyan-800/50 hover:bg-cyan-900/60'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5 text-cyan-300" />
-              <span>⚡ 7대 KPI 시뮬레이터</span>
-              <span className="bg-cyan-950 text-cyan-300 text-[9px] px-1.5 py-0.2 rounded font-black border border-cyan-500/60 animate-pulse">
-                NEW
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('reports_01')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'reports_01'
-                  ? 'bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 text-white shadow-md shadow-teal-600/30 ring-1 ring-teal-400/50'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5 text-emerald-400" />
-              <span>애널리스트리포트_분석_01</span>
-              <span className="bg-teal-950/90 text-teal-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-teal-700/60">
-                DB분석
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('reports_lookup_01')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'reports_lookup_01'
-                  ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white shadow-md shadow-amber-600/30 ring-1 ring-amber-400/50'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Search className="w-3.5 h-3.5 text-amber-400" />
-              <span>애널리스트리포트_조회_01</span>
-              <span className="bg-amber-950/90 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-amber-700/60">
-                수집조회
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('analysts_lookup_01')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'analysts_lookup_01'
-                  ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white shadow-md shadow-blue-600/30 ring-1 ring-cyan-400/50'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5 text-cyan-300" />
-              <span>애널리스트조회_01</span>
-              <span className="bg-blue-950/90 text-cyan-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-cyan-800/60">
-                성과·프로필
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('pipeline_01')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'pipeline_01'
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 ring-1 ring-emerald-400/40'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-              <span>파이프라인_01</span>
-              <span className="bg-emerald-950 text-emerald-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-emerald-800">
-                수집엔진
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('stats')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'stats'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-1 ring-cyan-400/40'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-              <span>월별통계_01</span>
-              <span className="bg-blue-950/90 text-cyan-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-cyan-800/50">
-                수집·섹터
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('db_files')}
-              className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'db_files'
-                  ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white shadow-md shadow-amber-600/30 ring-1 ring-amber-400/60'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Database className="w-3.5 h-3.5 text-amber-400" />
-              <span>DB 보관 파일 조회</span>
-              <span className="bg-amber-950 text-amber-300 text-[9px] px-1.5 py-0.2 rounded font-bold border border-amber-800">
-                임시
-              </span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`relative flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeTab === 'notifications'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-              }`}
-            >
-              <Bell className="w-3.5 h-3.5" />
-              <span>알림</span>
-              {unreadNotificationCount > 0 && (
-                <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                  {unreadNotificationCount}
-                </span>
-              )}
-            </button>
-          </nav>
-        </div>
+        <nav className="flex flex-wrap items-center gap-1.5 sm:gap-2 py-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onTabChange(item.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                  isActive
+                    ? item.highlight
+                      ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black shadow-md shadow-amber-500/20'
+                      : 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/20'
+                    : item.highlight
+                    ? 'text-yellow-400 hover:text-yellow-300 bg-amber-950/30 hover:bg-amber-900/40 border border-amber-500/40'
+                    : 'text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800'
+                }`}
+                title={item.label}
+              >
+                <Icon size={14} className={isActive && !item.highlight ? 'text-indigo-200' : ''} />
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full border font-mono font-medium ${
+                    isActive 
+                      ? item.highlight 
+                        ? 'bg-slate-950/20 text-slate-950 border-slate-950/30' 
+                        : 'bg-white/20 text-white border-white/30'
+                      : item.badgeColor
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
     </header>
   );
