@@ -7,10 +7,13 @@ import { ReportAnalysis01 } from './components/ReportAnalysis01';
 import { AnalystDirectory01 } from './components/AnalystDirectory01';
 import { Pipeline01 } from './components/Pipeline01';
 import { DartFactCheck } from './components/DartFactCheck';
+import { TargetPriceAccuracyChart } from './components/TargetPriceAccuracyChart';
 import { VersionManager } from './components/VersionManager';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('analysts_01');
+  const [selectedReportForChart, setSelectedReportForChart] = useState<any>(null);
+  const [selectedReportForAnalysis, setSelectedReportForAnalysis] = useState<any>(null);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
@@ -30,7 +33,23 @@ export const App: React.FC = () => {
         )}
 
         {currentTab === 'report_analysis_01' && (
-          <ReportAnalysis01 />
+          <ReportAnalysis01 
+            initialSelectedReport={selectedReportForAnalysis}
+            onNavigateToChart={(report) => {
+              if (report) setSelectedReportForChart(report);
+              setCurrentTab('target_price_accuracy');
+            }} 
+          />
+        )}
+
+        {currentTab === 'target_price_accuracy' && (
+          <TargetPriceAccuracyChart 
+            initialReport={selectedReportForChart}
+            onNavigateToReportAnalysis={(report) => {
+              if (report) setSelectedReportForAnalysis(report);
+              setCurrentTab('report_analysis_01');
+            }}
+          />
         )}
 
         {currentTab === 'analyst_directory_01' && (
@@ -59,7 +78,7 @@ export const App: React.FC = () => {
             독립 공인 AI 수석 심사평가 엔진 | DART 금융감독원 전자공시 팩트체크 검증 완료 | VERSION 1.8.0
           </p>
           <p className="text-[11px] text-slate-600">
-            본 평가 리포트는 금융감독원 공시 데이터와 32개 국내 증권사 4,868건의 실제 발간 리서치 리포트를 정밀 분석한 독립 AI 평가 결과입니다.
+            본 평가 리포트는 금융감독원 공시 데이터와 32개 국내 증권사 7,158건(1~9월 전수)의 실제 발간 리서치 리포트를 정밀 분석한 독립 AI 평가 결과입니다.
           </p>
         </div>
       </footer>

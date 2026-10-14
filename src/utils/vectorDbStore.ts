@@ -10,7 +10,7 @@ let inMemoryConfig: VectorDbConfig = {
   enabled: true,
   model: "text-embedding-004",
   dimension: 768,
-  totalIndexed: 4868,
+  totalIndexed: 7158,
   lastUpdated: new Date().toISOString()
 };
 

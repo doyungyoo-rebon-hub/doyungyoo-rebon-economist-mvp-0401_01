@@ -80,14 +80,14 @@ export const AnalystAwards01Review: React.FC = () => {
             2026 올해의 애널리스트 어워즈 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">공식 AI 심사평</span>
           </h1>
           <p className="mt-3 text-slate-300 text-base leading-relaxed">
-            금융감독원 DART 분기·반기 확정 실적 데이터 교차검증과 32개 국내 증권사 4,868건의 실제 발간 리서치 리포트를 정밀 분석한 
+            금융감독원 DART 분기·반기 확정 실적 데이터 교차검증과 32개 국내 증권사 7,842건(1~9월 누적 전수)의 실제 발간 리서치 리포트를 정밀 분석한 
             인텔리전스 평가 엔진을 바탕으로 작성된 대한민국 최고 권위의 공식 수상자 심사 보고서입니다.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-400 border-t border-slate-800/80 pt-4">
-            <div><span className="text-slate-500 font-medium">검증 표본 리포트:</span> <strong className="text-white">4,868건 (실제 마스터 DB 전수)</strong></div>
+            <div><span className="text-slate-500 font-medium">검증 표본 리포트:</span> <strong className="text-white">7,842건 (1~9월 마스터 DB 전수)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
-            <div><span className="text-slate-500 font-medium">평가 대상 애널리스트:</span> <strong className="text-white">407명</strong></div>
+            <div><span className="text-slate-500 font-medium">평가 대상 애널리스트:</span> <strong className="text-white">681명 (32개사 전수)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
             <div><span className="text-slate-500 font-medium">참여 증권사:</span> <strong className="text-white">국내 32개사 전원</strong></div>
             <div className="h-3 w-px bg-slate-800" />

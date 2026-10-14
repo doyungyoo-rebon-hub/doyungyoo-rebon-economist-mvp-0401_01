@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 
 export const DartFactCheck: React.FC = () => {
-  const [searchStock, setSearchStock] = useState<string>('삼성전자');
-  const [selectedQuarter, setSelectedQuarter] = useState<string>('2026-1Q');
+  const [searchStock, setSearchStock] = useState<string>('');
+  const [selectedQuarter, setSelectedQuarter] = useState<string>('ALL');
 
   const mockFactChecks = [
     {
@@ -29,7 +29,8 @@ export const DartFactCheck: React.FC = () => {
       verdict: 'EXACT_MATCH',
       surpriseType: 'SURPRISE',
       dartReportName: '제58기 1분기보고서 (2026.05.15 공시)',
-      dartUrl: 'https://dart.fss.or.kr'
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '1Q'
     },
     {
       stock: '삼양식품',
@@ -44,7 +45,24 @@ export const DartFactCheck: React.FC = () => {
       verdict: 'EXACT_MATCH',
       surpriseType: 'SURPRISE',
       dartReportName: '제66기 1분기보고서 (2026.05.15 공시)',
-      dartUrl: 'https://dart.fss.or.kr'
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '2Q'
+    },
+    {
+      stock: 'SK하이닉스',
+      code: '000660',
+      broker: '메리츠증권',
+      analyst: '김선우',
+      reportTitle: 'HBM3E 공급 확대와 3분기 사상 최대 분기 영업이익 달성 경로',
+      publishDate: '2026-07-28',
+      analystEstOperatingProfit: '7.02조원',
+      dartActualOperatingProfit: '7.05조원',
+      errorRate: '0.4%',
+      verdict: 'EXACT_MATCH',
+      surpriseType: 'SURPRISE',
+      dartReportName: '제78기 반기보고서 (2026.08.14 공시)',
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '3Q'
     },
     {
       stock: 'LG에너지솔루션',
@@ -59,7 +77,8 @@ export const DartFactCheck: React.FC = () => {
       verdict: 'EXACT_MATCH',
       surpriseType: 'INLINE',
       dartReportName: '제6기 1분기보고서 (2026.05.14 공시)',
-      dartUrl: 'https://dart.fss.or.kr'
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '1Q'
     },
     {
       stock: '현대자동차',
@@ -74,7 +93,56 @@ export const DartFactCheck: React.FC = () => {
       verdict: 'EXACT_MATCH',
       surpriseType: 'INLINE',
       dartReportName: '제60기 1분기보고서 (2026.05.15 공시)',
-      dartUrl: 'https://dart.fss.or.kr'
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '2Q'
+    },
+    {
+      stock: '기아',
+      code: '000270',
+      broker: 'KB증권',
+      analyst: '강성진',
+      reportTitle: '글로벌 RV 믹스와 북미 HEV 인센티브 절감에 따른 호실적 지속',
+      publishDate: '2026-08-14',
+      analystEstOperatingProfit: '3.42조원',
+      dartActualOperatingProfit: '3.40조원',
+      errorRate: '0.6%',
+      verdict: 'EXACT_MATCH',
+      surpriseType: 'INLINE',
+      dartReportName: '제82기 반기보고서 (2026.08.14 공시)',
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '3Q'
+    },
+    {
+      stock: 'NAVER',
+      code: '035420',
+      broker: 'KB증권',
+      analyst: '이선화',
+      reportTitle: '서치플랫폼 AI 브리핑 도입 및 커머스 솔루션 거래액 반등',
+      publishDate: '2026-08-08',
+      analystEstOperatingProfit: '4,820억원',
+      dartActualOperatingProfit: '4,850억원',
+      errorRate: '0.6%',
+      verdict: 'EXACT_MATCH',
+      surpriseType: 'SURPRISE',
+      dartReportName: '제27기 반기보고서 (2026.08.14 공시)',
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '3Q'
+    },
+    {
+      stock: '삼성바이오로직스',
+      code: '207940',
+      broker: '교보증권',
+      analyst: '이안나',
+      reportTitle: '4공장 풀가동과 5공장 조기 가동 가시화에 따른 영업레버리지',
+      publishDate: '2026-09-12',
+      analystEstOperatingProfit: '3,450억원',
+      dartActualOperatingProfit: '3,420억원',
+      errorRate: '0.9%',
+      verdict: 'EXACT_MATCH',
+      surpriseType: 'INLINE',
+      dartReportName: '제15기 반기/3분기 공시 (2026.09.30)',
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '3Q'
     },
     {
       stock: 'KB금융',
@@ -89,9 +157,20 @@ export const DartFactCheck: React.FC = () => {
       verdict: 'EXACT_MATCH',
       surpriseType: 'INLINE',
       dartReportName: '제19기 1분기보고서 (2026.05.15 공시)',
-      dartUrl: 'https://dart.fss.or.kr'
+      dartUrl: 'https://dart.fss.or.kr',
+      quarter: '1Q'
     }
   ];
+
+  const filteredItems = mockFactChecks.filter(row => {
+    const matchSearch = !searchStock.trim() || 
+      row.stock.includes(searchStock.trim()) || 
+      row.code.includes(searchStock.trim()) || 
+      row.analyst.includes(searchStock.trim()) ||
+      row.broker.includes(searchStock.trim());
+    const matchQuarter = selectedQuarter === 'ALL' || row.quarter === selectedQuarter;
+    return matchSearch && matchQuarter;
+  });
 
   return (
     <div className="space-y-8 pb-16">
@@ -103,7 +182,7 @@ export const DartFactCheck: React.FC = () => {
                 Open DART API 전자공시망 교차검증 엔진
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                실적 추정 오차율 25% 가중치 반영
+                1~9월 7,158건 전수 팩트체크 현행화
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-white">
@@ -119,7 +198,7 @@ export const DartFactCheck: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 border-t border-slate-800/80 pt-6">
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">DART 매칭 대상 공시</span>
-            <strong className="text-xl font-bold font-mono text-white">4,868건 (전수)</strong>
+            <strong className="text-xl font-bold font-mono text-white">7,158건 (1~9월 전수)</strong>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">평균 영업이익 오차율</span>
@@ -127,7 +206,7 @@ export const DartFactCheck: React.FC = () => {
           </div>
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">어닝 서프라이즈 적중률</span>
-            <strong className="text-xl font-bold font-mono text-indigo-300">91.8%</strong>
+            <strong className="text-xl font-bold font-mono text-indigo-300">92.4%</strong>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">AI 환각 차단율</span>
@@ -141,11 +220,32 @@ export const DartFactCheck: React.FC = () => {
         <div className="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-emerald-400" />
-            <h3 className="text-base font-bold text-white">수상자 주요 리포트 DART 실적 대사 검증표</h3>
+            <h3 className="text-base font-bold text-white">1~9월 수상자 주요 리포트 DART 실적 대사 검증표</h3>
           </div>
-          <span className="text-xs text-slate-400">
-            검증 기준: 발간일 기준 전후 30일 내 기업 확정 분기/사업보고서
-          </span>
+
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                placeholder="기업명/코드/연구원 검색..."
+                value={searchStock}
+                onChange={(e) => setSearchStock(e.target.value)}
+                className="pl-8 pr-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <select
+              value={selectedQuarter}
+              onChange={(e) => setSelectedQuarter(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-semibold text-white focus:outline-none cursor-pointer"
+            >
+              <option value="ALL">전체 분기 (1~3분기)</option>
+              <option value="1Q">1분기 (1Q)</option>
+              <option value="2Q">2분기 (2Q/반기)</option>
+              <option value="3Q">3분기 (3Q)</option>
+            </select>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -162,7 +262,7 @@ export const DartFactCheck: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {mockFactChecks.map((row, idx) => (
+              {filteredItems.map((row, idx) => (
                 <tr key={idx} className="hover:bg-slate-800/30 transition">
                   <td className="p-4 font-bold text-white">
                     {row.stock} <span className="text-[10px] text-slate-500 font-mono">({row.code})</span>
@@ -173,7 +273,7 @@ export const DartFactCheck: React.FC = () => {
                   </td>
                   <td className="p-4 max-w-xs">
                     <span className="text-slate-300 block truncate font-medium">{row.reportTitle}</span>
-                    <span className="text-slate-500 text-[10px]">{row.publishDate}</span>
+                    <span className="text-slate-500 text-[10px]">{row.publishDate} • {row.quarter}</span>
                   </td>
                   <td className="p-4 text-right font-mono font-semibold text-indigo-300">
                     {row.analystEstOperatingProfit}

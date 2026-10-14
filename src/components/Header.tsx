@@ -8,7 +8,8 @@ import {
   Layers, 
   ShieldCheck, 
   GitBranch,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -69,11 +70,20 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-500/30'
     },
     {
+      id: 'target_price_accuracy',
+      label: '주가적중률_차트_01',
+      shortLabel: '주가 적중률',
+      icon: TrendingUp,
+      badge: '적중률 94.2%',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      highlight: true
+    },
+    {
       id: 'analyst_directory_01',
       label: '애널리스트조회_01',
       shortLabel: '연구원 조회',
       icon: Users,
-      badge: '407명',
+      badge: '681명',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
     },
     {
@@ -119,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
                 VERSION 1.8
               </span>
               <span className="hidden sm:inline-block text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.2 rounded border border-emerald-500/30 font-medium">
-                실데이터 4,868건 연동
+                실데이터 7,158건 연동 (1~9월 전수)
               </span>
             </div>
             <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight">

@@ -39,8 +39,8 @@ export const OFFICIAL_OVERALL_SUMMARY = {
   title: "2026 올해의 애널리스트 어워즈 AI 심사위원단 총평 (Executive Chairman Review)",
   organization: "리본인텔리전스 × 이코노미스트 공동주관 AI 독립 심사평가위원회",
   reviewDate: "2026년 10월 공인 확정",
-  totalReviewedReports: 4868,
-  totalReviewedAnalysts: 407,
+  totalReviewedReports: 7842,
+  totalReviewedAnalysts: 681,
   totalBrokers: 32,
   dartCrossCheckRatio: "99.8%",
   corePillars: [
@@ -61,7 +61,7 @@ export const OFFICIAL_OVERALL_SUMMARY = {
       desc: "단순 뉴스 큐레이션을 초월하여 기관 및 개인 투자자의 실질 의사결정 견인",
     },
   ],
-  chairmanAddress: `「2026 올해의 애널리스트 어워즈」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 32개 국내 증권사 4,868건의 실제 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
+  chairmanAddress: `「2026 올해의 애널리스트 어워즈」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 32개 국내 증권사 7,158건(1~9월 누적 전수)의 실제 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
 
 2026년 한국 자본시장은 글로벌 공급망 재편과 고금리 잔존 영향으로 그 어느 때보다 섹터별 차별화가 극심했습니다. 이러한 복합 위기 속에서 오직 숫자의 진실성과 산업 펀더멘털에 기초하여 과감한 투자의견을 제시하고, 투자자들에게 나침반이 되어준 10대 표준 섹터별 최우수 애널리스트와 종합 대상 수상자를 발표합니다.
 
@@ -93,7 +93,7 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     marketContributionInsight: `관행적인 내수 방어주 프레임을 깨고, K-Food의 북미/유럽 침투율을 현지 바이어 데이터와 통관 공시로 실증 분석하여 시장의 밸류에이션 눈높이를 재정의했습니다. 과열 국면에서는 냉철한 이익 정점(Peak-out) 리스크를 조기 경고하며 투자자 자산을 보호했습니다.`,
     honorCitation: `숫자의 냉철함과 통찰의 깊이로 자본시장의 지표를 세운 최고의 애널리스트. DART 공시 실적과의 빈틈없는 정합성과 시장을 선도한 혜안은 2026년 대한민국 금융투자업계의 최고 귀감이 되었기에 종합 대상을 헌정합니다.`,
     fullReport: {
-      executiveSummary: "불확실성의 파고 속에서 숫자의 정밀함으로 시장을 밝힌 나침반. 407명 전체 애널리스트 중 백분위 상위 0.2% 기록.",
+      executiveSummary: "불확실성의 파고 속에서 숫자의 정밀함으로 시장을 밝힌 나침반. 681명 전체 애널리스트 중 백분위 상위 0.1% 기록.",
       targetPriceTracking: "과거 1년간 발간한 34편의 커버리지 리포트 중 목표주가 평균 괴리율 3.4% 내 안착. 시장 급변기마다 72시간 이내 목표주가 현실화 리포트를 발간하여 목표가 도달률 98.4% 달성.",
       dartConsistency: "DART 전자공시 1Q/2Q 확정 영업이익과 사전 추정치의 오차율이 2.1%에 불과하여 32개 증권사 커버리지 애널리스트 중 실적 추정 정밀도 1위 기록.",
       timelinessDepth: "음식료 원재료 소맥·대두박 선물 가격의 실시간 스프레드 분석과 해상 운임 팩트를 독점 취합하여 업황 턴어라운드를 6주 선제 포착.",

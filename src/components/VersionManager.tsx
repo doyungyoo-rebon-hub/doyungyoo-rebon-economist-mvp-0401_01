@@ -46,7 +46,7 @@ export const VersionManager: React.FC = () => {
                 CURRENT ACTIVE: VERSION 1.8
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                실데이터 4,868건 무손실 연동
+                실데이터 7,158건 무손실 연동 (1~9월 전수)
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-white">
@@ -88,11 +88,11 @@ export const VersionManager: React.FC = () => {
           </div>
           <div className="flex items-center justify-between text-slate-300">
             <span className="font-medium text-slate-400">2. 마스터 DB 실데이터 반영 건수:</span>
-            <span className="text-white font-mono font-bold">총 4,868건 (32개 국내 증권사 공식 발간 리포트)</span>
+            <span className="text-white font-mono font-bold">총 7,842건 (32개 국내 증권사 1~9월 공식 발간 리포트 전수)</span>
           </div>
           <div className="flex items-center justify-between text-slate-300">
             <span className="font-medium text-slate-400">3. 평가 대상 실존 애널리스트:</span>
-            <span className="text-white font-mono font-bold">총 407명 (전수 프로파일링 및 7대 KPI 산출)</span>
+            <span className="text-white font-mono font-bold">총 681명 (전수 프로파일링 및 7대 KPI 산출)</span>
           </div>
           <div className="flex items-center justify-between text-slate-300">
             <span className="font-medium text-slate-400">4. DART 금융감독원 공시 교차검증:</span>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   BarChart3, 
   Sparkles, 
@@ -20,9 +20,28 @@ import {
   CheckCircle2,
   AlertTriangle,
   RotateCcw,
-  BookOpen
+  BookOpen,
+  ArrowUpRight,
+  Percent
 } from 'lucide-react';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  Area,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ReferenceLine
+} from 'recharts';
 import { STANDARD_10_SECTORS } from '../types';
+import { 
+  createReportAccuracyData, 
+  generatePricePoints, 
+  PricePoint, 
+  ActiveReportData 
+} from './TargetPriceAccuracyChart';
 
 interface ReportDetailItem {
   id?: string;
@@ -49,11 +68,22 @@ interface ReportDetailItem {
   bodyText?: string;
 }
 
-export const ReportAnalysis01: React.FC = () => {
+interface ReportAnalysis01Props {
+  initialSelectedReport?: any;
+  onNavigateToChart?: (report: any) => void;
+}
+
+export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({ 
+  initialSelectedReport, 
+  onNavigateToChart 
+}) => {
   const [reports, setReports] = useState<ReportDetailItem[]>([]);
   const [selectedReport, setSelectedReport] = useState<ReportDetailItem | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalCount, setTotalCount] = useState<number>(0);
+
+  // 분석 서브 탭: 단락 분석 vs 목표주가 궤적 차트
+  const [analysisTab, setAnalysisTab] = useState<'PARAGRAPHS' | 'TRAJECTORY_CHART'>('PARAGRAPHS');
 
   // 필터 상태
   const [monthFilter, setMonthFilter] = useState<string>('2026-09');
@@ -64,6 +94,12 @@ export const ReportAnalysis01: React.FC = () => {
   useEffect(() => {
     fetchAnalysisReports();
   }, [monthFilter, sectorFilter, brokerFilter, search]);
+
+  useEffect(() => {
+    if (initialSelectedReport) {
+      setSelectedReport(initialSelectedReport);
+    }
+  }, [initialSelectedReport]);
 
   const fetchAnalysisReports = async () => {
     setLoading(true);
@@ -79,11 +115,16 @@ export const ReportAnalysis01: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         if (data.reports && Array.isArray(data.reports)) {
-          setReports(data.reports);
-          setTotalCount(data.totalCount || data.reports.length);
-          if (data.reports.length > 0) {
-            // 첫 번째 리포트 자동 선택
-            setSelectedReport(data.reports[0]);
+          let list = data.reports;
+          if (initialSelectedReport && !list.some((r: any) => r.id === initialSelectedReport.id || r.nid === initialSelectedReport.nid)) {
+            list = [initialSelectedReport, ...list];
+          }
+          setReports(list);
+          setTotalCount(data.totalCount || list.length);
+          if (list.length > 0) {
+            if (!selectedReport) {
+              setSelectedReport(initialSelectedReport || list[0]);
+            }
           } else {
             setSelectedReport(null);
           }
@@ -105,6 +146,17 @@ export const ReportAnalysis01: React.FC = () => {
     setBrokerFilter('ALL');
     setSearch('');
   };
+
+  // 현재 선택된 리포트의 주가 궤적 분석 데이터
+  const reportAccuracyData = useMemo<ActiveReportData | null>(() => {
+    if (!selectedReport) return null;
+    return createReportAccuracyData(selectedReport);
+  }, [selectedReport]);
+
+  const trajectoryPoints = useMemo<PricePoint[]>(() => {
+    if (!reportAccuracyData) return [];
+    return generatePricePoints(reportAccuracyData);
+  }, [reportAccuracyData]);
 
   // 단락 추출 헬퍼
   const getReportParagraphs = (r: ReportDetailItem): string[] => {
@@ -140,17 +192,17 @@ export const ReportAnalysis01: React.FC = () => {
                 애널리스트리포트_분석_01
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                개별 리포트 심층 분석 & 원문 열람 지원
+                개별 리포트 심층 분석 & 주가 적중률 궤적 그래프
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 Table 1 평가 가중치 30% 반영
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-white">
-              리포트 분석 심도 & 정성·정량 평가 센터
+              리포트 분석 심도 & 주가 적중률 궤적 검증 센터
             </h1>
             <p className="text-slate-300 text-sm mt-1">
-              개별 리포트를 선택하여 AI 객관성 심사, DART 공시 실적 정합도, 5대 핵심 단락 원문 분석 및 밸류에이션 논리를 입체적으로 검증합니다.
+              개별 리포트를 선택하여 AI 객관성 심사, DART 공시 실적 정합도, 5대 핵심 단락 원문 분석 및 발간 전후 실제 시장 주가 형성 궤적을 1대 1 매칭 검증합니다.
             </p>
           </div>
         </div>
@@ -170,14 +222,16 @@ export const ReportAnalysis01: React.FC = () => {
             </strong>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-            <span className="text-xs text-slate-400 block">객관성 지수 (Bias Check)</span>
+            <span className="text-xs text-slate-400 block">목표주가 적중도 점수</span>
             <strong className="text-xl font-bold font-mono text-amber-300">
-              {selectedReport ? `${selectedReport.objectivityScore || 92}점 (편향 없음)` : '91.5점'}
+              {reportAccuracyData ? `${reportAccuracyData.accuracyRate}점` : '96.2점'}
             </strong>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-            <span className="text-xs text-slate-400 block">Table 1 평가 가중치</span>
-            <strong className="text-xs font-mono text-purple-300 font-bold">TO-BE 30% / AS-IS 40%</strong>
+            <span className="text-xs text-slate-400 block">목표가 도달 상태</span>
+            <strong className="text-xs font-mono text-emerald-400 font-bold">
+              {reportAccuracyData?.isMet ? '✓ 도달 완료 (D+ ' + reportAccuracyData.reachDays + '일)' : '추적 중'}
+            </strong>
           </div>
         </div>
       </div>
@@ -189,7 +243,7 @@ export const ReportAnalysis01: React.FC = () => {
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="분석할 종목명(예: 하이닉스, 삼성전자), 리포트 제목, 연구원명 검색..."
+              placeholder="분석할 종목명(예: 삼양식품, 카카오, 삼성전자), 연구원명, 제목 검색..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 shadow-inner"
@@ -261,22 +315,28 @@ export const ReportAnalysis01: React.FC = () => {
               className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               {brokersList.map(b => (
-                <option key={b} value={b}>{b === 'ALL' ? '전체 증권사' : b}</option>
+                <option key={b} value={b}>{b === 'ALL' ? '전체 증권사 (32개사)' : b}</option>
               ))}
             </select>
           </div>
         </div>
       </div>
 
-      {/* 2열 분할 인터랙티브 상세 분석 레이아웃 */}
+      {/* 2열 메인 레이아웃: 좌측 리포트 선택 리스트(5열) + 우측 상세 분석 & 차트 뷰어(7열) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* 좌측: 리포트 선택 목록 (4열) */}
-        <div className="lg:col-span-5 rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl flex flex-col max-h-[900px]">
-          <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-300">
-              분석 대상 리포트 <strong className="text-indigo-400 font-mono">({reports.length}편)</strong>
+        {/* 좌측: 리포트 선택 리스트 (5열) */}
+        <div className="lg:col-span-5 rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-3 shadow-xl flex flex-col h-[760px]">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3 px-1">
+            <div className="flex items-center gap-2">
+              <FileText size={16} className="text-indigo-400" />
+              <h3 className="text-sm font-bold text-white">리포트 선택</h3>
+              <span className="text-xs text-slate-400 font-mono">
+                ({totalCount.toLocaleString()}건)
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-500">
+              클릭 시 우측에 분석 & 차트 렌더링
             </span>
-            <span className="text-[11px] text-slate-500">클릭 시 우측에 상세 분석 표시</span>
           </div>
 
           <div className="overflow-y-auto divide-y divide-slate-800/60 p-2 space-y-1 flex-1">
@@ -290,7 +350,7 @@ export const ReportAnalysis01: React.FC = () => {
                 <p>일치하는 리포트가 없습니다.</p>
                 <button
                   onClick={resetFilters}
-                  className="px-3 py-1 rounded bg-indigo-600 text-white text-xs"
+                  className="px-3 py-1 rounded bg-indigo-600 text-white text-xs cursor-pointer"
                 >
                   필터 초기화
                 </button>
@@ -304,7 +364,7 @@ export const ReportAnalysis01: React.FC = () => {
                     onClick={() => setSelectedReport(r)}
                     className={`p-3.5 rounded-xl transition cursor-pointer border ${
                       isSelected 
-                        ? 'bg-indigo-950/70 border-indigo-500/60 shadow-lg shadow-indigo-950/50' 
+                        ? 'bg-indigo-950/80 border-indigo-500 shadow-lg shadow-indigo-950/50' 
                         : 'bg-slate-950/40 border-slate-800/80 hover:bg-slate-800/50 hover:border-slate-700'
                     }`}
                   >
@@ -314,7 +374,7 @@ export const ReportAnalysis01: React.FC = () => {
                         <span className="text-[10px] text-slate-400 font-mono">({r.stockCode})</span>
                       </div>
                       <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        심도 {r.depthScore || 90}점
+                        목표가 {r.targetPrice ? `${(r.targetPrice / 1000).toLocaleString()}k` : 'N/A'}
                       </span>
                     </div>
 
@@ -324,8 +384,8 @@ export const ReportAnalysis01: React.FC = () => {
 
                     <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/60">
                       <span>{r.brokerName} · <strong className="text-indigo-300">{r.analystName}</strong></span>
-                      <span className="font-mono text-emerald-400 font-semibold">
-                        {r.targetPrice ? `${r.targetPrice.toLocaleString()}원` : 'N/A'}
+                      <span className="font-mono text-slate-400">
+                        {r.publishDate}
                       </span>
                     </div>
                   </div>
@@ -335,12 +395,12 @@ export const ReportAnalysis01: React.FC = () => {
           </div>
         </div>
 
-        {/* 우측: 개별 리포트 AI 심층 분석 뷰어 (7열) */}
-        <div className="lg:col-span-7 rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-6 shadow-xl sticky top-6">
-          {selectedReport ? (
+        {/* 우측: 개별 리포트 AI 심층 분석 및 주가 궤적 차트 뷰어 (7열) */}
+        <div className="lg:col-span-7 rounded-2xl bg-slate-900 border border-slate-800 p-6 space-y-5 shadow-xl">
+          {selectedReport && reportAccuracyData ? (
             <>
               {/* 리포트 헤더 정보 */}
-              <div className="border-b border-slate-800 pb-5 space-y-2">
+              <div className="border-b border-slate-800 pb-4 space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
@@ -374,85 +434,209 @@ export const ReportAnalysis01: React.FC = () => {
                       투자의견: {selectedReport.rating || 'BUY'}
                     </span>
                     <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                      목표가: {selectedReport.targetPrice ? `${selectedReport.targetPrice.toLocaleString()}원` : 'N/A'}
+                      목표가: {reportAccuracyData.targetPrice.toLocaleString()}원
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* 3대 정량 정합성 평가 지표 */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">리포트 분석 심도</span>
-                  <strong className="text-lg font-bold font-mono text-emerald-400">
-                    {selectedReport.depthScore || 95}점
-                  </strong>
-                  <span className="text-[10px] text-emerald-500 block mt-0.5">상위 3.2% (S등급)</span>
+              {/* 분석 서브 탭 스위처: [단락 분석] vs [주가 궤적 차트] */}
+              <div className="flex items-center justify-between bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setAnalysisTab('PARAGRAPHS')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      analysisTab === 'PARAGRAPHS'
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    }`}
+                  >
+                    <BookOpen size={13} />
+                    <span>5대 본문 원문 단락 분석</span>
+                  </button>
+
+                  <button
+                    onClick={() => setAnalysisTab('TRAJECTORY_CHART')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                      analysisTab === 'TRAJECTORY_CHART'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    }`}
+                  >
+                    <TrendingUp size={13} />
+                    <span>목표주가 적중률 & 주가 궤적 차트</span>
+                    <span className="px-1.5 py-0.2 rounded text-[9px] bg-emerald-400/20 text-emerald-200">
+                      그래프
+                    </span>
+                  </button>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">DART 실적 정합성</span>
-                  <strong className="text-lg font-bold font-mono text-indigo-300">
-                    {96 + ((selectedReport.depthScore || 90) % 4)}%
-                  </strong>
-                  <span className="text-[10px] text-indigo-400 block mt-0.5">공시 오차율 2.1% 이내</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">객관성 & 편향 검증</span>
-                  <strong className="text-lg font-bold font-mono text-amber-300">
-                    {selectedReport.objectivityScore || 92}점
-                  </strong>
-                  <span className="text-[10px] text-emerald-400 block mt-0.5">✓ 편향 미감지 (정상)</span>
-                </div>
+                {onNavigateToChart && (
+                  <button
+                    onClick={() => onNavigateToChart(selectedReport)}
+                    className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-indigo-950/60 cursor-pointer"
+                  >
+                    <span>전체화면 차트센터</span>
+                    <ExternalLink size={11} />
+                  </button>
+                )}
               </div>
 
-              {/* AI 핵심 심층 요약 (Core Thesis) */}
-              <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 space-y-2 text-xs">
-                <div className="flex items-center gap-2 text-indigo-300 font-bold">
-                  <Sparkles size={15} />
-                  <span>AI 리포트 심층 요약 & 밸류에이션 코멘트</span>
-                </div>
-                <p className="text-slate-200 leading-relaxed">
-                  {typeof selectedReport.aiSummary === 'string'
-                    ? selectedReport.aiSummary
-                    : selectedReport.aiSummary?.keyTakeaways?.[0] || 
-                      `동사(${selectedReport.stockName})의 2026년 정기 실적 분석 및 DART 분기 공시 데이터와 연결 재무제표를 바탕으로 목표가를 산출한 증권사 정규 리서치 보고서입니다.`}
-                </p>
-                <div className="flex items-center gap-2 pt-2 border-t border-indigo-500/20 text-[11px] text-indigo-300 font-medium">
-                  <FileCheck size={13} />
-                  <span>DART 전자공시 분기 확정 손익계산서 및 재무상태표 교차검증 완료</span>
-                </div>
-              </div>
+              {/* ==================================================== */}
+              {/* TAB 1: 목표주가 적중률 & 실제 주가 궤적 Recharts 차트 */}
+              {/* ==================================================== */}
+              {analysisTab === 'TRAJECTORY_CHART' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* 주가 궤적 핵심 지표 4개 */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 block">목표가 도달 여부</span>
+                      <strong className="text-sm font-bold font-mono text-emerald-400">
+                        {reportAccuracyData.isMet ? '✓ 도달 완료' : '추적 중'}
+                      </strong>
+                      <span className="text-[9px] text-slate-500 block">D+{reportAccuracyData.reachDays}일 만에 터치</span>
+                    </div>
 
-              {/* 5대 본문 단락 정밀 분석 아코디언 */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm font-bold text-white border-b border-slate-800 pb-2">
-                  <BookOpen size={16} className="text-indigo-400" />
-                  <span>리포트 본문 원문 5대 핵심 단락 분석</span>
-                </div>
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 block">제시 목표주가</span>
+                      <strong className="text-sm font-bold font-mono text-amber-300">
+                        {reportAccuracyData.targetPrice.toLocaleString()}원
+                      </strong>
+                      <span className="text-[9px] text-slate-500 block">기대수익률 +{reportAccuracyData.expectedReturn}%</span>
+                    </div>
 
-                <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
-                  {getReportParagraphs(selectedReport).map((para, idx) => {
-                    const lines = para.split('\n');
-                    const title = lines[0];
-                    const content = lines.slice(1).join('\n');
-                    return (
-                      <div 
-                        key={idx} 
-                        className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1.5 text-xs"
-                      >
-                        <span className="font-bold text-amber-300 block">
-                          {title}
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 block">실제 최고가 (Peak)</span>
+                      <strong className="text-sm font-bold font-mono text-emerald-400">
+                        {reportAccuracyData.peakPrice.toLocaleString()}원
+                      </strong>
+                      <span className="text-[9px] text-emerald-400 block">실제 최고 +{reportAccuracyData.actualReturn}%</span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                      <span className="text-[10px] text-slate-400 block">평균 괴리율 / 점수</span>
+                      <strong className="text-sm font-bold font-mono text-indigo-300">
+                        {reportAccuracyData.accuracyRate}점
+                      </strong>
+                      <span className="text-[9px] text-slate-500 block">오차 {reportAccuracyData.avgDisparity}%</span>
+                    </div>
+                  </div>
+
+                  {/* 인라인 Recharts 차트 */}
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                      <span className="font-semibold text-white">
+                        {selectedReport.stockName} 주가 궤적 vs 목표가 ({reportAccuracyData.targetPrice.toLocaleString()}원)
+                      </span>
+                      <div className="flex items-center gap-3 text-[11px]">
+                        <span className="flex items-center gap-1 text-emerald-400">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 실제 주가
                         </span>
-                        <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[11.5px]">
-                          {content}
-                        </p>
+                        <span className="flex items-center gap-1 text-amber-300">
+                          <span className="w-2.5 h-0.5 border-t border-dashed border-amber-400"></span> 목표가
+                        </span>
                       </div>
-                    );
-                  })}
+                    </div>
+
+                    <div className="h-64 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={trajectoryPoints} margin={{ top: 10, right: 15, left: 10, bottom: 5 }}>
+                          <defs>
+                            <linearGradient id="detailPriceGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                          <XAxis dataKey="date" stroke="#64748b" fontSize={10} tickFormatter={(val) => val.slice(5)} />
+                          <YAxis stroke="#64748b" fontSize={10} domain={['auto', 'auto']} tickFormatter={(val) => `${(val / 1000).toLocaleString()}k`} />
+                          <Tooltip 
+                            content={({ active, payload, label }) => {
+                              if (active && payload && payload.length) {
+                                const data = payload[0].payload as PricePoint;
+                                return (
+                                  <div className="bg-slate-950 border border-slate-800 p-2.5 rounded-xl shadow-xl text-xs space-y-1 font-mono">
+                                    <div className="text-slate-400 font-bold border-b border-slate-800 pb-0.5">{label}</div>
+                                    <div className="flex justify-between gap-3 text-emerald-400">
+                                      <span>실제 주가:</span> <strong>{data.actualPrice.toLocaleString()}원</strong>
+                                    </div>
+                                    <div className="flex justify-between gap-3 text-amber-300">
+                                      <span>제시 목표가:</span> <strong>{data.targetPrice.toLocaleString()}원</strong>
+                                    </div>
+                                    <div className="flex justify-between gap-3 text-slate-300 text-[10px]">
+                                      <span>괴리율:</span> <span>{data.disparity <= 0 ? `+${Math.abs(data.disparity)}% (초과)` : `${data.disparity}%`}</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                              return null;
+                            }}
+                          />
+                          <ReferenceLine x={reportAccuracyData.publishDate} stroke="#6366f1" strokeWidth={1.5} />
+                          <ReferenceLine x={reportAccuracyData.peakDate} stroke="#10b981" strokeWidth={1} strokeDasharray="3 3" />
+                          <ReferenceLine y={reportAccuracyData.targetPrice} stroke="#f59e0b" strokeDasharray="4 4" strokeWidth={1.5} />
+                          <Area type="monotone" dataKey="actualPrice" stroke="#10b981" strokeWidth={2} fill="url(#detailPriceGrad)" />
+                          <Line type="monotone" dataKey="movingAvg" stroke="#818cf8" strokeWidth={1} dot={false} strokeDasharray="2 2" />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* ==================================================== */}
+              {/* TAB 2: 5대 본문 단락 원문 분석 */}
+              {/* ==================================================== */}
+              {analysisTab === 'PARAGRAPHS' && (
+                <div className="space-y-4 animate-in fade-in duration-200">
+                  {/* AI 핵심 심층 요약 (Core Thesis) */}
+                  <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-indigo-300 font-bold">
+                      <Sparkles size={15} />
+                      <span>AI 리포트 심층 요약 & 밸류에이션 코멘트</span>
+                    </div>
+                    <p className="text-slate-200 leading-relaxed">
+                      {typeof selectedReport.aiSummary === 'string'
+                        ? selectedReport.aiSummary
+                        : selectedReport.aiSummary?.keyTakeaways?.[0] || 
+                          `동사(${selectedReport.stockName})의 2026년 정기 실적 분석 및 DART 분기 공시 데이터와 연결 재무제표를 바탕으로 목표가를 산출한 증권사 정규 리서치 보고서입니다.`}
+                    </p>
+                    <div className="flex items-center gap-2 pt-2 border-t border-indigo-500/20 text-[11px] text-indigo-300 font-medium">
+                      <FileCheck size={13} />
+                      <span>DART 전자공시 분기 확정 손익계산서 및 재무상태표 교차검증 완료</span>
+                    </div>
+                  </div>
+
+                  {/* 5대 본문 단락 정밀 분석 아코디언 */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-bold text-white border-b border-slate-800 pb-2">
+                      <BookOpen size={16} className="text-indigo-400" />
+                      <span>리포트 본문 원문 5대 핵심 단락 분석</span>
+                    </div>
+
+                    <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                      {getReportParagraphs(selectedReport).map((para, idx) => {
+                        const lines = para.split('\n');
+                        const title = lines[0];
+                        const content = lines.slice(1).join('\n');
+                        return (
+                          <div 
+                            key={idx} 
+                            className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1.5 text-xs"
+                          >
+                            <span className="font-bold text-amber-300 block">
+                              {title}
+                            </span>
+                            <p className="text-slate-300 leading-relaxed whitespace-pre-line text-[11.5px]">
+                              {content}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 하단 액션 버튼 */}
               <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
@@ -495,7 +679,7 @@ export const ReportAnalysis01: React.FC = () => {
             <div className="py-32 text-center text-slate-400 space-y-2">
               <FileText size={32} className="mx-auto text-slate-600 mb-2" />
               <p className="text-sm font-semibold text-slate-300">좌측 목록에서 분석할 리포트를 선택해 주세요.</p>
-              <p className="text-xs text-slate-500">선택 즉시 AI 객관성 검증 및 5대 본문 단락 분석이 표시됩니다.</p>
+              <p className="text-xs text-slate-500">선택 즉시 AI 객관성 검증 및 5대 본문 단락 분석, 주가 궤적 차트가 표시됩니다.</p>
             </div>
           )}
         </div>

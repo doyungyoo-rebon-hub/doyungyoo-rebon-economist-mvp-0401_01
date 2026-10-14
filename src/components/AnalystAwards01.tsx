@@ -226,7 +226,7 @@ export const AnalystAwards01: React.FC<{ onNavigateToReview: () => void }> = ({ 
       {loading ? (
         <div className="text-center py-20 text-slate-400">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent mb-3" />
-          <p className="text-sm">4,868건의 DART 공시 데이터 교차검증 점수를 불러오는 중...</p>
+          <p className="text-sm">7,158건의 DART 공시 데이터 교차검증 점수를 불러오는 중...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
