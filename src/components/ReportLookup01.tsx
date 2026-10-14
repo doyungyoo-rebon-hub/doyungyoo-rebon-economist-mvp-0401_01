@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Search, 
   FileText, 
@@ -10,6 +10,9 @@ import {
   Building2, 
   Sparkles,
   ChevronRight,
+  ChevronLeft,
+  ChevronsLeft,
+  ChevronsRight,
   TrendingUp,
   Database,
   RotateCcw,
@@ -56,7 +59,11 @@ const MAJOR_STOCKS = [
   { name: 'LG화학', code: '051910', sector: '화학/철강/소재' }
 ];
 
-export const ReportLookup01: React.FC = () => {
+interface ReportLookup01Props {
+  onNavigateToAnalysis?: (report: any) => void;
+}
+
+export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnalysis }) => {
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -69,11 +76,24 @@ export const ReportLookup01: React.FC = () => {
   const [search, setSearch] = useState<string>('');
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
 
-  useEffect(() => {
-    fetchFilteredReports();
-  }, [monthFilter, sectorFilter, stockFilter, brokerFilter, search]);
+  // 📄 페이지네이션 상태 (사용자 요청: 기간 선택 시에도 20개씩 분할 표시)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(20);
+  const [jumpPageInput, setJumpPageInput] = useState<string>('');
 
-  const fetchFilteredReports = async () => {
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // 필터 변경 시 1페이지로 자동 리셋
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [monthFilter, sectorFilter, stockFilter, brokerFilter, search, pageSize]);
+
+  // 필터 및 페이지 번호 변경 시 데이터 재조회
+  useEffect(() => {
+    fetchFilteredReports(currentPage, pageSize);
+  }, [monthFilter, sectorFilter, stockFilter, brokerFilter, search, currentPage, pageSize]);
+
+  const fetchFilteredReports = async (page = currentPage, limit = pageSize) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -82,7 +102,8 @@ export const ReportLookup01: React.FC = () => {
       if (stockFilter && stockFilter !== 'ALL') params.append('stock', stockFilter);
       if (brokerFilter && brokerFilter !== 'ALL') params.append('broker', brokerFilter);
       if (search.trim()) params.append('search', search.trim());
-      params.append('limit', '500');
+      params.append('page', String(page));
+      params.append('limit', String(limit));
 
       const res = await fetch(`/api/reports?${params.toString()}`);
       if (res.ok) {
@@ -102,12 +123,49 @@ export const ReportLookup01: React.FC = () => {
     setLoading(false);
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+    setCurrentPage(newPage);
+    const tableElem = document.getElementById('report-results-table-section');
+    if (tableElem) {
+      tableElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleJumpSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const p = parseInt(jumpPageInput, 10);
+    if (!isNaN(p) && p >= 1 && p <= totalPages) {
+      handlePageChange(p);
+      setJumpPageInput('');
+    }
+  };
+
+  const pageNumbers = useMemo(() => {
+    const pages: number[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push(-1);
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push(-1);
+      pages.push(totalPages);
+    }
+    return pages;
+  }, [totalPages, currentPage]);
+
   const resetFilters = () => {
     setMonthFilter('2026-09');
     setSectorFilter('ALL');
     setStockFilter('ALL');
     setBrokerFilter('ALL');
     setSearch('');
+    setCurrentPage(1);
   };
 
   const brokersList = [
@@ -305,15 +363,38 @@ export const ReportLookup01: React.FC = () => {
         </div>
       </div>
 
-      {/* 리포트 결과 테이블 */}
-      <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl">
-        <div className="p-4 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between text-xs">
-          <span className="font-semibold text-slate-300">
-            총 <strong className="text-emerald-400 font-mono text-sm">{totalCount.toLocaleString()}건</strong>의 리포트가 조회되었습니다.
-          </span>
-          <span className="text-slate-500">
-            목록을 클릭하시면 AI 요약 및 상세 정보를 열람하실 수 있습니다.
-          </span>
+      {/* 리포트 결과 테이블 (페이지네이션 적용) */}
+      <div id="report-results-table-section" className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden shadow-xl">
+        <div className="p-4 bg-slate-950/90 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-slate-300">
+              총 <strong className="text-emerald-400 font-mono text-sm">{totalCount.toLocaleString()}건</strong>의 리포트 중{' '}
+              <strong className="text-white font-mono">
+                {totalCount > 0 ? (currentPage - 1) * pageSize + 1 : 0} ~ {Math.min(currentPage * pageSize, totalCount)}
+              </strong>번째 리포트
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              {currentPage} / {totalPages} 페이지 (20개씩 분할 열람)
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <span>표시 개수:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-semibold text-white cursor-pointer focus:outline-none focus:border-indigo-500"
+              >
+                <option value={20}>20개씩 보기 (기본)</option>
+                <option value={50}>50개씩 보기</option>
+                <option value={100}>100개씩 보기</option>
+              </select>
+            </div>
+            <span className="text-slate-500 hidden md:inline">
+              목록 클릭 시 AI 요약 및 상세 정보를 열람하실 수 있습니다.
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -416,6 +497,109 @@ export const ReportLookup01: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {/* 하단 페이지네이션 컨트롤 바 */}
+        {totalCount > 0 && (
+          <div className="p-4 bg-slate-950/95 border-t border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs">
+            {/* 정보 텍스트 */}
+            <div className="text-slate-400 text-xs">
+              전체 <strong className="text-white font-mono">{totalCount.toLocaleString()}</strong>건 중{' '}
+              <span className="text-emerald-400 font-mono font-bold">
+                {(currentPage - 1) * pageSize + 1} ~ {Math.min(currentPage * pageSize, totalCount)}건
+              </span>{' '}
+              표시 중 (현재 <strong className="text-indigo-300 font-mono">{currentPage}</strong> / {totalPages} 페이지)
+            </div>
+
+            {/* 페이지 번호 버튼 그룹 */}
+            <div className="flex items-center gap-1.5 flex-wrap justify-center">
+              {/* 처음 페이지로 */}
+              <button
+                onClick={() => handlePageChange(1)}
+                disabled={currentPage === 1}
+                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                title="첫 페이지로"
+              >
+                <ChevronsLeft size={16} />
+              </button>
+
+              {/* 이전 페이지 */}
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer flex items-center gap-1"
+              >
+                <ChevronLeft size={15} />
+                <span className="hidden sm:inline">이전</span>
+              </button>
+
+              {/* 페이지 숫자 윈도우 */}
+              {pageNumbers.map((page, idx) => {
+                if (page === -1) {
+                  return (
+                    <span key={`dots-${idx}`} className="px-2 text-slate-600 font-mono">
+                      ...
+                    </span>
+                  );
+                }
+                const isActive = page === currentPage;
+                return (
+                  <button
+                    key={`page-${page}`}
+                    onClick={() => handlePageChange(page)}
+                    className={`min-w-8 h-8 px-2 rounded-lg font-mono font-bold text-xs transition cursor-pointer ${
+                      isActive
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/40 border border-indigo-400'
+                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              {/* 다음 페이지 */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer flex items-center gap-1"
+              >
+                <span className="hidden sm:inline">다음</span>
+                <ChevronRight size={15} />
+              </button>
+
+              {/* 마지막 페이지로 */}
+              <button
+                onClick={() => handlePageChange(totalPages)}
+                disabled={currentPage === totalPages}
+                className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer"
+                title="마지막 페이지로"
+              >
+                <ChevronsRight size={16} />
+              </button>
+            </div>
+
+            {/* 빠른 페이지 직접 이동 폼 */}
+            <form onSubmit={handleJumpSubmit} className="flex items-center gap-1.5 text-xs">
+              <span className="text-slate-500">페이지 이동:</span>
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                placeholder={String(currentPage)}
+                value={jumpPageInput}
+                onChange={(e) => setJumpPageInput(e.target.value)}
+                className="w-14 px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-center text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+              />
+              <span className="text-slate-500 font-mono">/ {totalPages}</span>
+              <button
+                type="submit"
+                className="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 font-semibold cursor-pointer transition text-xs"
+              >
+                이동
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* 리포트 상세 열람 팝업 모달 */}
@@ -488,16 +672,45 @@ export const ReportLookup01: React.FC = () => {
             </div>
 
             {/* 하단 액션 버튼 */}
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
-              >
-                닫기
-              </button>
-              {selectedReport.pdfUrl ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+              {onNavigateToAnalysis && (
+                <button
+                  onClick={() => {
+                    onNavigateToAnalysis(selectedReport);
+                    setSelectedReport(null);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 cursor-pointer"
+                >
+                  <Sparkles size={14} />
+                  <span>v1.6 심층 분석(5대 단락·재무대사) 전체 보기</span>
+                </button>
+              )}
+
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                >
+                  닫기
+                </button>
                 <a
-                  href={selectedReport.pdfUrl}
+                  href={(() => {
+                    if (selectedReport.pdfUrl && selectedReport.pdfUrl.startsWith('http')) return selectedReport.pdfUrl;
+                    if (selectedReport.pdfUrl && selectedReport.pdfUrl.startsWith('/api/')) return selectedReport.pdfUrl;
+                    const params = new URLSearchParams({
+                      nid: selectedReport.nid || selectedReport.id || '99001',
+                      stockName: selectedReport.stockName || '종목',
+                      stockCode: selectedReport.stockCode || '000000',
+                      brokerName: selectedReport.brokerName || '증권사',
+                      title: selectedReport.reportTitle || '리포트',
+                      date: selectedReport.publishDate || '2026-09-15',
+                      yymmdd: selectedReport.publishDate ? selectedReport.publishDate.replace(/-/g, '').slice(2) : '260915',
+                      targetPrice: String(selectedReport.targetPrice || 0),
+                      analystName: selectedReport.analystName || '',
+                      fileName: `${selectedReport.publishDate ? selectedReport.publishDate.replace(/-/g, '').slice(2) : '260915'}_${selectedReport.brokerName}_${selectedReport.stockName}_${selectedReport.reportTitle}.pdf`
+                    });
+                    return `/api/pipeline-01/view-pdf-stream?${params.toString()}`;
+                  })()}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/20"
@@ -505,11 +718,7 @@ export const ReportLookup01: React.FC = () => {
                   <Download size={14} />
                   <span>PDF 원문 다운로드</span>
                 </a>
-              ) : (
-                <span className="px-3 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs">
-                  PDF 원문 보관 완료 (사내 보안 링크)
-                </span>
-              )}
+              </div>
             </div>
           </div>
         </div>

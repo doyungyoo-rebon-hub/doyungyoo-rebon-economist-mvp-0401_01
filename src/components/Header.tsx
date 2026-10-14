@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '올해의 애널리스트_01',
       shortLabel: '올해의 애널리스트',
       icon: Trophy,
-      badge: 'TOP 20',
+      badge: '대상 & 섹터 1위',
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     },
     {
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '주가적중률_차트_01',
       shortLabel: '주가 적중률',
       icon: TrendingUp,
-      badge: '적중률 94.2%',
+      badge: '적중률·괴리율',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       highlight: true
     },

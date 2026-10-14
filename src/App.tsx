@@ -21,7 +21,17 @@ export const App: React.FC = () => {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {currentTab === 'analysts_01' && (
-          <AnalystAwards01 onNavigateToReview={() => setCurrentTab('analysts_01_review')} />
+          <AnalystAwards01 
+            onNavigateToReview={() => setCurrentTab('analysts_01_review')}
+            onNavigateToChart={(report) => {
+              if (report) setSelectedReportForChart(report);
+              setCurrentTab('target_price_accuracy');
+            }}
+            onNavigateToAnalysis={(report) => {
+              if (report) setSelectedReportForAnalysis(report);
+              setCurrentTab('report_analysis_01');
+            }}
+          />
         )}
 
         {currentTab === 'analysts_01_review' && (
@@ -29,7 +39,12 @@ export const App: React.FC = () => {
         )}
 
         {currentTab === 'report_lookup_01' && (
-          <ReportLookup01 />
+          <ReportLookup01 
+            onNavigateToAnalysis={(report) => {
+              if (report) setSelectedReportForAnalysis(report);
+              setCurrentTab('report_analysis_01');
+            }}
+          />
         )}
 
         {currentTab === 'report_analysis_01' && (

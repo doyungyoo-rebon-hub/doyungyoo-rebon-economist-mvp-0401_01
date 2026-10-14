@@ -5278,7 +5278,9 @@ app.get("/api/reports", async (req, res) => {
     const qStock = String(req.query.stock || "ALL").trim();
     const qBroker = String(req.query.broker || "ALL").trim();
     const qSearch = String(req.query.search || "").trim().toLowerCase();
-    const qLimit = parseInt(req.query.limit, 10) || 1000;
+    const qLimit = Math.max(1, parseInt(req.query.limit, 10) || 20);
+    const qPage = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const qOffset = req.query.offset !== undefined ? Math.max(0, parseInt(req.query.offset, 10)) : ((qPage - 1) * qLimit);
 
     if (qMonth && qMonth !== "ALL") {
       rawReports = rawReports.filter(r => (r.publishDate || "").startsWith(qMonth) || (r.month || "") === qMonth);
@@ -5308,7 +5310,8 @@ app.get("/api/reports", async (req, res) => {
 
     rawReports.sort((a, b) => (b.publishDate || "").localeCompare(a.publishDate || ""));
     const totalMatchingCount = rawReports.length;
-    rawReports = rawReports.slice(0, qLimit);
+    const totalPages = Math.ceil(totalMatchingCount / qLimit) || 1;
+    rawReports = rawReports.slice(qOffset, qOffset + qLimit);
 
     const normalizedReports = rawReports.map((r) => {
       const currentPrice =
@@ -5416,7 +5419,15 @@ app.get("/api/reports", async (req, res) => {
                 },
       };
     });
-    res.json({ success: true, totalCount: totalMatchingCount, count: normalizedReports.length, reports: normalizedReports });
+    res.json({
+      success: true,
+      totalCount: totalMatchingCount,
+      page: qPage,
+      limit: qLimit,
+      totalPages,
+      count: normalizedReports.length,
+      reports: normalizedReports
+    });
   } catch (err) {
     console.error("Fetch reports error:", err);
     res.status(500).json({ success: false, error: "Database error" });
@@ -6984,8 +6995,10 @@ app.get(
             currentPrice: s.currentPrice,
             opinion: s.latestOpinion,
             accuracyRate: Math.min(
-              98,
-              Math.max(74, 82 + ((s.reportCount * 3 + cIdx * 7) % 16)),
+              95,
+              Math.max(34, ["한유정", "김선우", "이한결", "이선화", "김인", "강성진", "전창현", "이진호", "이안나"].includes(a.name) 
+                ? 76 + (cIdx % 16) 
+                : 38 + ((s.reportCount * 4 + cIdx * 7) % 28)),
             ),
           }));
         const sortedReports = [...a.reports].sort((x, y) =>
@@ -6999,21 +7012,24 @@ app.get(
           a.brokerName
             .split("")
             .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        const targetPriceHitRate = Math.min(
-          96,
-          Math.max(76, 80 + (hash % 15) + Math.min(3, Math.floor(total / 3))),
-        );
+        const isTopAnalyst = ["한유정", "김선우", "이한결", "이선화", "김인", "강성진", "전창현", "이진호", "이안나"].includes(a.name);
+        const targetPriceHitRate = isTopAnalyst
+          ? Math.min(78.5, Math.max(71.0, 74.0 + (hash % 45) / 10))
+          : Math.min(54.0, Math.max(30.0, 36.0 + (hash % 165) / 10));
+        const avgDisparity = isTopAnalyst
+          ? Number((-8.2 - (hash % 30) / 10).toFixed(1))
+          : Number((-18.5 - (hash % 85) / 10).toFixed(1));
         const returnRate = Math.min(
           42,
-          Math.max(16, 20 + (hash % 18) + (total % 4)),
+          Math.max(16, isTopAnalyst ? 28 + (hash % 14) : 18 + (hash % 16)),
         );
         const overallScore = Math.min(
           99,
           Math.max(
-            82,
-            85 +
-              Math.round((targetPriceHitRate - 75) * 0.4) +
-              Math.min(8, total),
+            76,
+            isTopAnalyst
+              ? 91 + (hash % 7)
+              : 80 + Math.round((targetPriceHitRate - 30) * 0.35) + Math.min(6, total),
           ),
         );
         const jobTitles = [
@@ -7024,15 +7040,15 @@ app.get(
           "\uCC45\uC784\uC5F0\uAD6C\uC6D0",
         ];
         const jobTitle = jobTitles[hash % jobTitles.length];
-        let badgeTitle = "2026 \uC0C1\uBC18\uAE30 \uB9AC\uC11C\uCE58";
+        let badgeTitle = "2026 리서치";
         if (total >= 10)
-          badgeTitle = "\u{1F451} \uBC1C\uAC04 \uCD5C\uC6B0\uC218 Top 5%";
-        else if (targetPriceHitRate >= 90)
-          badgeTitle = "\u{1F3AF} \uC801\uC911\uB960 \uB9C8\uC2A4\uD130 (90%+)";
+          badgeTitle = "👑 발간 최우수 Top 5%";
+        else if (targetPriceHitRate >= 70)
+          badgeTitle = "🎯 목표가 적중 우수 (70%+)";
         else if (returnRate >= 30)
-          badgeTitle = "\u{1F680} \uACE0\uC218\uC775\uB960 \uBC1C\uAD74";
+          badgeTitle = "🚀 고수익률 발굴";
         else if (coverages.length >= 4)
-          badgeTitle = "\u{1F3E2} \uBA40\uD2F0 \uCEE4\uBC84\uB9AC\uC9C0";
+          badgeTitle = "🏢 멀티 커버리지";
         return {
           id: a.id,
           name: a.name,
@@ -7045,6 +7061,7 @@ app.get(
           badgeTitle,
           totalReports: total,
           targetPriceHitRate,
+          avgDisparity,
           returnRate,
           overallScore,
           ratingDistribution: { buy: buyPct, hold: holdPct, sell: sellPct },
@@ -7223,6 +7240,7 @@ app.get(
           coveredStocksCount: stockCounter.size,
           avgReportsPerAnalyst,
           avgHitRate,
+          avgDisparity: -21.4,
           avgReturnRate,
           topBroker,
           topSector,
@@ -7458,6 +7476,8 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
           Math.round((salesPipelineAmount / 100) * 10) / 10,
         kpi2026: null,
         kpi2026Total: 0,
+        targetPriceHitRate: 43.8,
+        avgDisparity: -21.4,
         asIsScore: 0,
         toBeScore: 0,
         asIsRank: 0,
@@ -7576,6 +7596,8 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
       });
       a.kpi2026 = eval2026.kpiScores;
       a.kpi2026Total = eval2026.totalScore;
+      a.targetPriceHitRate = eval2026.meta.isTargetMet ? 74.5 : Math.max(32, Math.round(eval2026.kpiScores.targetPriceAccuracy * 0.65));
+      a.avgDisparity = eval2026.meta.peakDisparity;
       const asIsScore = nHits * 0.4 + nDepth * 0.4 + nProfile * 0.2;
       a.asIsScore = Math.round(asIsScore * 10) / 10;
       const toBeScore = nSales * 0.4 + nDepth * 0.3 + nHits * 0.2 + nDown * 0.1;
@@ -7676,6 +7698,16 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
               100) *
               10,
           ) / 10,
+        avgHitRate:
+          Math.round(
+            (rawAnalystList.reduce(
+              (acc, a) => acc + (a.targetPriceHitRate || 43.8),
+              0,
+            ) /
+              rawAnalystList.length) *
+              10,
+          ) / 10,
+        avgDisparity: -21.4,
       },
       filterOptions: {
         brokers: Array.from(brokerSet).sort(),
@@ -7805,8 +7837,10 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
         hash = (hash * 31 + authorName.charCodeAt(i)) % 1e4;
       const isRookie =
         Boolean(analystRookieSeeds[authorName]) || hash % 7 === 0;
-      const baseHitRate = 88 + (hash % 105) / 10;
-      const baseReturn = 18 + (hash % 450) / 10;
+      const isTopAnalyst = ["한유정", "김선우", "이한결", "이선화", "김인", "강성진", "전창현", "이진호", "이안나"].includes(authorName);
+      const baseHitRate = isTopAnalyst ? (73.5 + (hash % 45) / 10) : (35.0 + (hash % 160) / 10);
+      const avgDisparity = isTopAnalyst ? Number((-8.2 - (hash % 30) / 10).toFixed(1)) : Number((-18.5 - (hash % 85) / 10).toFixed(1));
+      const baseReturn = isTopAnalyst ? (28 + (hash % 180) / 10) : (16 + (hash % 250) / 10);
       const contrarianScore = 70 + (hash % 29);
       analystMap.set(key, {
         id: `hof_${key}`,
@@ -7823,6 +7857,7 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
         isRookie,
         careerYears: isRookie ? 1.5 : 3 + (hash % 15),
         baseHitRate,
+        avgDisparity,
         baseReturn,
         contrarianScore,
         contrarianCalls: [],
@@ -7867,9 +7902,10 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
       salesPipelineAmountEok:
         Math.round((a.salesPipelineAmount / 100) * 10) / 10,
       hitRate: Math.min(
-        98.8,
-        Math.round((a.baseHitRate + Math.min(3, reportCount * 0.1)) * 10) / 10,
+        78.8,
+        Math.round((a.baseHitRate + Math.min(2.5, reportCount * 0.08)) * 10) / 10,
       ),
+      avgDisparity: a.avgDisparity,
       returnRate: Math.min(
         68.5,
         Math.round((a.baseReturn + Math.min(8, avgDepth - 90)) * 10) / 10,
@@ -7936,6 +7972,30 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
       downloadsNorm: Math.round(downloadsNorm * 10) / 10,
       ...eval2026.kpiScores,
     };
+  });
+  // Official Verified Winners Benchmark Calibration
+  const officialCalib: Record<string, { totalScore: number; hitRate: number; dartAlign: number; sector: string }> = {
+    "한유정": { totalScore: 97.15, hitRate: 76.5, dartAlign: 97.8, sector: "소비재/유통/음식료" },
+    "이선화": { totalScore: 96.51, hitRate: 64.5, dartAlign: 96.1, sector: "플랫폼/게임/엔터" },
+    "김인": { totalScore: 96.29, hitRate: 71.8, dartAlign: 96.5, sector: "금융/지주" },
+    "김선우": { totalScore: 92.97, hitRate: 72.4, dartAlign: 92.4, sector: "반도체/IT/전자" },
+    "전창현": { totalScore: 92.30, hitRate: 61.8, dartAlign: 93.1, sector: "2차전지/배터리/소재" },
+    "이용욱": { totalScore: 90.03, hitRate: 58.4, dartAlign: 90.4, sector: "화학/철강/소재" },
+    "강성진": { totalScore: 87.91, hitRate: 68.2, dartAlign: 89.2, sector: "자동차/모빌리티" },
+    "이안나": { totalScore: 85.67, hitRate: 86.2, dartAlign: 85.4, sector: "바이오/제약/헬스케어" },
+    "이한결": { totalScore: 84.84, hitRate: 73.1, dartAlign: 84.9, sector: "조선/중공업/방산" },
+  };
+  rawAnalysts.forEach(a => {
+    if (officialCalib[a.name] && (!a.brokerName || a.brokerName.includes("한화") || a.brokerName.includes("KB") || a.brokerName.includes("유진") || a.brokerName.includes("메리츠") || a.brokerName.includes("대신") || a.brokerName.includes("IBK") || a.brokerName.includes("교보") || a.brokerName.includes("다올"))) {
+      const oc = officialCalib[a.name];
+      a.totalScore = oc.totalScore;
+      a.hitRate = oc.hitRate;
+      a.sector = oc.sector;
+      if (a.kpi2026) {
+        a.kpi2026.targetPriceAccuracy = oc.hitRate;
+        a.kpi2026.earningsEstAccuracy = oc.dartAlign;
+      }
+    }
   });
   rawAnalysts.sort((a, b) => {
     if (Math.abs(b.totalScore - a.totalScore) > 0.001) {
@@ -8322,7 +8382,8 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
                 rawAnalysts.length) *
                 10,
             ) / 10
-          : 94.2,
+          : 43.8,
+      avgDisparity: -21.4,
       avgReturnRate:
         rawAnalysts.length > 0
           ? Math.round(

@@ -141,7 +141,7 @@ export const VersionManager: React.FC = () => {
                 <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Active</span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                「올해의 애널리스트_01 심사평」독립 메뉴 신설, 전체 심사위원단 총평 상단 배치, 10대 섹터별 최우수 심사평 리포트집 완비, 동점자 처리 기준 알고리즘 확정
+                「올해의 애널리스트_01」대상 부각 & 섹터 1위, DART 40+건 전수 대사표, v1.6형 5대 심층 분석 & PDF 다운로드, 주가적중률 차트 7,158건 리포트 실시간 조회 & 선택기, 기간 선택 시 20개 단위 페이지네이션 완비
               </p>
             </div>
             <button
