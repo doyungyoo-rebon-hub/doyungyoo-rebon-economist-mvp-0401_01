@@ -7386,17 +7386,19 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
       }
       a.recentReports.push(r);
     });
-    // 32개 국내 증권사 등록 연구원 전수 풀 (총 681명) 보장
+    // v1.8.1 국내 24개 공식 대상 증권사 및 5개 평가 진행/시상 제외 증권사 체계
     if (analystMap.size < 681) {
-      const all32Brokers = [
-        "미래에셋증권", "한국투자증권", "NH투자증권", "삼성증권", "KB증권",
-        "하나증권", "메리츠증권", "신한투자증권", "키움증권", "대신증권",
-        "한화투자증권", "교보증권", "다올투자증권", "유진투자증권", "IBK투자증권",
-        "현대차증권", "DB금융투자", "SK증권", "BNK투자증권", "iM증권",
-        "유안타증권", "신영증권", "LS증권", "부국증권", "한양증권",
-        "케이프투자증권", "상상인증권", "리딩투자증권", "카카오페이증권", "토스증권",
-        "코리아에셋투자증권", "DS투자증권"
+      const target24Brokers = [
+        "미래에셋증권", "NH투자증권", "하나증권", "LS증권", "KB증권",
+        "BNK투자증권", "DB증권", "DS투자증권", "SK증권", "교보증권",
+        "다올투자증권", "리딩투자증권", "메리츠증권", "상상인증권", "신영증권",
+        "신한투자증권", "유안타증권", "유진투자증권", "키움증권", "토스증권",
+        "한국투자증권", "한양증권", "현대차증권", "흥국증권"
       ];
+      const awardExcluded5Brokers = [
+        "IBK투자증권", "삼성증권", "한국투자증권", "대신증권", "iM증권"
+      ];
+      const allEvaluatedBrokers = Array.from(new Set([...target24Brokers, ...awardExcluded5Brokers]));
       const familyNames = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임", "한", "오", "서", "신", "권", "황", "안", "송", "전", "홍"];
       const firstNames = ["민우", "서준", "도윤", "예준", "시우", "하준", "지호", "지원", "유준", "현우", "건우", "우진", "선우", "서연", "서현", "민서", "하은", "지아", "채원", "수아", "지유", "다은", "예린", "소율", "하윤", "태민", "준영", "영호", "성진", "재혁", "경록", "동찬", "다운", "고운", "보영", "성준", "혜원", "진호", "상준", "희지"];
       const standardSectors = [
@@ -7405,8 +7407,8 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
         "소비재/유통/음식료", "건설/물류/기타", "투자전략/매크로/자산배분"
       ];
       for (let j = 0; analystMap.size < 681; j++) {
-        const i = j % all32Brokers.length;
-        const b = all32Brokers[i];
+        const i = j % allEvaluatedBrokers.length;
+        const b = allEvaluatedBrokers[i];
         brokerSet.add(b);
         const fn = familyNames[j % familyNames.length];
         const ln = firstNames[(j * 3 + Math.floor(j / 32)) % firstNames.length];
@@ -8016,8 +8018,28 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     // 4순위: 발간 리포트 편수 (10%)
     return (b.reportCount || 0) - (a.reportCount || 0);
   });
+  const AWARD_EXCLUDED_5_LIST = [
+    "IBK투자증권", "삼성증권", "한국투자증권", "대신증권", "iM증권"
+  ];
+  const TARGET_24_LIST = [
+    "미래에셋증권", "NH투자증권", "하나증권", "LS증권", "KB증권",
+    "BNK투자증권", "DB증권", "DS투자증권", "SK증권", "교보증권",
+    "다올투자증권", "리딩투자증권", "메리츠증권", "상상인증권", "신영증권",
+    "신한투자증권", "유안타증권", "유진투자증권", "키움증권", "토스증권",
+    "한국투자증권", "한양증권", "현대차증권", "흥국증권"
+  ];
   rawAnalysts.forEach((a, idx) => {
     a.rank = idx + 1;
+    const isExcluded = AWARD_EXCLUDED_5_LIST.some(
+      (b) => a.brokerName === b || (a.brokerName && a.brokerName.includes(b.replace("증권", "")))
+    );
+    const isTarget = TARGET_24_LIST.some(
+      (b) => a.brokerName === b || (a.brokerName && a.brokerName.includes(b.replace("증권", ""))) || (a.brokerName && a.brokerName.includes("DB"))
+    );
+    a.isAwardExcluded = isExcluded;
+    a.isTarget24 = isTarget;
+    a.awardEligibilityText = isExcluded ? "시상 제외 (평가 대상)" : (isTarget ? "공식 시상 대상 (24개사)" : "일반 평가 대상");
+    a.awardExclusionReason = isExcluded ? "v1.8.1 시상 제외 5개사 규정 적용 (컴플라이언스 준수, 7대 성과 지표는 100% 동일 산정)" : null;
   });
   const top20 = rawAnalysts.slice(0, 20).map((a, idx) => {
     let awardTitle = "\uBA85\uC608\uC758 \uC804\uB2F9 TOP 20";
@@ -8392,8 +8414,15 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
                 10,
             ) / 10
           : 45.6,
+        targetBrokersCount: 24,
+        awardExcludedBrokersCount: 5,
+        totalBrokers: 24,
+        brokerPolicyVersion: "v1.8.1",
+        target24Brokers: TARGET_24_LIST,
+        awardExcludedBrokers: AWARD_EXCLUDED_5_LIST,
     },
     top20,
+    top20AwardEligible: rawAnalysts.filter(a => !a.isAwardExcluded).slice(0, 20),
     top10,
     sectorAwards,
     convergenceAwards,
@@ -13024,7 +13053,7 @@ async function startServer() {
       .status(200)
       .json({
         status: "healthy",
-        version: "VERSION 1.8",
+        version: "VERSION 1.8.1",
         timestamp: new Date().toISOString(),
       });
   }, "healthResponse");
@@ -13056,10 +13085,25 @@ async function startServer() {
     ) ||
     candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) ||
     path.join(process.cwd(), "dist");
-  const hasStaticDist = fs.existsSync(path.join(distPath, "index.html"));
 
   // 1. Static file serving for built dist assets
-  if (hasStaticDist) {
+  app.use("/assets", (req, res, next) => {
+    const candidateDirs = [
+      path.join(process.cwd(), "dist", "assets"),
+      path.join(distPath, "assets"),
+      serverDir ? path.join(serverDir, "dist", "assets") : null,
+    ].filter(Boolean) as string[];
+
+    for (const d of candidateDirs) {
+      const target = path.join(d, req.path);
+      if (fs.existsSync(target) && fs.statSync(target).isFile()) {
+        return res.sendFile(target);
+      }
+    }
+    next();
+  });
+
+  if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
   }
 
@@ -13079,13 +13123,18 @@ async function startServer() {
         appType: "spa",
       });
       app.use(vite.middlewares);
-    } catch (viteErr) {
+    } catch (viteErr: any) {
       console.warn("[Vite Middleware Notice]", viteErr?.message || viteErr);
     }
   }
 
   // 3. Robust SPA route handler: ALWAYS serve real index.html, never dummy text
   app.get("*", (req, res) => {
+    // If request has static asset extension, do NOT serve index.html (prevents MIME type execution error)
+    if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|map|json)$/i.test(req.path)) {
+      return res.status(404).send("Asset not found");
+    }
+
     const indexPath = path.join(distPath, "index.html");
     if (fs.existsSync(indexPath)) {
       return res.sendFile(indexPath);

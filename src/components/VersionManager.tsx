@@ -43,17 +43,17 @@ export const VersionManager: React.FC = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                CURRENT ACTIVE: VERSION 1.8
+                CURRENT ACTIVE: VERSION 1.8.1
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                실데이터 7,158건 무손실 연동 (1~9월 전수)
+                공식 대상 24개사 · 평가제외 5개사 규정 적용
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-white">
-              버전 1.8 시스템 & 무손실 백업 관리 센터
+              버전 1.8.1 시스템 & 증권사 운영 규정 관리 센터
             </h1>
             <p className="text-slate-300 text-sm mt-1">
-              이전 버전(v1.7, v1.6, v1.5) 아카이브 보존 및 VERSION 1.8 최신 변경 사항 백업, 실데이터 반영 현황 검증을 수행합니다.
+              국내 24개 공식 대상 증권사 개편 및 5개 증권사(IBK·삼성·한국투자·대신·iM) 평가 진행·시상 제외 규정 반영, 이전 버전(v1.8, v1.7, v1.6) 아카이브를 영구 보존합니다.
             </p>
           </div>
 
@@ -63,7 +63,7 @@ export const VersionManager: React.FC = () => {
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-lg transition cursor-pointer"
           >
             <Archive size={16} />
-            {backupLoading ? 'v1.8 백업 생성 중...' : 'VERSION 1.8 무손실 백업 생성'}
+            {backupLoading ? 'v1.8.1 백업 생성 중...' : 'VERSION 1.8.1 무손실 백업 생성'}
           </button>
         </div>
 
@@ -83,12 +83,12 @@ export const VersionManager: React.FC = () => {
         </div>
         <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 text-xs space-y-3">
           <div className="flex items-center justify-between text-slate-300">
-            <span className="font-medium text-slate-400">1. 가상 생성(더미) 데이터 조치:</span>
-            <span className="text-emerald-400 font-bold">전체 삭제 및 정리 완료 (100% 실데이터 단일화)</span>
+            <span className="font-medium text-slate-400">1. 대상 증권사 체계 개편 (v1.8.1):</span>
+            <span className="text-emerald-400 font-bold">공식 대상 24개사 확정 & 5개사(IBK·삼성·한국투자·대신·iM) 평가 진행·시상 제외</span>
           </div>
           <div className="flex items-center justify-between text-slate-300">
             <span className="font-medium text-slate-400">2. 마스터 DB 실데이터 반영 건수:</span>
-            <span className="text-white font-mono font-bold">총 7,842건 (32개 국내 증권사 1~9월 공식 발간 리포트 전수)</span>
+            <span className="text-white font-mono font-bold">총 7,158건 (네이버 증권 1~9월 공식 발간 리포트 전수 100% 무손실)</span>
           </div>
           <div className="flex items-center justify-between text-slate-300">
             <span className="font-medium text-slate-400">3. 평가 대상 실존 애널리스트:</span>
@@ -134,14 +134,35 @@ export const VersionManager: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          <div className="p-4 rounded-xl bg-slate-950 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* VERSION 1.8.1 (현재 최신 활성 버전) */}
+          <div className="p-4 rounded-xl bg-slate-950 border border-amber-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/5">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-amber-400">VERSION 1.8 (현재 버전)</span>
+                <span className="text-xs font-bold text-amber-400">VERSION 1.8.1 (현재 버전)</span>
                 <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Active</span>
               </div>
+              <p className="text-xs text-slate-300 mt-1">
+                국내 24개 공식 대상 증권사 개편 및 5개 증권사(IBK·삼성·한국투자·대신·iM) 평가 진행·시상 제외 규정 반영, 시상 적격/제외 다차원 필터링 및 뱃지 시스템 도입, VERSION 1.8 무손실 백업 보존
+              </p>
+            </div>
+            <button
+              onClick={() => handleExportBackup('/api/export-project-zip')}
+              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold inline-flex items-center gap-1 cursor-pointer whitespace-nowrap shadow"
+            >
+              <Download size={13} />
+              v1.8.1 프로젝트 다운로드
+            </button>
+          </div>
+
+          {/* VERSION 1.8 (직전 백업본) */}
+          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-300">VERSION 1.8 (이전 백업본)</span>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Archived</span>
+              </div>
               <p className="text-xs text-slate-400 mt-1">
-                「올해의 애널리스트_01」대상 부각 & 섹터 1위, DART 40+건 전수 대사표, v1.6형 5대 심층 분석 & PDF 다운로드, 주가적중률 차트 7,158건 리포트 실시간 조회 & 선택기, 기간 선택 시 20개 단위 페이지네이션 완비
+                「올해의 애널리스트_01」대상 부각 & 섹터 1위, DART 40+건 전수 대사표, v1.6형 5대 심층 분석 & PDF 다운로드, 주가적중률 차트 7,158건 리포트 실시간 조회 & 20개 단위 페이징, 주가 궤적 차트 제시 목표가 상수 수평선(황색 점선 및 라벨) 전수 표출 최적화
               </p>
             </div>
             <button
@@ -149,7 +170,7 @@ export const VersionManager: React.FC = () => {
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium inline-flex items-center gap-1 cursor-pointer whitespace-nowrap"
             >
               <Download size={13} />
-              v1.8 프로젝트 다운로드
+              v1.8 백업 ZIP
             </button>
           </div>
 

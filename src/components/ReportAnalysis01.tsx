@@ -181,6 +181,26 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
     return generatePricePoints(reportAccuracyData);
   }, [reportAccuracyData]);
 
+  // Y축 도메인 계산 (목표주가 상수선과 실제 주가가 항상 안전하게 차트 안에 모두 렌더링되도록 보장)
+  const chartYDomain = useMemo(() => {
+    if (!trajectoryPoints || trajectoryPoints.length === 0 || !reportAccuracyData) {
+      return ['auto', 'auto'];
+    }
+    const allPrices = trajectoryPoints.map(p => p.actualPrice);
+    const target = reportAccuracyData.targetPrice;
+    const base = reportAccuracyData.basePrice || target * 0.8;
+    const peak = reportAccuracyData.peakPrice || target;
+
+    const minPrice = Math.min(...allPrices, target, base);
+    const maxPrice = Math.max(...allPrices, target, peak);
+    const spread = Math.max(maxPrice - minPrice, 1000);
+    const padding = spread * 0.12;
+
+    const yMin = Math.max(0, Math.floor((minPrice - padding) / 1000) * 1000);
+    const yMax = Math.ceil((maxPrice + padding) / 1000) * 1000;
+    return [yMin, yMax];
+  }, [trajectoryPoints, reportAccuracyData]);
+
   // PDF 다운로드 스트리밍 URL 생성기 (원문 파일 다운로드 보장)
   const getDownloadPdfUrl = (r: ReportDetailItem): string => {
     if (r.pdfUrl && r.pdfUrl.startsWith('http')) return r.pdfUrl;
@@ -741,11 +761,15 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
                         reportAccuracyData.status === 'PARTIAL_NEAR' ? 'text-amber-400' : 'text-rose-400'
                       }`}>
                         {reportAccuracyData.status === 'HIT_SUCCESS' ? '✓ 도달 완료' :
-                         reportAccuracyData.status === 'PARTIAL_NEAR' ? '△ 90% 근접' : '✕ 목표가 미도달'}
+                         reportAccuracyData.status === 'PARTIAL_NEAR' ? (
+                           reportAccuracyData.statusText.includes('진행 중') ? '⏳ 평가 진행 중' : '△ 90% 근접'
+                         ) : '✕ 목표가 미도달'}
                       </strong>
                       <span className="text-[9px] text-slate-500 block">
-                        {reportAccuracyData.reachDays 
+                        {reportAccuracyData.status === 'HIT_SUCCESS' 
                           ? `D+${reportAccuracyData.reachDays}일 터치` 
+                          : reportAccuracyData.statusText.includes('진행 중')
+                          ? reportAccuracyData.statusText
                           : `최고 괴리율 ${reportAccuracyData.maxDisparity}%`}
                       </span>
                     </div>
@@ -782,18 +806,18 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
                         {selectedReport.stockName} 발간 후 실제 주가 형성 궤적 vs 목표주가 ({reportAccuracyData.targetPrice.toLocaleString()}원)
                       </span>
                       <div className="flex items-center gap-3 text-[11px]">
-                        <span className="flex items-center gap-1 text-emerald-400">
-                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 실제 주가
+                        <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> 실제 주가 추이
                         </span>
-                        <span className="flex items-center gap-1 text-amber-300">
-                          <span className="w-2.5 h-0.5 border-t border-dashed border-amber-400"></span> 목표가
+                        <span className="flex items-center gap-1.5 text-amber-300 font-semibold">
+                          <span className="w-4 h-0.5 border-t-2 border-dashed border-amber-400"></span> --- 제시 목표가 ({reportAccuracyData.targetPrice.toLocaleString()}원)
                         </span>
                       </div>
                     </div>
 
                     <div className="h-64 w-full">
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart data={trajectoryPoints} margin={{ top: 10, right: 15, left: 10, bottom: 5 }}>
+                        <ComposedChart data={trajectoryPoints} margin={{ top: 10, right: 35, left: 10, bottom: 5 }}>
                           <defs>
                             <linearGradient id="detailPriceGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
@@ -802,23 +826,58 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                           <XAxis dataKey="date" stroke="#64748b" fontSize={10} tickFormatter={(val) => val.slice(5)} />
-                          <YAxis stroke="#64748b" fontSize={10} domain={['auto', 'auto']} tickFormatter={(val) => `${(val / 1000).toLocaleString()}k`} />
+                          <YAxis 
+                            stroke="#64748b" 
+                            fontSize={10} 
+                            domain={chartYDomain} 
+                            tickFormatter={(val) => `${(val / 1000).toLocaleString()}k`} 
+                          />
                           <Tooltip 
                             content={({ active, payload, label }) => {
                               if (active && payload && payload.length) {
                                 const data = payload[0].payload as PricePoint;
+                                const isPrePublish = reportAccuracyData && label < reportAccuracyData.publishDate;
+                                const isPublishDate = reportAccuracyData && label === reportAccuracyData.publishDate;
+                                const isPeakDate = reportAccuracyData && label === reportAccuracyData.peakDate;
                                 return (
-                                  <div className="bg-slate-950 border border-slate-800 p-2.5 rounded-xl shadow-xl text-xs space-y-1 font-mono">
-                                    <div className="text-slate-400 font-bold border-b border-slate-800 pb-0.5">{label}</div>
-                                    <div className="flex justify-between gap-3 text-emerald-400">
+                                  <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl shadow-2xl text-xs space-y-1.5 font-mono">
+                                    <div className="flex items-center justify-between border-b border-slate-800 pb-1 gap-2">
+                                      <span className="text-white font-bold">{label}</span>
+                                      {isPublishDate ? (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">
+                                          ★ 공식 발간일
+                                        </span>
+                                      ) : isPeakDate ? (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                                          🎯 기간 최고가
+                                        </span>
+                                      ) : isPrePublish ? (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-sans">
+                                          발간 전 과거 주가
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans">
+                                          발간 후 주가
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex justify-between gap-4 text-emerald-400">
                                       <span>실제 주가:</span> <strong>{data.actualPrice.toLocaleString()}원</strong>
                                     </div>
-                                    <div className="flex justify-between gap-3 text-amber-300">
+                                    <div className="flex justify-between gap-4 text-amber-300">
                                       <span>제시 목표가:</span> <strong>{data.targetPrice.toLocaleString()}원</strong>
                                     </div>
-                                    <div className="flex justify-between gap-3 text-slate-300 text-[10px]">
-                                      <span>괴리율:</span> <span className={data.disparity >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400'}>{data.disparity >= 0 ? `+${data.disparity}% (초과)` : `${data.disparity}% (미달)`}</span>
+                                    <div className="flex justify-between gap-4 text-slate-300 text-[10px]">
+                                      <span>괴리율:</span> 
+                                      <span className={data.disparity >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                                        {data.disparity >= 0 ? `+${data.disparity}% (초과 달성)` : `${data.disparity}% (미달)`}
+                                      </span>
                                     </div>
+                                    {isPrePublish && (
+                                      <div className="text-[10px] text-slate-400 pt-1 border-t border-slate-800/80 leading-tight font-sans">
+                                        ℹ️ 리포트 발간일({reportAccuracyData?.publishDate}) 이전 과거 데이터입니다.
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               }
@@ -827,7 +886,33 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
                           />
                           <ReferenceLine x={reportAccuracyData.publishDate} stroke="#6366f1" strokeWidth={1.5} />
                           <ReferenceLine x={reportAccuracyData.peakDate} stroke="#10b981" strokeWidth={1} strokeDasharray="3 3" />
-                          <ReferenceLine y={reportAccuracyData.targetPrice} stroke="#f59e0b" strokeDasharray="4 4" strokeWidth={1.5} />
+                          
+                          {/* 목표주가 수평 기준선 및 우측 라벨 */}
+                          <ReferenceLine 
+                            y={reportAccuracyData.targetPrice} 
+                            stroke="#f59e0b" 
+                            strokeDasharray="5 5" 
+                            strokeWidth={2} 
+                            label={{ 
+                              value: `목표주가 ${reportAccuracyData.targetPrice.toLocaleString()}원`, 
+                              fill: '#fcd34d', 
+                              fontSize: 11, 
+                              position: 'insideRight' 
+                            }}
+                          />
+
+                          {/* 목표주가 상수 직선 (차트 전체 가로 관통) */}
+                          <Line 
+                            type="linear" 
+                            dataKey="targetPrice" 
+                            stroke="#f59e0b" 
+                            strokeDasharray="5 5" 
+                            strokeWidth={2} 
+                            dot={false} 
+                            isAnimationActive={false} 
+                            name="제시 목표가"
+                          />
+
                           <Area type="monotone" dataKey="actualPrice" stroke="#10b981" strokeWidth={2} fill="url(#detailPriceGrad)" />
                           <Line type="monotone" dataKey="movingAvg" stroke="#818cf8" strokeWidth={1} dot={false} strokeDasharray="2 2" />
                         </ComposedChart>

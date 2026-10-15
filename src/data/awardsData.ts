@@ -18,6 +18,9 @@ export interface AnalystAwardReview {
   quantitativeQualitativeAnalysis: string;
   marketContributionInsight: string;
   honorCitation: string;
+  isAwardExcluded?: boolean;
+  awardExclusionNote?: string;
+  isTarget24?: boolean;
   // 5단계 상세 리포트
   fullReport: {
     executiveSummary: string;
@@ -38,10 +41,10 @@ export interface AnalystAwardReview {
 export const OFFICIAL_OVERALL_SUMMARY = {
   title: "2026 올해의 애널리스트 어워즈 AI 심사위원단 총평 (Executive Chairman Review)",
   organization: "리본인텔리전스 × 이코노미스트 공동주관 AI 독립 심사평가위원회",
-  reviewDate: "2026년 10월 공인 확정",
-  totalReviewedReports: 7842,
+  reviewDate: "2026년 10월 공인 확정 (v1.8.1 규정 반영)",
+  totalReviewedReports: 7158,
   totalReviewedAnalysts: 681,
-  totalBrokers: 32,
+  totalBrokers: 24, // 24개 공식 대상 증권사 (시상 제외 5개사 포함 전수 평가)
   dartCrossCheckRatio: "99.8%",
   corePillars: [
     {
@@ -61,11 +64,11 @@ export const OFFICIAL_OVERALL_SUMMARY = {
       desc: "단순 뉴스 큐레이션을 초월하여 기관 및 개인 투자자의 실질 의사결정 견인",
     },
   ],
-  chairmanAddress: `「2026 올해의 애널리스트 어워즈」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 32개 국내 증권사 7,158건(1~9월 누적 전수)의 실제 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
+  chairmanAddress: `「2026 올해의 애널리스트 어워즈(v1.8.1)」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 7,158건(1~9월 누적 전수) 실제 발간 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
 
 2026년 한국 자본시장은 글로벌 공급망 재편과 고금리 잔존 영향으로 그 어느 때보다 섹터별 차별화가 극심했습니다. 이러한 복합 위기 속에서 오직 숫자의 진실성과 산업 펀더멘털에 기초하여 과감한 투자의견을 제시하고, 투자자들에게 나침반이 되어준 10대 표준 섹터별 최우수 애널리스트와 종합 대상 수상자를 발표합니다.
 
-이번 심사는 정량적 괴리율 측정(35%)과 DART 확정 실적 일치도(25%)를 합산 60% 비중으로 두어 실증적 데이터의 정밀함을 증명했으며, 맹목적 매수(Buy) 리포트를 지양하고 위험을 선제 경고한 연구원들에게 높은 가점을 부여했습니다. 자본시장의 건전한 발전을 위해 헌신한 수상자 전원에게 경의를 표합니다.`
+특히 v1.8.1 개편을 통해 전체 32개 증권사 중 엄선된 24개 공식 대상 증권사를 집중 선정하고, 5개 증권사(IBK·삼성·한국투자·대신·iM)의 경우 시장 벤치마크 객관성을 위해 평가는 100% 동일하게 산정하되 시상 규정상 공식 시상에서 제외하는 투명한 평가 기준을 확립했습니다. 자본시장의 건전한 발전을 위해 헌신한 연구원 전원에게 경의를 표합니다.`
 };
 
 export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
@@ -152,6 +155,8 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     brokerName: "대신증권",
     sector: "2차전지/배터리/소재",
     score: 92.30,
+    isAwardExcluded: true,
+    awardExclusionNote: "※ 본 증권사(대신증권)는 2026 어워즈 [평가 대상이나 시상 제외 5개사] 규정에 해당하여, 성과 지표(종합 92.30점/적중률 61.8%)는 공정하게 공개되나 공식 시상(트로피) 대상에서는 제외됩니다.",
     keyReports: [
       "캐즘(Chasm) 탈출의 조건: ESS 그리드 수요와 LFP 양산 원가 곡선 (2026.03)",
       "양극재 판가 스프레드 바닥 확인과 북미 AMPC 귀속 이익 (2026.06)"
@@ -374,6 +379,8 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     brokerName: "IBK투자증권",
     sector: "화학/철강/소재",
     score: 90.03,
+    isAwardExcluded: true,
+    awardExclusionNote: "※ 본 증권사(IBK투자증권)는 2026 어워즈 [평가 대상이나 시상 제외 5개사] 규정에 해당하여, 성과 지표(종합 90.03점/적중률 58.4%)는 공정하게 공개되나 공식 시상(트로피) 대상에서는 제외됩니다.",
     keyReports: [
       "중국 증설 피크와 나프타 분해설비(NCC) 구조조정 마진 회복 시나리오 (2026.03)",
       "글로벌 인프라 투자와 탄소국경조정제도(CBAM) 철강 마진 스프레드 (2026.05)"

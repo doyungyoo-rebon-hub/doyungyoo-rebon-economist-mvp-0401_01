@@ -91,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '파이프라인_01',
       shortLabel: '파이프라인',
       icon: Layers,
-      badge: '32개사',
+      badge: '24개사',
       badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
     },
     {
@@ -107,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '버전 관리 & 백업',
       shortLabel: '버전 관리',
       icon: GitBranch,
-      badge: 'v1.8',
+      badge: 'v1.8.1',
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     }
   ];
@@ -126,10 +126,10 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
                 리본인텔리전스 × 이코노미스트
               </span>
               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                VERSION 1.8
+                VERSION 1.8.1
               </span>
               <span className="hidden sm:inline-block text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.2 rounded border border-emerald-500/30 font-medium">
-                실데이터 7,158건 연동 (1~9월 전수)
+                대상 24개사 · 평가 5개사 연동
               </span>
             </div>
             <h1 className="text-sm sm:text-base font-extrabold text-white tracking-tight">
@@ -156,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
               DART 정합성 99.8%
             </span>
             <span className="text-slate-700">|</span>
-            <span className="text-slate-300">32개 증권사 전수</span>
+            <span className="text-slate-300">공식 대상 24개사 (평가제외 5개사 별도)</span>
           </div>
         </div>
       </div>

@@ -21,6 +21,12 @@ import {
 } from 'lucide-react';
 import { OFFICIAL_WINNERS_REVIEWS } from '../data/awardsData';
 import { STANDARD_10_SECTORS } from '../types';
+import {
+  isAwardExcludedBroker,
+  isTarget24Broker,
+  TARGET_24_BROKERS,
+  AWARD_EXCLUDED_BROKERS
+} from '../data/brokerConfig';
 
 interface CoverageItem {
   stockName: string;
@@ -52,6 +58,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
   const [search, setSearch] = useState<string>('');
   const [brokerFilter, setBrokerFilter] = useState<string>('ALL');
   const [sectorFilter, setSectorFilter] = useState<string>('ALL');
+  const [brokerCategoryFilter, setBrokerCategoryFilter] = useState<'ALL' | 'TARGET_24' | 'EXCLUDED_5'>('ALL');
   const [selectedAnalyst, setSelectedAnalyst] = useState<AnalystProfile | null>(null);
 
   useEffect(() => {
@@ -122,11 +129,16 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
       a.name.toLowerCase().includes(search.toLowerCase()) ||
       a.brokerName.toLowerCase().includes(search.toLowerCase()) ||
       a.sector.toLowerCase().includes(search.toLowerCase());
-    return matchBroker && matchSector && matchSearch;
+    const matchCategory =
+      brokerCategoryFilter === 'ALL' ||
+      (brokerCategoryFilter === 'TARGET_24' && isTarget24Broker(a.brokerName) && !isAwardExcludedBroker(a.brokerName)) ||
+      (brokerCategoryFilter === 'EXCLUDED_5' && isAwardExcludedBroker(a.brokerName));
+    return matchBroker && matchSector && matchSearch && matchCategory;
   });
 
-  const totalRegistered = analysts.length;
-  const totalBrokers = brokers.length > 1 ? (brokers.length - 1) : 32;
+  const totalRegistered = loading ? 681 : analysts.length;
+  const totalBrokers = 24; // v1.8.1 공식 대상 24개사
+  const isAwardWinnersOnly = !loading && analysts.length <= 10;
   const avgCoverage = analysts.length > 0
     ? (analysts.reduce((acc, a) => acc + (a.coverageCount || 0), 0) / analysts.length).toFixed(1)
     : '14.8';
@@ -136,6 +148,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
     setSearch('');
     setBrokerFilter('ALL');
     setSectorFilter('ALL');
+    setBrokerCategoryFilter('ALL');
   };
 
   return (
@@ -149,17 +162,21 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
                 애널리스트조회_01
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                실존 {loading ? '...' : totalRegistered.toLocaleString()}명 애널리스트 전수 프로파일
+                {loading ? '전수 681명 로딩 중...' : isAwardWinnersOnly ? '🏆 10대 섹터 1위 수상자 (10명)' : `전수 ${totalRegistered.toLocaleString()}명 애널리스트 프로파일`}
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                32개 국내 증권사 전원
+                {isAwardWinnersOnly ? '9개 증권사' : '공식 대상 24개사 · 평가 5개사'}
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-white">
               애널리스트 프로필 & 커버리지 종목 조회 센터
             </h1>
             <p className="text-slate-300 text-sm mt-1">
-              국내 {totalBrokers}개 증권사의 {totalRegistered.toLocaleString()}명 현직 연구원 프로필, 전담 섹터, 커버리지 종목 수 및 프로필 조회수를 검색합니다.
+              {isAwardWinnersOnly ? (
+                <>국내 <strong>9개 증권사</strong>의 <strong>10명</strong> 올해의 애널리스트 섹터별 1위 수상자 프로필, 전담 섹터, 커버리지 종목 수 및 조회수를 검색합니다. (전체 마스터 DB 대상 24개사 및 평가 5개사 연동)</>
+              ) : (
+                <>국내 <strong>24개 공식 대상 증권사</strong> 및 <strong>5개 시상제외 평가사</strong>의 <strong>{totalRegistered.toLocaleString()}명</strong> 현직 연구원 프로필, 전담 섹터, 커버리지 종목 수 및 프로필 조회수를 검색합니다.</>
+              )}
             </p>
           </div>
 
@@ -268,12 +285,47 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
           </div>
         </div>
 
+        {/* v1.8.1 증권사 구분 탭 */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
+          <span className="text-slate-400 text-[11px] font-medium">증권사 구분 (v1.8.1):</span>
+          <button
+            onClick={() => setBrokerCategoryFilter('ALL')}
+            className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
+              brokerCategoryFilter === 'ALL'
+                ? 'bg-indigo-600 text-white shadow'
+                : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+            }`}
+          >
+            전체 (24개 대상사 + 시상제외 5개사)
+          </button>
+          <button
+            onClick={() => setBrokerCategoryFilter('TARGET_24')}
+            className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 ${
+              brokerCategoryFilter === 'TARGET_24'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'bg-slate-950 text-slate-400 hover:text-emerald-300 border border-slate-800'
+            }`}
+          >
+            공식 대상 증권사 (24개사)
+          </button>
+          <button
+            onClick={() => setBrokerCategoryFilter('EXCLUDED_5')}
+            className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer flex items-center gap-1 ${
+              brokerCategoryFilter === 'EXCLUDED_5'
+                ? 'bg-amber-600 text-white shadow'
+                : 'bg-slate-950 text-slate-400 hover:text-amber-300 border border-slate-800'
+            }`}
+          >
+            시상 제외 증권사 (5개사)
+          </button>
+        </div>
+
         <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
           <span>
             조회 결과: <strong className="text-white font-mono">{filtered.length.toLocaleString()}명</strong> / 전체 등록: <strong className="text-indigo-300 font-mono">{totalRegistered.toLocaleString()}명</strong>
           </span>
-          <span className="text-[11px] text-slate-500">
-            카드 클릭 시 커버리지 종목 및 상세 지표 열람
+          <span className="text-[11px] text-slate-500 font-mono">
+            {brokerCategoryFilter === 'TARGET_24' ? '24개 공식 대상사 연구원' : brokerCategoryFilter === 'EXCLUDED_5' ? '시상 제외 5개사 연구원' : '전수 통합 연동'}
           </span>
         </div>
       </div>
@@ -306,10 +358,19 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
               <div className="space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-bold">
                         {analyst.brokerName}
                       </span>
+                      {isAwardExcludedBroker(analyst.brokerName) ? (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          시상 제외 (평가 대상)
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          공식 대상
+                        </span>
+                      )}
                       <span className="text-xs text-slate-400 font-mono">#{analyst.rank}</span>
                     </div>
                     <h3 className="text-xl font-extrabold text-white mt-1 group-hover:text-indigo-300 transition">
@@ -361,10 +422,19 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
             {/* 상단 닫기 및 기본 정보 */}
             <div className="flex items-start justify-between border-b border-slate-800 pb-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="px-2 py-0.5 rounded text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     {selectedAnalyst.brokerName}
                   </span>
+                  {isAwardExcludedBroker(selectedAnalyst.brokerName) ? (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      시상 제외 (평가 대상)
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      공식 대상 (24개사)
+                    </span>
+                  )}
                   <span className="text-xs text-slate-400 font-mono">종합 순위 #{selectedAnalyst.rank}</span>
                   <span className="text-xs text-emerald-400 font-semibold">• DART 검증 완료</span>
                 </div>
@@ -374,6 +444,13 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
                 <p className="text-xs text-slate-400 mt-1">
                   전문 섹터: <strong className="text-indigo-300">{selectedAnalyst.sector}</strong>
                 </p>
+
+                {isAwardExcludedBroker(selectedAnalyst.brokerName) && (
+                  <div className="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
+                    <strong className="text-amber-300 font-bold block mb-0.5">※ v1.8.1 시상 운영 규정 준수</strong>
+                    {selectedAnalyst.brokerName}은(는) v1.8.1 증권사 운영 규정에 따라 성과 평가는 객관적으로 동일 집계(종합 {selectedAnalyst.totalScore}점)되나 컴플라이언스 기준상 공식 시상 대상에서는 제외됩니다.
+                  </div>
+                )}
               </div>
 
               <button

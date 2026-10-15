@@ -20,6 +20,11 @@ import {
   Briefcase
 } from 'lucide-react';
 import { STANDARD_10_SECTORS } from '../types';
+import { 
+  TARGET_24_BROKERS, 
+  AWARD_EXCLUDED_BROKERS, 
+  isAwardExcludedBroker 
+} from '../data/brokerConfig';
 
 interface ReportItem {
   id?: string;
@@ -170,10 +175,8 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
 
   const brokersList = [
     'ALL',
-    '한국투자증권', '미래에셋증권', 'NH투자증권', '삼성증권', 'KB증권',
-    '하나증권', '메리츠증권', '신한투자증권', '키움증권', '대신증권',
-    '한화투자증권', '교보증권', '다올투자증권', '유진투자증권', 'IBK투자증권',
-    '현대차증권', 'DB금융투자', 'SK증권', 'BNK투자증권', 'iM증권'
+    ...TARGET_24_BROKERS,
+    ...AWARD_EXCLUDED_BROKERS.filter(b => !TARGET_24_BROKERS.includes(b as any))
   ];
 
   return (
@@ -189,6 +192,9 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 전체 마스터 DB 7,158건 연동
               </span>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                대상 24개사 · 평가 5개사
+              </span>
               {monthFilter === '2026-09' && (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                   ⚡ 기본 조회: 현재월(2026년 09월) 적용 중
@@ -199,7 +205,7 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               증권사 리서치 리포트 종합 조회 & 열람 센터
             </h1>
             <p className="text-slate-300 text-sm mt-1">
-              발간월별, 종목별, 10대 섹터별, 증권사별 다차원 필터를 통해 국내 32개 증권사의 전수 리서치 리포트를 실시간 검색하고 목표가, 조회수, 원문을 조회합니다.
+              발간월별, 종목별, 10대 섹터별, 증권사별 다차원 필터를 통해 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 전수 리서치 리포트를 실시간 검색하고 목표가, 조회수, 원문을 조회합니다.
             </p>
           </div>
         </div>
@@ -328,7 +334,13 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               {brokersList.map(b => (
-                <option key={b} value={b}>{b === 'ALL' ? '전체 증권사 (32개사)' : b}</option>
+                <option key={b} value={b}>
+                  {b === 'ALL'
+                    ? '전체 증권사 (대상 24개사 + 평가 5개사)'
+                    : isAwardExcludedBroker(b)
+                    ? `[시상제외] ${b}`
+                    : b}
+                </option>
               ))}
             </select>
           </div>

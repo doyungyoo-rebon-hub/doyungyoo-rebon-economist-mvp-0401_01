@@ -477,6 +477,15 @@ export function createReportAccuracyData(rawReport: any): ActiveReportData {
   }
 
   const pubD = new Date(publishDate);
+  const dataEndDate = new Date('2026-09-30');
+  const availableDays = Math.max(1, Math.floor((dataEndDate.getTime() - pubD.getTime()) / (1000 * 60 * 60 * 24)));
+
+  // 발간일이 9월 말이라 데이터 종료일(9월 30일)까지 경과일수가 15일 미만인 경우:
+  // 금융 실무상 12개월 목표치 중 발간 직후 관찰 기간이므로 관찰 상태 적용
+  if (availableDays < 15 && status === 'HIT_SUCCESS') {
+    status = 'PARTIAL_NEAR';
+  }
+
   let reachDays: number | null = null;
   let peakDate = '';
   let peakPrice = 0;
@@ -492,8 +501,9 @@ export function createReportAccuracyData(rawReport: any): ActiveReportData {
   const publishDisparity = Number(((basePrice - targetPrice) / targetPrice * 100).toFixed(1)); // 발간일 괴리율 (항상 음수)
 
   if (status === 'HIT_SUCCESS') {
-    // [1] 목표가 도달 성공: 발간 후 30~80일 사이 목표가를 터치하거나 초과 달성
-    reachDays = 32 + (seed % 42);
+    // [1] 목표가 도달 성공: 반드시 차트 표시 기간(9월 30일) 내에 도달하도록 reachDays 산출
+    const maxReach = Math.max(3, availableDays - 3);
+    reachDays = Math.min(maxReach, Math.max(5, 20 + (seed % 35)));
     const rDate = new Date(pubD.getTime() + reachDays * 24 * 60 * 60 * 1000);
     // 피크는 도달일 전후로 형성 (+2% ~ +12% 오버슈팅)
     const overshootRatio = 1.02 + ((seed % 10) * 0.01);
@@ -507,24 +517,28 @@ export function createReportAccuracyData(rawReport: any): ActiveReportData {
     accuracyRate = Number((88 + (seed % 11)).toFixed(1)); // 88 ~ 98점
     analysisComment = `발간 당시 기준가(${basePrice.toLocaleString()}원) 대비 목표가까지 펀더멘털 개선이 실현되어 D+${reachDays}일 만에 목표주가에 도달하였으며 최고 괴리율 +${maxDisparity}%를 기록했습니다.`;
   } else if (status === 'PARTIAL_NEAR') {
-    // [2] 근접 도달: 목표가의 88% ~ 95% 수준까지 상승했으나 목표선 직전에서 저항을 받고 조정
+    // [2] 근접 도달 또는 발간 직후 관찰 중
     reachDays = null;
-    const daysToPeak = 45 + (seed % 40);
+    const daysToPeak = Math.min(Math.max(2, availableDays - 1), 30 + (seed % 30));
     const pDate = new Date(pubD.getTime() + daysToPeak * 24 * 60 * 60 * 1000);
     peakDate = pDate.toISOString().slice(0, 10);
-    const nearRatio = 0.88 + ((seed % 7) * 0.01); // 88% ~ 94%
+    const nearRatio = availableDays < 15 ? 0.82 + ((seed % 8) * 0.01) : 0.88 + ((seed % 7) * 0.01);
     peakPrice = Math.round(targetPrice * nearRatio);
     lowestPrice = Math.round(basePrice * 0.92);
     latestPrice = Math.round(basePrice * 1.08);
-    statusText = '목표가 90% 근접 후 조정 (Partial)';
-    maxDisparity = Number(((peakPrice - targetPrice) / targetPrice * 100).toFixed(1)); // -6% ~ -12%
+    statusText = availableDays < 15 
+      ? `발간 직후 평가 진행 중 (D+${availableDays}일 경과)`
+      : '목표가 90% 근접 후 조정 (Partial)';
+    maxDisparity = Number(((peakPrice - targetPrice) / targetPrice * 100).toFixed(1)); // -6% ~ -18%
     avgDisparity = Number((-19.4 - (seed % 6) * 0.5).toFixed(1));
     accuracyRate = Number((68 + (seed % 12)).toFixed(1)); // 68 ~ 79점
-    analysisComment = `발간 후 주가가 견조하게 상승했으나 목표주가 90%선(최고가 ${peakPrice.toLocaleString()}원, 괴리율 ${maxDisparity}%)에서 차익 실현 매물이 출회되며 목표가 안착에는 미치지 못했습니다.`;
+    analysisComment = availableDays < 15
+      ? `2026년 9월 하순 발간된 최신 리포트로, 9월 말 기준 발간 D+${availableDays}일이 경과하여 12개월 목표주가 형성 궤적이 순항 중입니다.`
+      : `발간 후 주가가 견조하게 상승했으나 목표주가 90%선(최고가 ${peakPrice.toLocaleString()}원, 괴리율 ${maxDisparity}%)에서 차익 실현 매물이 출회되며 목표가 안착에는 미치지 못했습니다.`;
   } else {
     // [3] 목표가 미도달: 시황 악화 또는 실적 부진으로 주가가 목표가에 훨씬 못 미침 (괴리율 -20% ~ -40% 지속)
     reachDays = null;
-    const daysToPeak = 20 + (seed % 30);
+    const daysToPeak = Math.min(Math.max(2, availableDays - 1), 15 + (seed % 20));
     const pDate = new Date(pubD.getTime() + daysToPeak * 24 * 60 * 60 * 1000);
     peakDate = pDate.toISOString().slice(0, 10);
     peakPrice = Math.round(basePrice * (1.02 + (seed % 5) * 0.01)); // 거의 상승하지 못함
@@ -759,6 +773,26 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
     return generatePricePoints(activeReport);
   }, [activeReport]);
 
+  // Y축 도메인 계산 (목표주가 상수선과 실제 주가가 항상 안전하게 차트 안에 모두 렌더링되도록 보장)
+  const chartYDomain = useMemo(() => {
+    if (!priceTrajectoryData || priceTrajectoryData.length === 0 || !activeReport) {
+      return ['auto', 'auto'];
+    }
+    const allPrices = priceTrajectoryData.map(p => p.actualPrice);
+    const target = activeReport.targetPrice;
+    const base = activeReport.basePrice || target * 0.8;
+    const peak = activeReport.peakPrice || target;
+
+    const minPrice = Math.min(...allPrices, target, base);
+    const maxPrice = Math.max(...allPrices, target, peak);
+    const spread = Math.max(maxPrice - minPrice, 1000);
+    const padding = spread * 0.12;
+
+    const yMin = Math.max(0, Math.floor((minPrice - padding) / 1000) * 1000);
+    const yMax = Math.ceil((maxPrice + padding) / 1000) * 1000;
+    return [yMin, yMax];
+  }, [priceTrajectoryData, activeReport]);
+
   // 필터링 및 정렬된 리포트 목록
   const displayedReports = useMemo(() => {
     let list = [...reportList];
@@ -954,7 +988,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                 <Info size={11} className="text-slate-500" />
               </div>
               <span className="text-2xl font-black font-mono text-emerald-400">43.8%</span>
-              <span className="text-[10px] text-slate-500 block">32개 증권사 현실 통계</span>
+              <span className="text-[10px] text-slate-500 block">24개 대상사 현실 통계</span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-right">
@@ -1506,7 +1540,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                   <YAxis 
                     stroke="#64748b" 
                     fontSize={11}
-                    domain={['auto', 'auto']}
+                    domain={chartYDomain}
                     tickFormatter={(val) => `${(val / 1000).toLocaleString()}k`}
                   />
                   <Tooltip 
@@ -1536,6 +1570,11 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                                 {data.disparity >= 0 ? `+${data.disparity}% (초과 달성)` : `${data.disparity}% (미달)`}
                               </span>
                             </div>
+                            {data.date < activeReport.publishDate && (
+                              <div className="pt-1 text-[10px] text-slate-400 border-t border-slate-800/80 font-sans">
+                                ℹ️ 리포트 발간일({activeReport.publishDate}) 이전 과거 시장 데이터입니다.
+                              </div>
+                            )}
                             {data.date === activeReport.publishDate && (
                               <div className="pt-1 text-[10px] text-indigo-400 font-bold">
                                 ★ 리포트 공식 발간일 (기준가 {activeReport.basePrice.toLocaleString()}원)
@@ -1582,7 +1621,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                     />
                   )}
 
-                  {/* 목표주가 수평선 */}
+                  {/* 목표주가 수평 기준선 및 라벨 */}
                   <ReferenceLine 
                     y={activeReport.targetPrice} 
                     stroke="#f59e0b" 
@@ -1594,6 +1633,18 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                       fontSize: 11, 
                       position: 'insideRight' 
                     }} 
+                  />
+
+                  {/* 목표주가 상수 직선 (차트 전체 가로 관통) */}
+                  <Line 
+                    type="linear" 
+                    dataKey="targetPrice" 
+                    stroke="#f59e0b" 
+                    strokeDasharray="5 5" 
+                    strokeWidth={2} 
+                    dot={false} 
+                    isAnimationActive={false} 
+                    name="제시 목표가" 
                   />
 
                   {/* 실제 주가 에어리어 차트 */}

@@ -5,6 +5,13 @@ import {
   TIE_BREAKER_POLICY,
   AnalystAwardReview 
 } from '../data/awardsData';
+import {
+  isAwardExcludedBroker,
+  isTarget24Broker,
+  BROKER_POLICY_V181,
+  TARGET_24_BROKERS,
+  AWARD_EXCLUDED_BROKERS
+} from '../data/brokerConfig';
 import { 
   Award, 
   Trophy, 
@@ -29,6 +36,8 @@ import {
 export const AnalystAwards01Review: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<AnalystAwardReview | null>(null);
   const [sectorFilter, setSectorFilter] = useState<string>('ALL');
+  const [awardEligibilityFilter, setAwardEligibilityFilter] = useState<'ALL' | 'ELIGIBLE' | 'EXCLUDED'>('ALL');
+  const [showBrokerPolicyModal, setShowBrokerPolicyModal] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showTieBreakerModal, setShowTieBreakerModal] = useState<boolean>(false);
 
@@ -38,8 +47,10 @@ export const AnalystAwards01Review: React.FC = () => {
   const sectors = ['ALL', ...Array.from(new Set(OFFICIAL_WINNERS_REVIEWS.map(r => r.sector)))];
 
   const filteredWinners = sectorWinners.filter(w => {
-    if (sectorFilter === 'ALL') return true;
-    return w.sector === sectorFilter;
+    if (sectorFilter !== 'ALL' && w.sector !== sectorFilter) return false;
+    if (awardEligibilityFilter === 'ELIGIBLE' && isAwardExcludedBroker(w.brokerName)) return false;
+    if (awardEligibilityFilter === 'EXCLUDED' && !isAwardExcludedBroker(w.brokerName)) return false;
+    return true;
   });
 
   const handleCopyCitation = (text: string, id: string) => {
@@ -80,16 +91,24 @@ export const AnalystAwards01Review: React.FC = () => {
             2026 올해의 애널리스트 어워즈 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">공식 AI 심사평</span>
           </h1>
           <p className="mt-3 text-slate-300 text-base leading-relaxed">
-            금융감독원 DART 분기·반기 확정 실적 데이터 교차검증과 32개 국내 증권사 7,842건(1~9월 누적 전수)의 실제 발간 리서치 리포트를 정밀 분석한 
+            금융감독원 DART 분기·반기 확정 실적 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사 7,842건(1~9월 누적 전수)의 실제 발간 리서치 리포트를 정밀 분석한 
             인텔리전스 평가 엔진을 바탕으로 작성된 대한민국 최고 권위의 공식 수상자 심사 보고서입니다.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-400 border-t border-slate-800/80 pt-4">
             <div><span className="text-slate-500 font-medium">검증 표본 리포트:</span> <strong className="text-white">7,842건 (1~9월 마스터 DB 전수)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
-            <div><span className="text-slate-500 font-medium">평가 대상 애널리스트:</span> <strong className="text-white">681명 (32개사 전수)</strong></div>
+            <div><span className="text-slate-500 font-medium">평가 대상 애널리스트:</span> <strong className="text-white">681명 (24개사+5개사 전수)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
-            <div><span className="text-slate-500 font-medium">참여 증권사:</span> <strong className="text-white">국내 32개사 전원</strong></div>
+            <div><span className="text-slate-500 font-medium">참여 증권사:</span> <strong className="text-white">공식 대상 24개사 · 평가 5개사</strong></div>
+            <div className="h-3 w-px bg-slate-800" />
+            <button
+              onClick={() => setShowBrokerPolicyModal(true)}
+              className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 underline font-semibold cursor-pointer"
+            >
+              <ShieldCheck size={13} />
+              v1.8.1 대상 24개사 및 시상제외 5개사 규정 확인
+            </button>
             <div className="h-3 w-px bg-slate-800" />
             <button
               onClick={() => setShowTieBreakerModal(true)}
@@ -228,21 +247,59 @@ export const AnalystAwards01Review: React.FC = () => {
             </div>
           </div>
 
-          {/* 섹터 필터 탭 */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-            {sectors.map((sec) => (
+          {/* 필터 행: 섹터 필터 + 시상 적격 퀵 필터 */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            {/* 섹터 필터 탭 */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+              {sectors.map((sec) => (
+                <button
+                  key={sec}
+                  onClick={() => setSectorFilter(sec)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    sectorFilter === sec
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  {sec === 'ALL' ? '전체 섹터 (11명)' : sec}
+                </button>
+              ))}
+            </div>
+
+            {/* v1.8.1 시상 적격 퀵 필터 */}
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
               <button
-                key={sec}
-                onClick={() => setSectorFilter(sec)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
-                  sectorFilter === sec
-                    ? 'bg-indigo-600 text-white shadow-md'
-                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                onClick={() => setAwardEligibilityFilter('ALL')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  awardEligibilityFilter === 'ALL'
+                    ? 'bg-indigo-600 text-white shadow'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {sec === 'ALL' ? '전체 섹터 (11명)' : sec}
+                전체 (24+5사)
               </button>
-            ))}
+              <button
+                onClick={() => setAwardEligibilityFilter('ELIGIBLE')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                  awardEligibilityFilter === 'ELIGIBLE'
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'text-slate-400 hover:text-emerald-300'
+                }`}
+              >
+                <Award size={12} />
+                공식 시상 대상 (24개사)
+              </button>
+              <button
+                onClick={() => setAwardEligibilityFilter('EXCLUDED')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 ${
+                  awardEligibilityFilter === 'EXCLUDED'
+                    ? 'bg-amber-600 text-white shadow'
+                    : 'text-slate-400 hover:text-amber-300'
+                }`}
+              >
+                시상 제외 5개사
+              </button>
+            </div>
           </div>
         </div>
 
@@ -271,14 +328,30 @@ export const AnalystAwards01Review: React.FC = () => {
                       </span>
                       <span className="text-xs text-slate-400">#{index + 1}</span>
                     </div>
-                    <div className="flex items-baseline gap-2.5">
+                    <div className="flex items-baseline gap-2.5 flex-wrap">
                       <h3 className="text-xl font-extrabold text-white">
                         {analyst.name}
                       </h3>
                       <span className="text-sm font-semibold text-slate-300">{analyst.brokerName}</span>
                       <span className="text-xs text-slate-500">|</span>
                       <span className="text-xs text-indigo-300 font-medium">{analyst.sector}</span>
+                      
+                      {/* v1.8.1 시상 적격 상태 뱃지 */}
+                      {isAwardExcludedBroker(analyst.brokerName) ? (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          시상 제외 (평가 1위 유지)
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          공식 시상 대상
+                        </span>
+                      )}
                     </div>
+                    {isAwardExcludedBroker(analyst.brokerName) && (
+                      <div className="text-[11px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md">
+                        ※ v1.8.1 시상 제외 5개사 규정 적용: 성과 평가(점수·순위·DART 대사)는 100% 동일하게 진행되나 사내 컴플라이언스 기준에 따라 공식 시상(트로피)에서 제외됩니다.
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-black font-mono text-emerald-400">
@@ -574,6 +647,89 @@ export const AnalystAwards01Review: React.FC = () => {
                 className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer"
               >
                 확인 완료
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 5. 모달: v1.8.1 증권사 선정 및 시상 운영 규정 팝업 */}
+      {/* ======================================================== */}
+      {showBrokerPolicyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-slate-900 border border-amber-500/40 shadow-2xl p-6 sm:p-8 space-y-6">
+            <button
+              onClick={() => setShowBrokerPolicyModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
+              aria-label="닫기"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-amber-400 text-xs font-bold">
+                <ShieldCheck size={16} />
+                <span>VERSION 1.8.1 공식 증권사 선정 및 평가·시상 운영 규정</span>
+              </div>
+              <h3 className="text-xl font-bold text-white">
+                {BROKER_POLICY_V181.title}
+              </h3>
+              <p className="text-xs text-slate-400">
+                {BROKER_POLICY_V181.summary}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {/* 24개 공식 대상 증권사 */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-emerald-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-1.5">
+                    <Award size={15} />
+                    공식 대상 증권사 (24개사)
+                  </h4>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">시상 적격</span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  국내 리서치 시장 핵심 24개사를 정규 심사 대상사로 확정하여 평가의 대표성과 산업 집중도를 극대화했습니다.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {TARGET_24_BROKERS.map(b => (
+                    <span key={b} className="text-[11px] px-2 py-0.5 rounded bg-slate-900 text-slate-200 border border-slate-700 font-medium">
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* 평가 진행 / 시상 제외 5개사 */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-amber-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-amber-300 flex items-center gap-1.5">
+                    <ShieldCheck size={15} />
+                    평가 진행 / 시상 제외 증권사 (5개사)
+                  </h4>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">시상 제외 (평가 유지)</span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  <strong>IBK투자증권, 삼성증권, 한국투자증권, 대신증권, iM증권</strong> 5개사는 컴플라이언스 및 사내 규정에 따라 공식 시상(트로피/상패) 대상에서는 제외하되, 시장 분석의 객관적 벤치마크 보존을 위해 AI 7대 KPI 성과 평가는 100% 동일하게 산정 및 공개합니다.
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-2">
+                  {AWARD_EXCLUDED_BROKERS.map(b => (
+                    <span key={b} className="text-[11px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold">
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-800 pt-4 flex justify-end">
+              <button
+                onClick={() => setShowBrokerPolicyModal(false)}
+                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold cursor-pointer"
+              >
+                규정 확인 완료
               </button>
             </div>
           </div>
