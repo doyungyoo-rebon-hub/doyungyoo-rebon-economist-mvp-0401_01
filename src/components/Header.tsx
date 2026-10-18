@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   GitBranch,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  FileSpreadsheet
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -51,6 +52,15 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       icon: Award,
       badge: 'AI 공식 평가집',
       badgeColor: 'bg-yellow-400/20 text-yellow-300 border-yellow-400/30',
+      highlight: true
+    },
+    {
+      id: 'eval_report',
+      label: '평가결과_보고서_01',
+      shortLabel: '보고서 추출',
+      icon: FileSpreadsheet,
+      badge: 'PDF/Excel/인쇄',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
       highlight: true
     },
     {
@@ -113,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/95 border-b border-slate-800 shadow-md">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/95 border-b border-slate-800 shadow-md print:hidden">
       {/* 1행: 서비스 브랜딩 & 상단 요약 바 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between border-b border-slate-900/80">
         <div className="flex items-center gap-3">

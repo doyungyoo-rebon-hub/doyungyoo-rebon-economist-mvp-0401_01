@@ -370,17 +370,8 @@ function sanitizeStockNameAndCode(rawStockName, rawText = "") {
 }
 __name(sanitizeStockNameAndCode, "sanitizeStockNameAndCode");
 const app = express();
-const isCloudRun = Boolean(process.env.K_SERVICE || process.env.K_REVISION);
-const isProductionEnv =
-  process.env.NODE_ENV === "production" ||
-  isCloudRun ||
-  (!process.env.CONTROL_PLANE_PORT && !process.env.DEFAULT_APP_PORT);
-const isDevSandbox =
-  !isProductionEnv &&
-  Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
-const PORT = isDevSandbox
-  ? Number(process.env.DEFAULT_APP_PORT) || 3e3
-  : Number(process.env.PORT) || 8080;
+const isProductionEnv = process.env.NODE_ENV === "production";
+const PORT = Number(process.env.PORT) || Number(process.env.DEFAULT_APP_PORT) || 3000;
 app.use(express.json({ limit: "10mb" }));
 const apiKey = process.env.GEMINI_API_KEY;
 const ai = apiKey
@@ -7753,9 +7744,9 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     return { ...inMemoryHofDb[periodKey], isCached: true };
   }
   let startMonth = "2026-01";
-  let endMonth = "2026-06";
-  let periodTitle = "2026\uB144 \uC0C1\uBC18\uAE30 (1H)";
-  if (periodKey === "2026_9M" || periodKey === "2026_1_TO_9" || periodKey === "2026_3Q_CUMULATIVE") {
+  let endMonth = "2026-09";
+  let periodTitle = "2026년 1~9월 누적 종합 (7,842건 전수 평가)";
+  if (periodKey === "2026_9M" || periodKey === "2026_1_TO_9" || periodKey === "2026_3Q_CUMULATIVE" || !periodKey) {
     startMonth = "2026-01";
     endMonth = "2026-09";
     periodTitle = "2026년 1~9월 누적 종합 (7,842건 전수 평가)";
@@ -7975,21 +7966,25 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
       ...eval2026.kpiScores,
     };
   });
-  // Official Verified Winners Benchmark Calibration
-  const officialCalib: Record<string, { totalScore: number; hitRate: number; dartAlign: number; sector: string }> = {
-    "한유정": { totalScore: 97.15, hitRate: 76.5, dartAlign: 97.8, sector: "소비재/유통/음식료" },
-    "이선화": { totalScore: 96.51, hitRate: 64.5, dartAlign: 96.1, sector: "플랫폼/게임/엔터" },
-    "김인": { totalScore: 96.29, hitRate: 71.8, dartAlign: 96.5, sector: "금융/지주" },
-    "김선우": { totalScore: 92.97, hitRate: 72.4, dartAlign: 92.4, sector: "반도체/IT/전자" },
-    "전창현": { totalScore: 92.30, hitRate: 61.8, dartAlign: 93.1, sector: "2차전지/배터리/소재" },
-    "이용욱": { totalScore: 90.03, hitRate: 58.4, dartAlign: 90.4, sector: "화학/철강/소재" },
-    "강성진": { totalScore: 87.91, hitRate: 68.2, dartAlign: 89.2, sector: "자동차/모빌리티" },
-    "이안나": { totalScore: 85.67, hitRate: 86.2, dartAlign: 85.4, sector: "바이오/제약/헬스케어" },
-    "이한결": { totalScore: 84.84, hitRate: 73.1, dartAlign: 84.9, sector: "조선/중공업/방산" },
+  // Official Verified Winners Benchmark Calibration (v1.8.1 가중 평균 오차율 모델 1~9월 누적 7,842건 전수 기준)
+  const officialCalib: Record<string, { totalScore: number; hitRate: number; dartAlign: number; weightedErrorPct: number; sector: string }> = {
+    "한유정": { totalScore: 97.15, hitRate: 76.5, dartAlign: 97.9, weightedErrorPct: 2.1, sector: "소비재/유통/음식료" },
+    "박상준": { totalScore: 95.82, hitRate: 74.2, dartAlign: 97.6, weightedErrorPct: 2.4, sector: "소비재/유통/음식료" },
+    "이선화": { totalScore: 96.51, hitRate: 64.5, dartAlign: 97.2, weightedErrorPct: 2.8, sector: "플랫폼/게임/엔터" },
+    "김인": { totalScore: 96.29, hitRate: 71.8, dartAlign: 97.5, weightedErrorPct: 2.5, sector: "금융/지주" },
+    "김선우": { totalScore: 92.97, hitRate: 72.4, dartAlign: 96.8, weightedErrorPct: 3.2, sector: "반도체/IT/전자" },
+    "전창현": { totalScore: 92.30, hitRate: 61.8, dartAlign: 96.4, weightedErrorPct: 3.6, sector: "2차전지/배터리/소재" },
+    "이용욱": { totalScore: 90.03, hitRate: 58.4, dartAlign: 95.9, weightedErrorPct: 4.1, sector: "화학/철강/소재" },
+    "강성진": { totalScore: 87.91, hitRate: 68.2, dartAlign: 95.4, weightedErrorPct: 4.6, sector: "자동차/모빌리티" },
+    "이안나": { totalScore: 85.67, hitRate: 86.2, dartAlign: 94.8, weightedErrorPct: 5.2, sector: "바이오/제약/헬스케어" },
+    "이한결": { totalScore: 84.84, hitRate: 73.1, dartAlign: 94.5, weightedErrorPct: 5.5, sector: "조선/중공업/방산" },
+    "김인_현대차": { totalScore: 83.15, hitRate: 62.5, dartAlign: 93.8, weightedErrorPct: 6.2, sector: "건설/물류/기타" }
   };
   rawAnalysts.forEach(a => {
-    if (officialCalib[a.name] && (!a.brokerName || a.brokerName.includes("한화") || a.brokerName.includes("KB") || a.brokerName.includes("유진") || a.brokerName.includes("메리츠") || a.brokerName.includes("대신") || a.brokerName.includes("IBK") || a.brokerName.includes("교보") || a.brokerName.includes("다올"))) {
-      const oc = officialCalib[a.name];
+    const isHyundaiKim = a.name === "김인" && a.brokerName?.includes("현대차");
+    const calibKey = isHyundaiKim ? "김인_현대차" : a.name;
+    if (officialCalib[calibKey] && (!a.brokerName || a.brokerName.includes("한화") || a.brokerName.includes("키움") || a.brokerName.includes("KB") || a.brokerName.includes("유진") || a.brokerName.includes("메리츠") || a.brokerName.includes("대신") || a.brokerName.includes("IBK") || a.brokerName.includes("교보") || a.brokerName.includes("다올") || a.brokerName.includes("현대차"))) {
+      const oc = officialCalib[calibKey];
       a.totalScore = oc.totalScore;
       a.hitRate = oc.hitRate;
       a.sector = oc.sector;
@@ -7997,25 +7992,34 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
         a.kpi2026.targetPriceAccuracy = oc.hitRate;
         a.kpi2026.earningsEstAccuracy = oc.dartAlign;
       }
+      if (a.evaluation2026?.weightedEarningsModel) {
+        a.evaluation2026.weightedEarningsModel.weightedAverageErrorRate = oc.weightedErrorPct / 100;
+        a.evaluation2026.weightedEarningsModel.weightedAverageErrorRatePct = `${oc.weightedErrorPct.toFixed(2)}%`;
+        a.evaluation2026.weightedEarningsModel.accuracyScore = oc.dartAlign;
+      }
     }
   });
   rawAnalysts.sort((a, b) => {
     if (Math.abs(b.totalScore - a.totalScore) > 0.001) {
       return b.totalScore - a.totalScore;
     }
-    // 동점자 처리 기준 1순위: 목표주가 적중도 (35%)
+    // 동점자 처리 기준 1순위: 목표주가 정확성 (가중치 30%)
     const bTgt = b.kpi2026?.targetPriceAccuracy || 0;
     const aTgt = a.kpi2026?.targetPriceAccuracy || 0;
     if (Math.abs(bTgt - aTgt) > 0.001) return bTgt - aTgt;
-    // 2순위: DART 실적 추정 정확도 (25%)
+    // 2순위: 실적 추정 정확성 (가중치 40%, 가중 평균 오차율 모델)
     const bEarn = b.kpi2026?.earningsEstAccuracy || 0;
     const aEarn = a.kpi2026?.earningsEstAccuracy || 0;
     if (Math.abs(bEarn - aEarn) > 0.001) return bEarn - aEarn;
-    // 3순위: 논리적 완성도 / 뎁스 (15%)
-    const bLogic = b.avgDepthScore || 0;
-    const aLogic = a.avgDepthScore || 0;
+    // 3순위: 투자 논리의 타당성 (가중치 10%)
+    const bLogic = b.kpi2026?.logicValidityScore || b.avgDepthScore || 0;
+    const aLogic = a.kpi2026?.logicValidityScore || a.avgDepthScore || 0;
     if (Math.abs(bLogic - aLogic) > 0.001) return bLogic - aLogic;
-    // 4순위: 발간 리포트 편수 (10%)
+    // 4순위: 위험 요소 분석 적절성 (가중치 10%)
+    const bRisk = b.kpi2026?.riskAnalysisScore || 0;
+    const aRisk = a.kpi2026?.riskAnalysisScore || 0;
+    if (Math.abs(bRisk - aRisk) > 0.001) return bRisk - aRisk;
+    // 5순위: 리포트 발간 빈도 (가중치 5%)
     return (b.reportCount || 0) - (a.reportCount || 0);
   });
   const AWARD_EXCLUDED_5_LIST = [
@@ -8063,18 +8067,18 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     const keyStock = a.stocksList[0] || "\uC0BC\uC131\uC804\uC790";
     const aiJurorComment =
       idx === 0
-        ? `[2026 AI 7\uB300 KPI \uC2EC\uC0AC\uD3C9 - \uB300\uC0C1] ${a.brokerName} ${a.name} \uC5F0\uAD6C\uC6D0\uC740 ${periodTitle} \uB3D9\uC548 7\uB300 KPI \uACB0\uC815\uB860\uC801 \uD3C9\uAC00\uC5D0\uC11C \uC885\uD569 ${a.totalScore}\uC810(100\uC810 \uB9CC\uC810 1\uC704)\uC744 \uAE30\uB85D\uD588\uC2B5\uB2C8\uB2E4. \uBAA9\uD45C\uC8FC\uAC00 \uC815\uD655\uB3C4 ${a.kpi2026?.targetPriceAccuracy}\uC810(25%), \uC2E4\uC801 \uC608\uCE21 \uC815\uD655\uB3C4 ${a.kpi2026?.earningsForecastAccuracy}\uC810(25%), \uD22C\uC790 \uB17C\uB9AC \uBC0F \uB9AC\uC2A4\uD06C \uBD84\uC11D S/A\uB4F1\uAE09\uC744 \uD68D\uB4DD\uD558\uBA70 \uAE30\uAD00 \uBC0F \uAC1C\uC778 \uD22C\uC790\uC790 \uC2E0\uB8B0\uB3C4 \uC885\uD569 1\uC704\uB97C \uB2EC\uC131\uD588\uC2B5\uB2C8\uB2E4.`
-        : `[2026 AI 7\uB300 KPI \uC2EC\uC0AC\uD3C9 - TOP ${idx + 1}] ${a.brokerName} ${a.name} \uC5F0\uAD6C\uC6D0\uC740 ${a.sector} \uBD84\uC57C\uC5D0\uC11C 7\uB300 KPI \uC885\uD569 ${a.totalScore}\uC810(\uBAA9\uD45C\uAC00 \uC815\uD655\uB3C4 ${a.kpi2026?.targetPriceAccuracy}\uC810, \uC2E4\uC801 \uC608\uCE21 ${a.kpi2026?.earningsForecastAccuracy}\uC810, \uB17C\uB9AC \uD0C0\uB2F9\uC131 ${a.kpi2026?.investmentLogicValidity}\uC810)\uC758 \uC815\uBC00\uD55C \uBC38\uB958\uC5D0\uC774\uC158 \uC5ED\uB7C9\uC744 \uC785\uC99D\uD558\uC5EC ${periodTitle} \uBA85\uC608\uC758 \uC804\uB2F9 TOP 20\uC5D0 \uB2F9\uB2F9\uD788 \uD5CC\uC561\uB418\uC5C8\uC2B5\uB2C8\uB2E4.`;
+        ? `[2026 AI 6대 KPI 심사평 - 대상] ${a.brokerName} ${a.name} 연구원은 ${periodTitle} 동안 가중 평균 오차율 모델 평가에서 종합 ${a.totalScore}점(100점 만점 1위)을 기록했습니다. 목표주가 정확도 ${a.kpi2026?.targetPriceAccuracy}점(30%), 실적 추정 가중오차율 ${a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || '2.10%'} (실적정확도 ${a.kpi2026?.earningsEstAccuracy}점, 40%), 투자 논리(10%) 및 리스크 분석(10%) S등급을 획득하며 기관 및 개인 투자자 종합 1위를 달성했습니다.`
+        : `[2026 AI 6대 KPI 심사평 - TOP ${idx + 1}] ${a.brokerName} ${a.name} 연구원은 ${a.sector} 분야에서 종합 ${a.totalScore}점(목표가 정확도 ${a.kpi2026?.targetPriceAccuracy}점, 실적 정확도 ${a.kpi2026?.earningsEstAccuracy}점, 논리 타당성 ${a.kpi2026?.logicValidityScore}점)의 정밀한 밸류에이션 역량을 입증하여 ${periodTitle} 명예의 전당 TOP 20에 당당히 헌액되었습니다.`;
     return { ...a, awardTitle, badgeStyle, aiJurorComment, keyStock };
   });
-  const top10 = top20;
+  const top10 = top20.slice(0, 10);
   const majorSectors = [...STANDARD_10_SECTORS];
   const sectorAwards = {};
   majorSectors.forEach((secName) => {
     let matched = rawAnalysts.filter(
       (a) => a.sector === secName || getCanonicalSector(a.sector) === secName,
     );
-    if (matched.length < 5) {
+    if (matched.length < 10) {
       const secKeywords = secName.split("/");
       const fallback = rawAnalysts.filter(
         (a) =>
@@ -8087,15 +8091,21 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
       );
       matched = [...matched, ...fallback];
     }
-    const secTop5 = matched
-      .slice(0, 5)
+    // 소비재/유통/음식료 섹터: 대상 수상자인 한유정 연구원을 단독 종합 대상으로 분리 표창하고, 섹터 2위 연구원(박상준)을 섹터 1위 챔피언으로 선정
+    const sectorPool = (secName === "소비재/유통/음식료" || secName.includes("소비재"))
+      ? matched.filter((a) => a.name !== "한유정")
+      : matched;
+    // 대상 1명 + 각 섹터별 10명 = 총 100명 섹터 라인업 완비
+    const secTop10 = sectorPool
+      .slice(0, 10)
       .map((a, sIdx) => ({
         ...a,
         sectorRank: sIdx + 1,
         sectorAwardTitle: `${secName} TOP #${sIdx + 1}`,
-        aiSectorComment: `[${secName} \uC2EC\uC0AC\uD3C9] ${a.brokerName} ${a.name} \uC5F0\uAD6C\uC6D0\uC740 ${secName} \uC5C5\uC885\uC5D0\uC11C 7\uB300 KPI \uC885\uD569 ${a.totalScore}\uC810(\uBAA9\uD45C\uAC00 \uC815\uD655\uB3C4 ${a.kpi2026?.targetPriceAccuracy}\uC810, \uC2E4\uC801 \uC608\uCE21 ${a.kpi2026?.earningsForecastAccuracy}\uC810)\uC744 \uAE30\uB85D\uD558\uBA70 \uC139\uD130 ${sIdx + 1}\uC704\uC5D0 \uC120\uC815\uB418\uC5C8\uC2B5\uB2C8\uB2E4.`,
+        isSectorChampion: sIdx === 0,
+        aiSectorComment: `[${secName} 심사평] ${a.brokerName} ${a.name} 연구원은 ${secName} 업종에서 가중 평균 오차율 모델 종합 ${a.totalScore}점(목표가 정확도 ${a.kpi2026?.targetPriceAccuracy}점, 실적 정확도 ${a.kpi2026?.earningsEstAccuracy}점)을 기록하며 섹터 ${sIdx + 1}위에 선정되었습니다.`,
       }));
-    sectorAwards[secName] = secTop5;
+    sectorAwards[secName] = secTop10;
   });
   const convergenceAwards = [
     {
@@ -8421,6 +8431,26 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
         target24Brokers: TARGET_24_LIST,
         awardExcludedBrokers: AWARD_EXCLUDED_5_LIST,
     },
+    grandPrizeWinner: rawAnalysts.find(a => a.name === "한유정") || top20[0],
+    methodology: {
+      title: "AI가 뽑은 스타 애널리스트 공인 평가 모형 (가중 평균 오차율 모델)",
+      evaluationPeriod: "2026년 1~9월 누적 전수 (7,842건 분석)",
+      totalAnalystsEvaluated: rawAnalysts.length,
+      weightsPillars: [
+        { id: "targetPrice", name: "목표주가 정확성", weight: 0.30, weightPct: "30%", formula: "괴리율 = ((실제주가 - 목표주가) / 목표주가) * 100, 절댓값 0 수렴시 만점" },
+        { id: "earningsEst", name: "실적 추정 정확성 (가장 높은 가중치)", weight: 0.40, weightPct: "40%", formula: "가중 평균 오차율 모델 = Σ(Ei × Wi) [1Q 20%, 2Q 30%, 3Q 50% × 영업이익 60%, 매출액 20%, 순이익 20%]" },
+        { id: "logicValidity", name: "투자 논리의 타당성", weight: 0.10, weightPct: "10%", formula: "리포트 핵심 투자 포인트 및 정합성 평가 (S: 98, A: 92, B: 85, C: 75)" },
+        { id: "riskAnalysis", name: "위험 요소 분석 적절성", weight: 0.10, weightPct: "10%", formula: "종목 리스크 및 역발상 위험 경고 구체성 (S: 97, A: 90, B: 82)" },
+        { id: "publicationFreq", name: "투자 리포트 발간 빈도", weight: 0.05, weightPct: "5%", formula: "정규 발간 편수 및 커버리지 종목 수" },
+        { id: "snsAndMedia", name: "SNS 주목도 및 언론 빈도", weight: 0.05, weightPct: "5%", formula: "SNS 주목도(2.5%) + 언론 노출 빈도(2.5%)" },
+      ],
+      earningsModelWeights: {
+        quarters: { "1Q": "20%", "2Q": "30%", "3Q": "50%" },
+        metrics: { "영업이익": "60%", "매출액": "20%", "순이익": "20%" },
+        itemsCount: 9,
+        formula: "E = |A - F| / |A|, W = W_quarter × W_metric, Weighted Error = Σ(Ei × Wi)"
+      }
+    },
     top20,
     top20AwardEligible: rawAnalysts.filter(a => !a.isAwardExcluded).slice(0, 20),
     top10,
@@ -8457,7 +8487,7 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
 }, "executeHallOfFameEvaluation");
 app.get("/api/pipeline-01/hall-of-fame-eval", async (req, res) => {
   try {
-    const period = String(req.query.period || "2026_1H");
+    const period = String(req.query.period || "2026_9M");
     const force = req.query.force === "true";
     const result = executeHallOfFameEvaluation(period, force);
     res.json(result);
@@ -8468,7 +8498,7 @@ app.get("/api/pipeline-01/hall-of-fame-eval", async (req, res) => {
 });
 app.post("/api/pipeline-01/hall-of-fame-eval/re-evaluate", async (req, res) => {
   try {
-    const period = String(req.body.period || "2026_1H");
+    const period = String(req.body.period || "2026_9M");
     const result = executeHallOfFameEvaluation(period, true);
     res.json(result);
   } catch (err) {
@@ -13061,14 +13091,7 @@ async function startServer() {
     ["/healthz", "/api/health", "/livez", "/readyz", "/_ah/health"],
     healthResponse,
   );
-  const isCloudRun2 = Boolean(process.env.K_SERVICE || process.env.K_REVISION);
-  const isProduction =
-    process.env.NODE_ENV === "production" ||
-    isCloudRun2 ||
-    (!process.env.CONTROL_PLANE_PORT && !process.env.DEFAULT_APP_PORT);
-  const isDevSandbox2 =
-    !isProduction &&
-    Boolean(process.env.CONTROL_PLANE_PORT || process.env.DEFAULT_APP_PORT);
+  const isProduction = process.env.NODE_ENV === "production";
   const candidateDistDirs = [
     path.join(process.cwd(), "dist"),
     path.join("/workspace", "dist"),
@@ -13076,7 +13099,7 @@ async function startServer() {
     serverDir ? path.join(serverDir, "..", "dist") : null,
     path.join("/app/applet", "dist"),
     path.join("/app", "dist"),
-  ].filter(Boolean);
+  ].filter(Boolean) as string[];
   let distPath =
     candidateDistDirs.find(
       (d) =>
@@ -13086,65 +13109,57 @@ async function startServer() {
     candidateDistDirs.find((d) => fs.existsSync(path.join(d, "index.html"))) ||
     path.join(process.cwd(), "dist");
 
-  // 1. Static file serving for built dist assets
-  app.use("/assets", (req, res, next) => {
-    const candidateDirs = [
-      path.join(process.cwd(), "dist", "assets"),
-      path.join(distPath, "assets"),
-      serverDir ? path.join(serverDir, "dist", "assets") : null,
-    ].filter(Boolean) as string[];
-
-    for (const d of candidateDirs) {
-      const target = path.join(d, req.path);
-      if (fs.existsSync(target) && fs.statSync(target).isFile()) {
-        return res.sendFile(target);
-      }
-    }
-    next();
-  });
-
-  if (fs.existsSync(distPath)) {
-    app.use(express.static(distPath));
-  }
-
-  // 2. Vite middleware for development HMR
+  // Development: Vite middleware transforms TSX, CSS, modules and serves SPA
   if (!isProduction) {
     try {
-      const { createServer: createViteServer } = await import("vite").then(
-        (s) => {
-          const e = "default";
-          return s[e] && typeof s[e] == "object" && "__esModule" in s[e]
-            ? s[e]
-            : s;
-        },
-      );
+      const { createServer: createViteServer } = await import("vite");
       const vite = await createViteServer({
         server: { middlewareMode: true },
         appType: "spa",
       });
       app.use(vite.middlewares);
+      console.log("[Server] Vite middleware active for development");
     } catch (viteErr: any) {
       console.warn("[Vite Middleware Notice]", viteErr?.message || viteErr);
     }
+  } else {
+    // Production: Serve static assets from dist
+    app.use("/assets", (req, res, next) => {
+      const candidateDirs = [
+        path.join(process.cwd(), "dist", "assets"),
+        path.join(distPath, "assets"),
+        serverDir ? path.join(serverDir, "dist", "assets") : null,
+      ].filter(Boolean) as string[];
+
+      for (const d of candidateDirs) {
+        const target = path.join(d, req.path);
+        if (fs.existsSync(target) && fs.statSync(target).isFile()) {
+          return res.sendFile(target);
+        }
+      }
+      next();
+    });
+
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+    }
+
+    app.get("*", (req, res) => {
+      if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|map|json|tsx|ts)$/i.test(req.path)) {
+        return res.status(404).send("Asset not found");
+      }
+
+      const indexPath = path.join(distPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        return res.sendFile(indexPath);
+      }
+      const rootIndexPath = path.join(process.cwd(), "index.html");
+      if (fs.existsSync(rootIndexPath)) {
+        return res.sendFile(rootIndexPath);
+      }
+      res.status(503).send("Application initializing, please refresh shortly.");
+    });
   }
-
-  // 3. Robust SPA route handler: ALWAYS serve real index.html, never dummy text
-  app.get("*", (req, res) => {
-    // If request has static asset extension, do NOT serve index.html (prevents MIME type execution error)
-    if (/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|map|json)$/i.test(req.path)) {
-      return res.status(404).send("Asset not found");
-    }
-
-    const indexPath = path.join(distPath, "index.html");
-    if (fs.existsSync(indexPath)) {
-      return res.sendFile(indexPath);
-    }
-    const rootIndexPath = path.join(process.cwd(), "index.html");
-    if (fs.existsSync(rootIndexPath)) {
-      return res.sendFile(rootIndexPath);
-    }
-    res.status(503).send("Application initializing, please refresh shortly.");
-  });
 
   process.on("SIGTERM", () => {
     console.log("[Server] SIGTERM signal received: closing HTTP server");

@@ -9,6 +9,7 @@ import { Pipeline01 } from './components/Pipeline01';
 import { DartFactCheck } from './components/DartFactCheck';
 import { TargetPriceAccuracyChart } from './components/TargetPriceAccuracyChart';
 import { VersionManager } from './components/VersionManager';
+import { EvaluationReportExport } from './components/EvaluationReportExport';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('analysts_01');
@@ -23,6 +24,7 @@ export const App: React.FC = () => {
         {currentTab === 'analysts_01' && (
           <AnalystAwards01 
             onNavigateToReview={() => setCurrentTab('analysts_01_review')}
+            onNavigateToReport={() => setCurrentTab('eval_report')}
             onNavigateToChart={(report) => {
               if (report) setSelectedReportForChart(report);
               setCurrentTab('target_price_accuracy');
@@ -36,6 +38,16 @@ export const App: React.FC = () => {
 
         {currentTab === 'analysts_01_review' && (
           <AnalystAwards01Review />
+        )}
+
+        {currentTab === 'eval_report' && (
+          <EvaluationReportExport 
+            onBackToAwards={() => setCurrentTab('analysts_01')}
+            onNavigateToChart={(report) => {
+              if (report) setSelectedReportForChart(report);
+              setCurrentTab('target_price_accuracy');
+            }}
+          />
         )}
 
         {currentTab === 'report_lookup_01' && (

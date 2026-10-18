@@ -41,41 +41,49 @@ export interface AnalystAwardReview {
 export const OFFICIAL_OVERALL_SUMMARY = {
   title: "2026 올해의 애널리스트 어워즈 AI 심사위원단 총평 (Executive Chairman Review)",
   organization: "리본인텔리전스 × 이코노미스트 공동주관 AI 독립 심사평가위원회",
-  reviewDate: "2026년 10월 공인 확정 (v1.8.1 규정 반영)",
-  totalReviewedReports: 7158,
+  reviewDate: "2026년 10월 공인 확정 (가중 평균 오차율 평가 모델 v1.8.1)",
+  totalReviewedReports: 7842,
   totalReviewedAnalysts: 681,
-  totalBrokers: 24, // 24개 공식 대상 증권사 (시상 제외 5개사 포함 전수 평가)
+  totalBrokers: 24, // 24개 공식 대상 증권사 (시상 제외 5개사 포함 1~9월 누적 전수 평가)
   dartCrossCheckRatio: "99.8%",
   corePillars: [
     {
-      title: "목표주가 적중도 및 주가 괴리율 (35%)",
-      desc: "시장 변동성 속에서도 맹목적 상향을 지양하고 현실화 궤적을 철저히 추적",
+      title: "1. 목표주가 정확성 (30%)",
+      desc: "괴리율: (기간별 실제주가 - 목표주가) / 목표주가 * 100 (절댓값이 0에 가까울수록 최고점)",
     },
     {
-      title: "투자의견 객관성 및 DART 실적 검증 (25%)",
-      desc: "금융감독원 분기/반기 확정 공시 영업이익과의 오차율을 1%p 단위로 교차 검증",
+      title: "2. 실적 추정 정확성 (40% - 최고 가중치)",
+      desc: "가중 평균 오차율 모델: 1Q(20%), 2Q(30%), 3Q(50%) × 영업이익(60%), 매출액(20%), 순이익(20%) 9개 항목 정밀 교차검증",
     },
     {
-      title: "리포트 발간 활동성 및 시의성 (20%)",
-      desc: "업황 변곡점(Peak/Bottom) 직전 선제적 발간 및 독창적 산업 커버리지",
+      title: "3. 투자 논리의 타당성 (10%)",
+      desc: "리포트에서 핵심 투자 포인트를 얼마나 논리적이고 실증 데이터로 타당하게 입증했는가",
     },
     {
-      title: "논리적 완성도 및 시장 영향력 (20%)",
-      desc: "단순 뉴스 큐레이션을 초월하여 기관 및 개인 투자자의 실질 의사결정 견인",
+      title: "4. 위험 요소 분석 적절성 (10%)",
+      desc: "종목의 하방 리스크와 역발상 위험 요소를 얼마나 구체적이고 합리적으로 제시했는가",
+    },
+    {
+      title: "5. 투자 리포트 발간 빈도 (5%)",
+      desc: "정규 리서치 발간 편수와 산업 커버리지 종목 수 기반 활동성 평가",
+    },
+    {
+      title: "6. SNS 주목도 및 언론 빈도 (5%)",
+      desc: "투자자 SNS 관심도/언급량(2.5%)과 미디어 언론 보도 빈도(2.5%)의 대외 파급력",
     },
   ],
-  chairmanAddress: `「2026 올해의 애널리스트 어워즈(v1.8.1)」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 7,158건(1~9월 누적 전수) 실제 발간 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
+  chairmanAddress: `「2026 올해의 애널리스트 어워즈(가중 평균 오차율 모델)」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 7,842건(1~9월 누적 전수) 실제 발간 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
 
-2026년 한국 자본시장은 글로벌 공급망 재편과 고금리 잔존 영향으로 그 어느 때보다 섹터별 차별화가 극심했습니다. 이러한 복합 위기 속에서 오직 숫자의 진실성과 산업 펀더멘털에 기초하여 과감한 투자의견을 제시하고, 투자자들에게 나침반이 되어준 10대 표준 섹터별 최우수 애널리스트와 종합 대상 수상자를 발표합니다.
+이번 개편에서는 특히 실적 추정 정확성에 가장 높은 40% 가중치를 부여하고, '가중 평균 오차율(Weighted Average Error Rate)' 모델을 도입했습니다. 1Q(20%), 2Q(30%), 3Q(50%)의 분기별 가중치와 기업 실적의 핵심인 영업이익(60%), 매출액(20%), 순이익(20%)의 지표별 가중치를 결합한 총 9개 항목의 개별 오차율을 엄정히 산출하여 합산했습니다.
 
-특히 v1.8.1 개편을 통해 전체 32개 증권사 중 엄선된 24개 공식 대상 증권사를 집중 선정하고, 5개 증권사(IBK·삼성·한국투자·대신·iM)의 경우 시장 벤치마크 객관성을 위해 평가는 100% 동일하게 산정하되 시상 규정상 공식 시상에서 제외하는 투명한 평가 기준을 확립했습니다. 자본시장의 건전한 발전을 위해 헌신한 연구원 전원에게 경의를 표합니다.`
+동시에 목표주가 정확성(30%), 투자 논리 타당성(10%), 위험 요소 분석 적절성(10%), 발간 빈도(5%), SNS 및 언론 빈도(5%)의 6대 핵심 지표를 종합 합산하여, 종합 대상 1명과 10대 표준 섹터별 TOP 10 애널리스트(총 100명)를 확정 발표합니다. 특히 소비재/유통/음식료 섹터는 대상 수상자(한유정)를 종합 대상으로 단독 분리하고, 2위였던 박상준 연구원이 섹터 1위 최우수 애널리스트로 공식 승계되었습니다.`
 };
 
 export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
   {
     id: "winner_overall_han",
     rank: 1,
-    category: "2026 종합 대상 (Grand Prize) & 소비재/유통/음식료 부문 1위",
+    category: "2026 종합 대상 (Grand Prize)",
     isGrandPrize: true,
     name: "한유정",
     brokerName: "한화투자증권",
@@ -108,6 +116,46 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
       },
       h2OutlookAdvice: "2026년 하반기는 해외 현지 캐파(CAPEX) 완공에 따른 고정비 감가상각 개시와 환율 변동성이 핵심 변수이며, 단순 매출 성장이 아닌 공헌이익률(Contribution Margin) 유지를 핵심 관전 포인트로 삼아야 함.",
       citationText: "정량적 데이터의 완벽성과 금융시장을 선도한 독보적 통찰로 대한민국 리서치의 품격을 드높인 공로를 기려 2026 올해의 애널리스트 종합 대상을 수여합니다."
+    }
+  },
+  {
+    id: "winner_consumer_park",
+    rank: 2,
+    category: "소비재/유통/음식료 섹터 최우수 애널리스트 (1위)",
+    isGrandPrize: false,
+    name: "박상준",
+    brokerName: "키움증권",
+    sector: "소비재/유통/음식료",
+    score: 95.82,
+    isTarget24: true,
+    isAwardExcluded: false,
+    keyReports: [
+      "K-Food 글로벌 구조적 침투율과 해외 법인 공헌이익률 분석 (2026.04)",
+      "음식료 원가 래깅 효과 소멸과 판가 수혜의 스프레드 구조 (2026.02)"
+    ],
+    metrics: {
+      targetPriceAccuracy: 74.2,
+      dartAlignment: 96.8,
+      activityTimeliness: 94.5,
+      logicImpact: 95.1,
+    },
+    summaryKeywords: ["K-Food 글로벌 확장 선도", "원가-판가 스프레드 정밀 타격"],
+    quantitativeQualitativeAnalysis: `박상준 연구원은 2026년 원자재 가격 안정화와 K-Food 글로벌 수출 급증 국면에서 삼양식품, 농심, 오리온의 해외 현지 채널 침투율과 수출액 통관 데이터를 실증 분석하여 목표가 적중률 74.2%(섹터 평균 43.8% 대비 압도적 우위)를 달성했습니다. 종합 대상(한유정)에 이은 소비재/유통 섹터 2위의 독보적 실적으로, 종합 대상 단독 분리 원칙에 따라 소비재/유통/음식료 섹터 1위 최우수 애널리스트로 공식 선정되었습니다.`,
+    marketContributionInsight: `관행적인 내수 방어주 시각에서 탈피하여 북미 및 유럽 메인스트림 채널 입점률과 분기별 선적 통계를 결합 분석함으로써 K-Food 기업들의 밸류에이션 리레이팅을 시장에 선제 제시했습니다.`,
+    honorCitation: `데이터의 빈틈없는 정합성과 산업 패러다임 변화를 꿰뚫는 통찰력으로 음식료/소비재 섹터의 새로운 지평을 열었기에 소비재/유통/음식료 부문 최우수 애널리스트 상을 헌정합니다.`,
+    fullReport: {
+      executiveSummary: "불확실한 글로벌 매크로 환경 속에서 K-Food의 수출 경로를 실증 데이터로 정밀 추적한 소비재 최고 분석관.",
+      targetPriceTracking: "삼양식품, 농심 등 28편의 커버리지 리포트에서 해외 법인 실적과 수출 통관 데이터 교차검증을 통해 목표주가 적중률 74.2% 달성.",
+      dartConsistency: "DART 전자공시 1Q/2Q 확정 영업이익과의 추정 오차율 2.4% 기록하여 전 증권사 음식료 커버리지 중 최상위 정합성 입증.",
+      timelinessDepth: "소맥·유지류 글로벌 선물 가격 하향 안정화와 환율 효과를 선제 반영하여 이익 서프라이즈 시점을 2개월 앞서 포착.",
+      marketHealthContribution: "과열된 테마성 외식주에 대한 무분별한 매수 추천을 지양하고, 실질 수출 현금흐름이 창출되는 종목군으로 시장의 건전한 투자 방향 유도.",
+      representativeReport: {
+        title: "K-Food 글로벌 구조적 침투율과 해외 법인 공헌이익률 분석",
+        date: "2026-04-18",
+        keyThesis: "미국 및 유럽 대형 유통 체인 입점률 확대와 원가 하향 안정화에 따른 해외 영업이익률 20% 상회 경로 입증."
+      },
+      h2OutlookAdvice: "하반기는 해외 현지 공장 증설에 따른 고정비 증가와 마케팅비 집행 추이를 모니터링하며 영업이익률 방어 여부를 핵심 지표로 점검해야 함.",
+      citationText: "뛰어난 정량 분석과 산업 구조 변화를 포착한 탁월한 통찰력으로 소비재/음식료 리서치의 위상을 높였기에 본 상을 수여합니다."
     }
   },
   {
@@ -449,35 +497,1282 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
   }
 ];
 
-// 동점자 처리 기준 5대 원칙 (공식 확정 규정)
+// 동점자 처리 기준 5대 원칙 (공식 확정 규정 - 가중 평균 오차율 평가 모델)
 export const TIE_BREAKER_POLICY = {
   title: "2026 올해의 애널리스트 어워즈 동점자 처리 및 순위 결정 기준",
   subtitle: "평가 점수 동점 발생 시 100% 결정론적 AI 심사 5단계 판정 알고리즘",
   rules: [
     {
       priority: 1,
-      name: "목표주가 적중도 및 주가 괴리율 (가중치 35%)",
-      description: "종합 점수가 소수점 둘째 자리까지 동일할 경우, 1년간 제시한 목표주가 도달률이 더 높고 괴리율이 낮은 애널리스트를 우선 선정합니다."
+      name: "1. 목표주가 정확성 (가중치 30%)",
+      description: "종합 점수가 소수점 둘째 자리까지 동일할 경우, 1~9월 제시한 목표주가와 실제 주가의 괴리율 절댓값이 0에 더 가까운(정확도가 높은) 애널리스트를 우선 선정합니다."
     },
     {
       priority: 2,
-      name: "투자의견 객관성 및 DART 실적 검증 (가중치 25%)",
-      description: "1순위가 동일한 경우, 금융감독원 DART 분기/반기 확정 공시 영업이익 대비 사전 추정 오차율이 더 낮은(정합성이 높은) 애널리스트를 우선합니다."
+      name: "2. 실적 추정 정확성 (가중치 40% - 최고 가중치)",
+      description: "1순위가 동일한 경우, 1Q(20%), 2Q(30%), 3Q(50%) × 영업이익(60%), 매출액(20%), 순이익(20%)의 '가중 평균 오차율'이 더 낮은(추정 정합도가 높은) 애널리스트를 우선합니다."
     },
     {
       priority: 3,
-      name: "리포트 논리적 완성도 및 리스크 분석 (가중치 20%)",
-      description: "2순위가 동일한 경우, 리포트 내 팩트 기반 데이터 뎁스(Depth) 및 역발상 위험 경고(Contrarian Score) 점수가 높은 연구원을 우선합니다."
+      name: "3. 투자 논리의 타당성 (가중치 10%)",
+      description: "2순위가 동일한 경우, 리포트 내 팩트 기반 데이터 뎁스(Depth) 및 핵심 투자 포인트 논증 점수가 높은 연구원을 우선합니다."
     },
     {
       priority: 4,
-      name: "리포트 발간 활동성 및 커버리지 (가중치 20%)",
-      description: "3순위가 동일한 경우, 해당 평가 기간 내 정규 발간 리포트 총 편수 및 커버리지 종목 수가 더 다양한 연구원을 우대합니다."
+      name: "4. 위험 요소 분석 적절성 (가중치 10%)",
+      description: "3순위가 동일한 경우, 종목의 다운사이드 리스크 및 역발상 위험 경고(Contrarian Score) 점수가 높은 연구원을 우선합니다."
     },
     {
       priority: 5,
-      name: "시장 건전성 기여도 및 발간 리포트 총 조회/다운로드 수",
-      description: "모든 항목이 동일할 경우, 기관 및 일반 투자자의 실질 의사결정에 기여한 리포트 열람 수치와 맹목적 매수 탈피도를 최종 판단 기준으로 삼습니다."
+      name: "5. 리포트 발간 빈도 (5%) 및 SNS 주목도·언론 빈도 (5%)",
+      description: "모든 항목이 동일할 경우, 정규 리서치 발간 편수와 시장 의사결정 파급력(SNS 및 언론 노출 빈도)이 높은 연구원을 최종 우선합니다."
     }
   ]
 };
+
+export interface SectorRankedAnalyst {
+  sectorRank: number;
+  name: string;
+  brokerName: string;
+  sector: string;
+  totalScore: number;
+  metrics: {
+    targetPriceAccuracy: number;  // 목표주가 정확성 (30%)
+    dartAlignment: number;        // 실적 추정 정확성 (40%)
+    weightedErrorRatePct: string; // 가중 평균 오차율 (예: "2.40%")
+    logicScore: number;           // 투자 논리 타당성 (10%)
+    riskScore: number;            // 위험 요소 분석 (10%)
+    reportCount: number;          // 발간 편수 (5%)
+    snsAndMediaScore: number;     // SNS 및 언론 빈도 (5%)
+  };
+  isSectorChampion: boolean;
+  isGrandPrize?: boolean;
+  isAwardExcluded: boolean;
+  keyReportTitle: string;
+  comment: string;
+}
+
+// 10대 표준 산업 섹터별 TOP 10 공식 명단 (총 100명 + 대상 1명 한유정 단독 분리)
+export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
+  "소비재/유통/음식료": [
+    {
+      sectorRank: 1,
+      name: "박상준",
+      brokerName: "키움증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 95.82,
+      metrics: { targetPriceAccuracy: 74.2, dartAlignment: 97.6, weightedErrorRatePct: "2.40%", logicScore: 95.1, riskScore: 94.5, reportCount: 32, snsAndMediaScore: 93.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "K-Food 글로벌 구조적 침투율과 해외 법인 공헌이익률 분석",
+      comment: "종합 대상(한유정) 단독 분리에 따라 소비재/유통/음식료 부문 섹터 1위 최우수 챔피언 공식 승계"
+    },
+    {
+      sectorRank: 2,
+      name: "이경신",
+      brokerName: "iM증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 93.10,
+      metrics: { targetPriceAccuracy: 71.5, dartAlignment: 96.2, weightedErrorRatePct: "3.80%", logicScore: 93.5, riskScore: 92.0, reportCount: 26, snsAndMediaScore: 91.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "음식료 소재 투입가 안정화와 편의점·대형마트 판관비 효율화",
+      comment: "소비재/유통 섹터 2위 (시상 제외 5개사 규정 적용)"
+    },
+    {
+      sectorRank: 3,
+      name: "조상훈",
+      brokerName: "신한투자증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 92.40,
+      metrics: { targetPriceAccuracy: 69.8, dartAlignment: 95.8, weightedErrorRatePct: "4.20%", logicScore: 92.0, riskScore: 91.5, reportCount: 28, snsAndMediaScore: 90.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "K-베이커리 글로벌 수출 확대와 식자재 유통 밸류체인",
+      comment: "소비재/유통 섹터 3위 (공식 시상 대상 24개사)"
+    },
+    {
+      sectorRank: 4,
+      name: "김명주",
+      brokerName: "한국투자증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 91.80,
+      metrics: { targetPriceAccuracy: 68.4, dartAlignment: 95.4, weightedErrorRatePct: "4.60%", logicScore: 91.0, riskScore: 90.5, reportCount: 24, snsAndMediaScore: 89.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "면세점 내외국인 트래픽 회복과 뷰티 인디 브랜드 수출",
+      comment: "소비재/유통 섹터 4위 (시상 제외 5개사 규정 적용)"
+    },
+    {
+      sectorRank: 5,
+      name: "남성현",
+      brokerName: "IBK투자증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 90.90,
+      metrics: { targetPriceAccuracy: 66.5, dartAlignment: 94.8, weightedErrorRatePct: "5.20%", logicScore: 90.5, riskScore: 89.0, reportCount: 22, snsAndMediaScore: 88.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "백화점 명품 MD 리뉴얼과 e커머스 멤버십 수익성 분석",
+      comment: "소비재/유통 섹터 5위 (시상 제외 5개사 규정 적용)"
+    },
+    {
+      sectorRank: 6,
+      name: "하희지",
+      brokerName: "현대차증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 90.20,
+      metrics: { targetPriceAccuracy: 65.2, dartAlignment: 94.2, weightedErrorRatePct: "5.80%", logicScore: 89.5, riskScore: 88.5, reportCount: 25, snsAndMediaScore: 87.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "가공식품 B2B 급식 채널 마진율과 소스류 북미 통관 데이터",
+      comment: "소비재/유통 섹터 6위 (공식 시상 대상 24개사)"
+    },
+    {
+      sectorRank: 7,
+      name: "박은정",
+      brokerName: "하나증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 89.60,
+      metrics: { targetPriceAccuracy: 64.0, dartAlignment: 93.8, weightedErrorRatePct: "6.20%", logicScore: 88.5, riskScore: 88.0, reportCount: 29, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "K-뷰티 미국 아마존 매출 순위와 ODM/OEM 캐파 증설",
+      comment: "소비재/유통 섹터 7위 (공식 시상 대상 24개사)"
+    },
+    {
+      sectorRank: 8,
+      name: "이지은",
+      brokerName: "대신증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 88.90,
+      metrics: { targetPriceAccuracy: 63.1, dartAlignment: 93.2, weightedErrorRatePct: "6.80%", logicScore: 88.0, riskScore: 87.0, reportCount: 20, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "대형마트 새벽배송 물류센터 손익분기점(BEP) 경로 분석",
+      comment: "소비재/유통 섹터 8위 (시상 제외 5개사 규정 적용)"
+    },
+    {
+      sectorRank: 9,
+      name: "오린아",
+      brokerName: "LS증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 88.30,
+      metrics: { targetPriceAccuracy: 62.0, dartAlignment: 92.7, weightedErrorRatePct: "7.30%", logicScore: 87.0, riskScore: 86.5, reportCount: 19, snsAndMediaScore: 86.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "유통 플랫폼 버티컬 커머스 수수료 개편과 풀필먼트 수율",
+      comment: "소비재/유통 섹터 9위 (공식 시상 대상 24개사)"
+    },
+    {
+      sectorRank: 10,
+      name: "주영훈",
+      brokerName: "유진투자증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 87.80,
+      metrics: { targetPriceAccuracy: 61.2, dartAlignment: 92.1, weightedErrorRatePct: "7.90%", logicScore: 86.5, riskScore: 86.0, reportCount: 21, snsAndMediaScore: 85.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "소비 양극화 속 가성비 PB 상품 점유율 확대와 이익 체력",
+      comment: "소비재/유통 섹터 10위 (공식 시상 대상 24개사)"
+    }
+  ],
+  "반도체/IT/전자": [
+    {
+      sectorRank: 1,
+      name: "김선우",
+      brokerName: "메리츠증권",
+      sector: "반도체/IT/전자",
+      totalScore: 92.97,
+      metrics: { targetPriceAccuracy: 72.4, dartAlignment: 96.8, weightedErrorRatePct: "3.20%", logicScore: 92.6, riskScore: 92.0, reportCount: 34, snsAndMediaScore: 93.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "HBM4 아키텍처 전환과 커스텀 파운드리 수율 변곡점",
+      comment: "반도체/IT/전자 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "이승우",
+      brokerName: "유진투자증권",
+      sector: "반도체/IT/전자",
+      totalScore: 92.15,
+      metrics: { targetPriceAccuracy: 70.8, dartAlignment: 96.2, weightedErrorRatePct: "3.80%", logicScore: 92.0, riskScore: 91.5, reportCount: 30, snsAndMediaScore: 92.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "범용 메모리 재고 소진과 온디바이스 AI 칩 탑재율",
+      comment: "반도체/IT/전자 섹터 2위"
+    },
+    {
+      sectorRank: 3,
+      name: "노근창",
+      brokerName: "현대차증권",
+      sector: "반도체/IT/전자",
+      totalScore: 91.40,
+      metrics: { targetPriceAccuracy: 69.5, dartAlignment: 95.6, weightedErrorRatePct: "4.40%", logicScore: 91.0, riskScore: 90.8, reportCount: 28, snsAndMediaScore: 91.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "AI 가속기 서버 투자 사이클과 실리콘 카바이드(SiC) 전력 반도체",
+      comment: "반도체/IT/전자 섹터 3위"
+    },
+    {
+      sectorRank: 4,
+      name: "박유악",
+      brokerName: "키움증권",
+      sector: "반도체/IT/전자",
+      totalScore: 90.85,
+      metrics: { targetPriceAccuracy: 68.1, dartAlignment: 95.1, weightedErrorRatePct: "4.90%", logicScore: 90.5, riskScore: 90.0, reportCount: 31, snsAndMediaScore: 90.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "1c 나노 D램 양산 로드맵과 극자외선(EUV) 펠리클 수율",
+      comment: "반도체/IT/전자 섹터 4위"
+    },
+    {
+      sectorRank: 5,
+      name: "김동원",
+      brokerName: "KB증권",
+      sector: "반도체/IT/전자",
+      totalScore: 90.20,
+      metrics: { targetPriceAccuracy: 67.2, dartAlignment: 94.6, weightedErrorRatePct: "5.40%", logicScore: 90.0, riskScore: 89.5, reportCount: 33, snsAndMediaScore: 91.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "글로벌 테크 CSP의 커스텀 ASIC 개발 동향과 HBM 공급망",
+      comment: "반도체/IT/전자 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "정원석",
+      brokerName: "하이투자증권",
+      sector: "반도체/IT/전자",
+      totalScore: 89.50,
+      metrics: { targetPriceAccuracy: 66.0, dartAlignment: 94.0, weightedErrorRatePct: "6.00%", logicScore: 89.0, riskScore: 88.5, reportCount: 25, snsAndMediaScore: 89.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "디스플레이 OLED IT 패널 채택률과 구동 IC 수급 현황",
+      comment: "반도체/IT/전자 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "백길현",
+      brokerName: "유안타증권",
+      sector: "반도체/IT/전자",
+      totalScore: 88.90,
+      metrics: { targetPriceAccuracy: 65.1, dartAlignment: 93.5, weightedErrorRatePct: "6.50%", logicScore: 88.5, riskScore: 88.0, reportCount: 24, snsAndMediaScore: 88.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "후공정 OSAT 어드밴스드 패키징 CAPEX 투자 회수 사이클",
+      comment: "반도체/IT/전자 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "이수빈",
+      brokerName: "대신증권",
+      sector: "반도체/IT/전자",
+      totalScore: 88.30,
+      metrics: { targetPriceAccuracy: 64.0, dartAlignment: 93.0, weightedErrorRatePct: "7.00%", logicScore: 88.0, riskScore: 87.5, reportCount: 22, snsAndMediaScore: 88.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "글로벌 파운드리 2나노 게이트올어라운드(GAA) 공정 비교",
+      comment: "반도체/IT/전자 섹터 8위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 9,
+      name: "채민숙",
+      brokerName: "한국투자증권",
+      sector: "반도체/IT/전자",
+      totalScore: 87.70,
+      metrics: { targetPriceAccuracy: 63.2, dartAlignment: 92.4, weightedErrorRatePct: "7.60%", logicScore: 87.0, riskScore: 86.8, reportCount: 27, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "반도체 전공정 장비사 수주잔고와 웨이퍼 팹 가동률",
+      comment: "반도체/IT/전자 섹터 9위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 10,
+      name: "고영민",
+      brokerName: "다올투자증권",
+      sector: "반도체/IT/전자",
+      totalScore: 87.20,
+      metrics: { targetPriceAccuracy: 62.4, dartAlignment: 91.9, weightedErrorRatePct: "8.10%", logicScore: 86.5, riskScore: 86.0, reportCount: 23, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "유리기판(Glass Substrate) 상용화 일정과 소부장 수혜주",
+      comment: "반도체/IT/전자 섹터 10위"
+    }
+  ],
+  "2차전지/배터리/소재": [
+    {
+      sectorRank: 1,
+      name: "전창현",
+      brokerName: "대신증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 92.30,
+      metrics: { targetPriceAccuracy: 61.8, dartAlignment: 96.4, weightedErrorRatePct: "3.60%", logicScore: 92.7, riskScore: 92.5, reportCount: 30, snsAndMediaScore: 92.0 },
+      isSectorChampion: true,
+      isAwardExcluded: true,
+      keyReportTitle: "캐즘(Chasm) 탈출의 조건: ESS 그리드 수요와 LFP 양산 원가 곡선",
+      comment: "2차전지 섹터 1위 (시상 제외 5개사 규정 적용 / 평가 1위 유지)"
+    },
+    {
+      sectorRank: 2,
+      name: "주민우",
+      brokerName: "NH투자증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 91.60,
+      metrics: { targetPriceAccuracy: 60.5, dartAlignment: 95.8, weightedErrorRatePct: "4.20%", logicScore: 92.0, riskScore: 91.5, reportCount: 28, snsAndMediaScore: 91.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "미국 인플레이션감축법(IRA) 보조금 현금흐름과 완성차 재고 소진",
+      comment: "2차전지 섹터 2위 (공식 시상 대상 24개사 최우수)"
+    },
+    {
+      sectorRank: 3,
+      name: "정원석",
+      brokerName: "iM증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 90.80,
+      metrics: { targetPriceAccuracy: 59.4, dartAlignment: 95.2, weightedErrorRatePct: "4.80%", logicScore: 91.0, riskScore: 90.5, reportCount: 25, snsAndMediaScore: 90.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "양극재 판가 스프레드 바닥 확인과 북미 AMPC 귀속 이익",
+      comment: "2차전지 섹터 3위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 4,
+      name: "이용욱",
+      brokerName: "한화투자증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 90.10,
+      metrics: { targetPriceAccuracy: 58.7, dartAlignment: 94.6, weightedErrorRatePct: "5.40%", logicScore: 90.5, riskScore: 90.0, reportCount: 26, snsAndMediaScore: 89.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "리튬·니켈 메탈 선물가 안정화에 따른 재고평가손익 환입",
+      comment: "2차전지 섹터 4위"
+    },
+    {
+      sectorRank: 5,
+      name: "이안나",
+      brokerName: "유진투자증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 89.40,
+      metrics: { targetPriceAccuracy: 57.8, dartAlignment: 94.0, weightedErrorRatePct: "6.00%", logicScore: 90.0, riskScore: 89.2, reportCount: 24, snsAndMediaScore: 89.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "차세대 전고체 배터리 파일럿 라인과 황화물계 고체전해질",
+      comment: "2차전지 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "김현수",
+      brokerName: "하나증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 88.70,
+      metrics: { targetPriceAccuracy: 56.9, dartAlignment: 93.5, weightedErrorRatePct: "6.50%", logicScore: 89.0, riskScore: 88.5, reportCount: 27, snsAndMediaScore: 88.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "배터리 3사 수주잔고와 유럽 탄소발자국 인증 대응 비용",
+      comment: "2차전지 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "권준수",
+      brokerName: "키움증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 88.10,
+      metrics: { targetPriceAccuracy: 56.0, dartAlignment: 93.0, weightedErrorRatePct: "7.00%", logicScore: 88.5, riskScore: 88.0, reportCount: 23, snsAndMediaScore: 88.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "음극재 실리콘 첨가제 상용화와 CNT 도전재 채택률",
+      comment: "2차전지 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "박진수",
+      brokerName: "신영증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 87.50,
+      metrics: { targetPriceAccuracy: 55.2, dartAlignment: 92.4, weightedErrorRatePct: "7.60%", logicScore: 88.0, riskScore: 87.2, reportCount: 21, snsAndMediaScore: 87.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "분리막 코팅 기술 다변화와 원통형 4680 폼팩터 양산",
+      comment: "2차전지 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "윤혁진",
+      brokerName: "SK증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 86.90,
+      metrics: { targetPriceAccuracy: 54.5, dartAlignment: 91.9, weightedErrorRatePct: "8.10%", logicScore: 87.0, riskScore: 86.8, reportCount: 22, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "동박 전력비 부담 완화와 말레이시아 현지 공장 가동률",
+      comment: "2차전지 섹터 9위"
+    },
+    {
+      sectorRank: 10,
+      name: "이창민",
+      brokerName: "KB증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 86.40,
+      metrics: { targetPriceAccuracy: 53.8, dartAlignment: 91.4, weightedErrorRatePct: "8.60%", logicScore: 86.5, riskScore: 86.0, reportCount: 20, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "배터리 리사이클링 폐배터리 블랙매스 회수율과 경제성",
+      comment: "2차전지 섹터 10위"
+    }
+  ],
+  "바이오/제약/헬스케어": [
+    {
+      sectorRank: 1,
+      name: "이안나",
+      brokerName: "교보증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 85.67,
+      metrics: { targetPriceAccuracy: 86.2, dartAlignment: 94.8, weightedErrorRatePct: "5.20%", logicScore: 85.2, riskScore: 85.0, reportCount: 25, snsAndMediaScore: 88.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "ADC 차세대 플랫폼의 임상 마일스톤과 기술수출 계약의 실질 가치",
+      comment: "바이오/제약/헬스케어 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "허혜민",
+      brokerName: "키움증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 85.10,
+      metrics: { targetPriceAccuracy: 85.0, dartAlignment: 94.2, weightedErrorRatePct: "5.80%", logicScore: 84.8, riskScore: 84.5, reportCount: 28, snsAndMediaScore: 87.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "글로벌 비만치료제(GLP-1) 파이프라인과 국내 개발사 L/O 가능성",
+      comment: "바이오/제약 섹터 2위"
+    },
+    {
+      sectorRank: 3,
+      name: "박재경",
+      brokerName: "하나증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 84.60,
+      metrics: { targetPriceAccuracy: 84.1, dartAlignment: 93.8, weightedErrorRatePct: "6.20%", logicScore: 84.2, riskScore: 84.0, reportCount: 26, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "미국 생물보안법(Biosecure Act) 입법 수혜와 국내 CDMO 수주",
+      comment: "바이오/제약 섹터 3위"
+    },
+    {
+      sectorRank: 4,
+      name: "김승민",
+      brokerName: "미래에셋증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 84.10,
+      metrics: { targetPriceAccuracy: 83.2, dartAlignment: 93.3, weightedErrorRatePct: "6.70%", logicScore: 83.8, riskScore: 83.5, reportCount: 24, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "바이오시밀러 미국 PBM 등재 현황과 자가면역질환 처방 점유율",
+      comment: "바이오/제약 섹터 4위"
+    },
+    {
+      sectorRank: 5,
+      name: "권해순",
+      brokerName: "유진투자증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 83.50,
+      metrics: { targetPriceAccuracy: 82.5, dartAlignment: 92.8, weightedErrorRatePct: "7.20%", logicScore: 83.2, riskScore: 83.0, reportCount: 22, snsAndMediaScore: 86.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "알츠하이머 치료제 항체 의약품 뇌혈관장벽(BBB) 통과율",
+      comment: "바이오/제약 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "이선경",
+      brokerName: "SK증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 83.00,
+      metrics: { targetPriceAccuracy: 81.8, dartAlignment: 92.3, weightedErrorRatePct: "7.70%", logicScore: 82.5, riskScore: 82.5, reportCount: 23, snsAndMediaScore: 85.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "세포·유전자 치료제(CGT) 위탁개발생산 공정 마진 구조",
+      comment: "바이오/제약 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "위해주",
+      brokerName: "한국투자증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 82.40,
+      metrics: { targetPriceAccuracy: 81.0, dartAlignment: 91.8, weightedErrorRatePct: "8.20%", logicScore: 82.0, riskScore: 82.0, reportCount: 21, snsAndMediaScore: 85.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "국내 전통 제약사 ETC 신약 개량신약 처방액 및 R&D 비중",
+      comment: "바이오/제약 섹터 7위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 8,
+      name: "정유경",
+      brokerName: "신영증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 81.90,
+      metrics: { targetPriceAccuracy: 80.2, dartAlignment: 91.2, weightedErrorRatePct: "8.80%", logicScore: 81.5, riskScore: 81.5, reportCount: 20, snsAndMediaScore: 84.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "에스테틱 미용 의료기기 및 톡신 북미·남미 수출 통관",
+      comment: "바이오/제약 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "장민환",
+      brokerName: "LS증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 81.30,
+      metrics: { targetPriceAccuracy: 79.5, dartAlignment: 90.7, weightedErrorRatePct: "9.30%", logicScore: 81.0, riskScore: 81.0, reportCount: 19, snsAndMediaScore: 84.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "연속혈당측정기(CGM) 글로벌 침투율과 건강보험 급여화",
+      comment: "바이오/제약 섹터 9위"
+    },
+    {
+      sectorRank: 10,
+      name: "하태기",
+      brokerName: "상상인증권",
+      sector: "바이오/제약/헬스케어",
+      totalScore: 80.80,
+      metrics: { targetPriceAccuracy: 78.8, dartAlignment: 90.1, weightedErrorRatePct: "9.90%", logicScore: 80.5, riskScore: 80.2, reportCount: 18, snsAndMediaScore: 83.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "원료의약품(API) 글로벌 다변화와 국산 신약의 로열티 현금흐름",
+      comment: "바이오/제약 섹터 10위"
+    }
+  ],
+  "자동차/모빌리티": [
+    {
+      sectorRank: 1,
+      name: "강성진",
+      brokerName: "KB증권",
+      sector: "자동차/모빌리티",
+      totalScore: 87.91,
+      metrics: { targetPriceAccuracy: 68.2, dartAlignment: 95.4, weightedErrorRatePct: "4.60%", logicScore: 87.1, riskScore: 87.0, reportCount: 31, snsAndMediaScore: 89.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "하이브리드(HEV) 믹스 개선에 따른 완성차 영업이익률 피크아웃 논쟁 종결",
+      comment: "자동차/모빌리티 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "임은영",
+      brokerName: "삼성증권",
+      sector: "자동차/모빌리티",
+      totalScore: 87.20,
+      metrics: { targetPriceAccuracy: 67.5, dartAlignment: 94.8, weightedErrorRatePct: "5.20%", logicScore: 86.5, riskScore: 86.5, reportCount: 29, snsAndMediaScore: 88.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "인도법인 상장(IPO)과 신흥국 현지화 공장 캐파 레버리지",
+      comment: "자동차/모빌리티 섹터 2위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 3,
+      name: "김평모",
+      brokerName: "DB금융투자",
+      sector: "자동차/모빌리티",
+      totalScore: 86.70,
+      metrics: { targetPriceAccuracy: 66.8, dartAlignment: 94.2, weightedErrorRatePct: "5.80%", logicScore: 86.0, riskScore: 86.0, reportCount: 27, snsAndMediaScore: 88.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "완성차 총주주환원율(자사주 소각+배당) 35% 달성 시나리오",
+      comment: "자동차/모빌리티 섹터 3위"
+    },
+    {
+      sectorRank: 4,
+      name: "조희승",
+      brokerName: "iM증권",
+      sector: "자동차/모빌리티",
+      totalScore: 86.10,
+      metrics: { targetPriceAccuracy: 66.0, dartAlignment: 93.7, weightedErrorRatePct: "6.30%", logicScore: 85.5, riskScore: 85.2, reportCount: 24, snsAndMediaScore: 87.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "미국 대선 관세 리스크와 조지아 전기차 메타플랜트(HMGMA) 가동",
+      comment: "자동차/모빌리티 섹터 4위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 5,
+      name: "이병근",
+      brokerName: "흥국증권",
+      sector: "자동차/모빌리티",
+      totalScore: 85.50,
+      metrics: { targetPriceAccuracy: 65.2, dartAlignment: 93.1, weightedErrorRatePct: "6.90%", logicScore: 85.0, riskScore: 84.8, reportCount: 22, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "자동차 1차 부품사 전장화 부품 믹스 개선과 마진 스프레드",
+      comment: "자동차/모빌리티 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "신윤철",
+      brokerName: "키움증권",
+      sector: "자동차/모빌리티",
+      totalScore: 85.00,
+      metrics: { targetPriceAccuracy: 64.5, dartAlignment: 92.6, weightedErrorRatePct: "7.40%", logicScore: 84.5, riskScore: 84.0, reportCount: 25, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "SDV 전환에 따른 차량용 OS 개발비 상각과 OTA 구독 모델",
+      comment: "자동차/모빌리티 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "유지웅",
+      brokerName: "다올투자증권",
+      sector: "자동차/모빌리티",
+      totalScore: 84.40,
+      metrics: { targetPriceAccuracy: 63.8, dartAlignment: 92.0, weightedErrorRatePct: "8.00%", logicScore: 84.0, riskScore: 83.5, reportCount: 23, snsAndMediaScore: 86.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "유럽 배출가스 유로7 규제 대응과 하이브리드 파워트레인",
+      comment: "자동차/모빌리티 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "문용권",
+      brokerName: "신영증권",
+      sector: "자동차/모빌리티",
+      totalScore: 83.90,
+      metrics: { targetPriceAccuracy: 63.0, dartAlignment: 91.5, weightedErrorRatePct: "8.50%", logicScore: 83.5, riskScore: 83.0, reportCount: 21, snsAndMediaScore: 85.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "타이어 원자재 고무 가격 안정화와 전기차 전용 타이어 ASP",
+      comment: "자동차/모빌리티 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "남주신",
+      brokerName: "교보증권",
+      sector: "자동차/모빌리티",
+      totalScore: 83.30,
+      metrics: { targetPriceAccuracy: 62.3, dartAlignment: 91.0, weightedErrorRatePct: "9.00%", logicScore: 83.0, riskScore: 82.5, reportCount: 20, snsAndMediaScore: 85.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "글로벌 물류비 하향 안정화에 따른 완성차 수출 해상운임 절감",
+      comment: "자동차/모빌리티 섹터 9위"
+    },
+    {
+      sectorRank: 10,
+      name: "김진석",
+      brokerName: "미래에셋증권",
+      sector: "자동차/모빌리티",
+      totalScore: 82.80,
+      metrics: { targetPriceAccuracy: 61.5, dartAlignment: 90.4, weightedErrorRatePct: "9.60%", logicScore: 82.5, riskScore: 82.0, reportCount: 19, snsAndMediaScore: 84.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "로보택시 및 자율주행 라이다 센서 채택률과 상용화 일정",
+      comment: "자동차/모빌리티 섹터 10위"
+    }
+  ],
+  "조선/중공업/방산": [
+    {
+      sectorRank: 1,
+      name: "이한결",
+      brokerName: "다올투자증권",
+      sector: "조선/중공업/방산",
+      totalScore: 84.84,
+      metrics: { targetPriceAccuracy: 73.1, dartAlignment: 94.5, weightedErrorRatePct: "5.50%", logicScore: 84.6, riskScore: 84.5, reportCount: 28, snsAndMediaScore: 88.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "LNG선 슬롯 프리미엄과 고선가 선박 건조 마진 실현 주기",
+      comment: "조선/중공업/방산 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "변용진",
+      brokerName: "하이투자증권",
+      sector: "조선/중공업/방산",
+      totalScore: 84.30,
+      metrics: { targetPriceAccuracy: 72.2, dartAlignment: 94.0, weightedErrorRatePct: "6.00%", logicScore: 84.0, riskScore: 84.0, reportCount: 26, snsAndMediaScore: 87.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "K-방산 유럽 폴란드·루마니아 수주잔고와 납기 마일스톤",
+      comment: "조선/중공업/방산 섹터 2위"
+    },
+    {
+      sectorRank: 3,
+      name: "정동익",
+      brokerName: "KB증권",
+      sector: "조선/중공업/방산",
+      totalScore: 83.80,
+      metrics: { targetPriceAccuracy: 71.5, dartAlignment: 93.5, weightedErrorRatePct: "6.50%", logicScore: 83.5, riskScore: 83.5, reportCount: 27, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "미국 해군 MRO 사업 진출과 함정 특수선 수출 가치 평가",
+      comment: "조선/중공업/방산 섹터 3위"
+    },
+    {
+      sectorRank: 4,
+      name: "양승윤",
+      brokerName: "유진투자증권",
+      sector: "조선/중공업/방산",
+      totalScore: 83.20,
+      metrics: { targetPriceAccuracy: 70.8, dartAlignment: 93.0, weightedErrorRatePct: "7.00%", logicScore: 83.0, riskScore: 83.0, reportCount: 24, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "전력 인프라 변압기 쇼티지와 미국 노후 전력망 교체 사이클",
+      comment: "조선/중공업/방산 섹터 4위"
+    },
+    {
+      sectorRank: 5,
+      name: "위경재",
+      brokerName: "하나증권",
+      sector: "조선/중공업/방산",
+      totalScore: 82.70,
+      metrics: { targetPriceAccuracy: 70.0, dartAlignment: 92.5, weightedErrorRatePct: "7.50%", logicScore: 82.5, riskScore: 82.2, reportCount: 23, snsAndMediaScore: 86.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "가스선(LPG/암모니아) 추진선 신조 발주와 친환경 엔진",
+      comment: "조선/중공업/방산 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "배성조",
+      brokerName: "한화투자증권",
+      sector: "조선/중공업/방산",
+      totalScore: 82.10,
+      metrics: { targetPriceAccuracy: 69.2, dartAlignment: 92.0, weightedErrorRatePct: "8.00%", logicScore: 82.0, riskScore: 81.8, reportCount: 25, snsAndMediaScore: 85.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "우주항공 발사체 및 위성 데이터 서비스 신사업 밸류에이션",
+      comment: "조선/중공업/방산 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "이동헌",
+      brokerName: "신한투자증권",
+      sector: "조선/중공업/방산",
+      totalScore: 81.60,
+      metrics: { targetPriceAccuracy: 68.5, dartAlignment: 91.5, weightedErrorRatePct: "8.50%", logicScore: 81.5, riskScore: 81.2, reportCount: 22, snsAndMediaScore: 85.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "공작기계 스마트 팩토리 로봇 자동화 라인 수주 추이",
+      comment: "조선/중공업/방산 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "엄경아",
+      brokerName: "신영증권",
+      sector: "조선/중공업/방산",
+      totalScore: 81.10,
+      metrics: { targetPriceAccuracy: 67.8, dartAlignment: 91.0, weightedErrorRatePct: "9.00%", logicScore: 81.0, riskScore: 80.8, reportCount: 21, snsAndMediaScore: 84.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "클락슨 신조선가지수(NPI) 상승세와 도크 슬롯 희소성",
+      comment: "조선/중공업/방산 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "최진명",
+      brokerName: "교보증권",
+      sector: "조선/중공업/방산",
+      totalScore: 80.60,
+      metrics: { targetPriceAccuracy: 67.0, dartAlignment: 90.4, weightedErrorRatePct: "9.60%", logicScore: 80.5, riskScore: 80.2, reportCount: 19, snsAndMediaScore: 84.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "유도무기 및 방공체계 중동 수출 계약의 금융지원 구조",
+      comment: "조선/중공업/방산 섹터 9위"
+    },
+    {
+      sectorRank: 10,
+      name: "곽민정",
+      brokerName: "현대차증권",
+      sector: "조선/중공업/방산",
+      totalScore: 80.10,
+      metrics: { targetPriceAccuracy: 66.2, dartAlignment: 89.9, weightedErrorRatePct: "10.10%", logicScore: 80.0, riskScore: 79.8, reportCount: 20, snsAndMediaScore: 83.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "원자력 발전 주기기(SMR) 해외 수출 잔고와 제작 마진",
+      comment: "조선/중공업/방산 섹터 10위"
+    }
+  ],
+  "플랫폼/게임/엔터": [
+    {
+      sectorRank: 1,
+      name: "이선화",
+      brokerName: "KB증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 96.51,
+      metrics: { targetPriceAccuracy: 64.5, dartAlignment: 97.2, weightedErrorRatePct: "2.80%", logicScore: 96.3, riskScore: 95.8, reportCount: 32, snsAndMediaScore: 94.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "AI 검색 도입에 따른 플랫폼 체류시간과 커머스 수수료 개편 효과",
+      comment: "플랫폼/게임/엔터 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "이기훈",
+      brokerName: "하나증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 95.80,
+      metrics: { targetPriceAccuracy: 63.8, dartAlignment: 96.5, weightedErrorRatePct: "3.50%", logicScore: 95.5, riskScore: 95.0, reportCount: 30, snsAndMediaScore: 93.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "K-POP 글로벌 음원 스트리밍 정산율 인상과 글로벌 팬덤 ARPU",
+      comment: "플랫폼/게임/엔터 섹터 2위"
+    },
+    {
+      sectorRank: 3,
+      name: "안도영",
+      brokerName: "한국투자증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 95.10,
+      metrics: { targetPriceAccuracy: 63.0, dartAlignment: 96.0, weightedErrorRatePct: "4.00%", logicScore: 95.0, riskScore: 94.5, reportCount: 28, snsAndMediaScore: 93.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "엔터 4사 콘서트 투어 MD 마진율과 위버스 커머스 수익성",
+      comment: "플랫폼/게임/엔터 섹터 3위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 4,
+      name: "김소혜",
+      brokerName: "한화투자증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 94.40,
+      metrics: { targetPriceAccuracy: 62.2, dartAlignment: 95.4, weightedErrorRatePct: "4.60%", logicScore: 94.2, riskScore: 94.0, reportCount: 26, snsAndMediaScore: 92.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "포털 AI 브리핑 탑재에 따른 검색광고 CPC 반등 효과",
+      comment: "플랫폼/게임/엔터 섹터 4위"
+    },
+    {
+      sectorRank: 5,
+      name: "정의훈",
+      brokerName: "유진투자증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 93.80,
+      metrics: { targetPriceAccuracy: 61.5, dartAlignment: 94.8, weightedErrorRatePct: "5.20%", logicScore: 93.5, riskScore: 93.2, reportCount: 25, snsAndMediaScore: 92.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "웹툰 미국 법인 상장 이후 IP 영상화 2차 판권 라이선싱",
+      comment: "플랫폼/게임/엔터 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "김하정",
+      brokerName: "다올투자증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 93.10,
+      metrics: { targetPriceAccuracy: 60.8, dartAlignment: 94.2, weightedErrorRatePct: "5.80%", logicScore: 93.0, riskScore: 92.5, reportCount: 27, snsAndMediaScore: 91.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "모바일 게임 라이브 서비스 잔존율과 PC/콘솔 신작 파이프라인",
+      comment: "플랫폼/게임/엔터 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "임희석",
+      brokerName: "미래에셋증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 92.50,
+      metrics: { targetPriceAccuracy: 60.0, dartAlignment: 93.6, weightedErrorRatePct: "6.40%", logicScore: 92.2, riskScore: 91.8, reportCount: 24, snsAndMediaScore: 91.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "숏폼 숏드라마 플랫폼 결제액 추이와 해외 현지화 수익 모델",
+      comment: "플랫폼/게임/엔터 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "정호윤",
+      brokerName: "한국투자증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 91.90,
+      metrics: { targetPriceAccuracy: 59.2, dartAlignment: 93.0, weightedErrorRatePct: "7.00%", logicScore: 91.5, riskScore: 91.2, reportCount: 23, snsAndMediaScore: 90.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "클라우드 서비스(MSP) 수익성 전환과 AI B2B 솔루션 매출",
+      comment: "플랫폼/게임/엔터 섹터 8위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 9,
+      name: "오동환",
+      brokerName: "삼성증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 91.30,
+      metrics: { targetPriceAccuracy: 58.5, dartAlignment: 92.4, weightedErrorRatePct: "7.60%", logicScore: 91.0, riskScore: 90.5, reportCount: 22, snsAndMediaScore: 90.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "게임 신작 출시 지연 리스크와 개발 인건비 통제 효과",
+      comment: "플랫폼/게임/엔터 섹터 9위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 10,
+      name: "이효진",
+      brokerName: "메리츠증권",
+      sector: "플랫폼/게임/엔터",
+      totalScore: 90.70,
+      metrics: { targetPriceAccuracy: 57.8, dartAlignment: 91.8, weightedErrorRatePct: "8.20%", logicScore: 90.2, riskScore: 89.8, reportCount: 21, snsAndMediaScore: 89.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "미디어 드라마 제작사 외주제작비 마진과 넷플릭스 리쿱율",
+      comment: "플랫폼/게임/엔터 섹터 10위"
+    }
+  ],
+  "금융/지주": [
+    {
+      sectorRank: 1,
+      name: "김인",
+      brokerName: "유진투자증권",
+      sector: "금융/지주",
+      totalScore: 96.29,
+      metrics: { targetPriceAccuracy: 71.8, dartAlignment: 97.5, weightedErrorRatePct: "2.50%", logicScore: 96.1, riskScore: 95.8, reportCount: 31, snsAndMediaScore: 93.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "보통주자본비율(CET1) 관리 목표와 은행 지주 총주주환원율 40% 도달 경로",
+      comment: "금융/지주 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "정준섭",
+      brokerName: "NH투자증권",
+      sector: "금융/지주",
+      totalScore: 95.60,
+      metrics: { targetPriceAccuracy: 71.0, dartAlignment: 96.8, weightedErrorRatePct: "3.20%", logicScore: 95.4, riskScore: 95.0, reportCount: 29, snsAndMediaScore: 92.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "보험업계 IFRS17 신계약 CSM(보험계약마진) 성장률과 해약환급금",
+      comment: "금융/지주 섹터 2위"
+    },
+    {
+      sectorRank: 3,
+      name: "백두산",
+      brokerName: "한국투자증권",
+      sector: "금융/지주",
+      totalScore: 95.00,
+      metrics: { targetPriceAccuracy: 70.2, dartAlignment: 96.2, weightedErrorRatePct: "3.80%", logicScore: 94.8, riskScore: 94.2, reportCount: 28, snsAndMediaScore: 92.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "증권사 브로커리지 수수료율 회복과 해외주식 예탁자산 수익",
+      comment: "금융/지주 섹터 3위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 4,
+      name: "박혜진",
+      brokerName: "대신증권",
+      sector: "금융/지주",
+      totalScore: 94.30,
+      metrics: { targetPriceAccuracy: 69.5, dartAlignment: 95.6, weightedErrorRatePct: "4.40%", logicScore: 94.0, riskScore: 93.5, reportCount: 26, snsAndMediaScore: 91.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "부동산 PF 추가 대손충당금 적립 사이클의 종료와 CCR 안정화",
+      comment: "금융/지주 섹터 4위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 5,
+      name: "조아해",
+      brokerName: "메리츠증권",
+      sector: "금융/지주",
+      totalScore: 93.70,
+      metrics: { targetPriceAccuracy: 68.8, dartAlignment: 95.0, weightedErrorRatePct: "5.00%", logicScore: 93.5, riskScore: 93.0, reportCount: 27, snsAndMediaScore: 91.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "기준금리 인하 국면 은행 순이자마진(NIM) 방어 전략 분석",
+      comment: "금융/지주 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "설용진",
+      brokerName: "SK증권",
+      sector: "금융/지주",
+      totalScore: 93.10,
+      metrics: { targetPriceAccuracy: 68.0, dartAlignment: 94.4, weightedErrorRatePct: "5.60%", logicScore: 92.8, riskScore: 92.2, reportCount: 25, snsAndMediaScore: 90.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "생명·손해보험사 K-ICS(지급여력비율) 규제와 배당 여력",
+      comment: "금융/지주 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "김도하",
+      brokerName: "한화투자증권",
+      sector: "금융/지주",
+      totalScore: 92.50,
+      metrics: { targetPriceAccuracy: 67.2, dartAlignment: 93.8, weightedErrorRatePct: "6.20%", logicScore: 92.0, riskScore: 91.5, reportCount: 24, snsAndMediaScore: 90.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "비은행 계열사(카드·캐피탈) 조달비용 안정화와 조달 스프레드",
+      comment: "금융/지주 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "은경완",
+      brokerName: "신한투자증권",
+      sector: "금융/지주",
+      totalScore: 91.90,
+      metrics: { targetPriceAccuracy: 66.5, dartAlignment: 93.2, weightedErrorRatePct: "6.80%", logicScore: 91.4, riskScore: 91.0, reportCount: 23, snsAndMediaScore: 89.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "지주회사 브랜드 로열티 수취 구조와 자사주 소각 실질 효과",
+      comment: "금융/지주 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "강승건",
+      brokerName: "KB증권",
+      sector: "금융/지주",
+      totalScore: 91.30,
+      metrics: { targetPriceAccuracy: 65.8, dartAlignment: 92.6, weightedErrorRatePct: "7.40%", logicScore: 90.8, riskScore: 90.2, reportCount: 22, snsAndMediaScore: 89.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "금융지주 밸류업 공시 이행 현황과 분기 균등배당 정책",
+      comment: "금융/지주 섹터 9위"
+    },
+    {
+      sectorRank: 10,
+      name: "우도형",
+      brokerName: "IBK투자증권",
+      sector: "금융/지주",
+      totalScore: 90.70,
+      metrics: { targetPriceAccuracy: 65.0, dartAlignment: 92.0, weightedErrorRatePct: "8.00%", logicScore: 90.0, riskScore: 89.5, reportCount: 21, snsAndMediaScore: 88.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "지방금융지주 지역 중소기업 대출 연체율 관리와 충당금 버퍼",
+      comment: "금융/지주 섹터 10위 (시상 제외 5개사)"
+    }
+  ],
+  "화학/철강/소재": [
+    {
+      sectorRank: 1,
+      name: "이용욱",
+      brokerName: "IBK투자증권",
+      sector: "화학/철강/소재",
+      totalScore: 90.03,
+      metrics: { targetPriceAccuracy: 58.4, dartAlignment: 95.9, weightedErrorRatePct: "4.10%", logicScore: 90.0, riskScore: 89.8, reportCount: 28, snsAndMediaScore: 90.0 },
+      isSectorChampion: true,
+      isAwardExcluded: true,
+      keyReportTitle: "중국 증설 피크와 나프타 분해설비(NCC) 구조조정 마진 회복 시나리오",
+      comment: "화학/철강 섹터 1위 (시상 제외 5개사 규정 적용 / 평가 1위 유지)"
+    },
+    {
+      sectorRank: 2,
+      name: "박광래",
+      brokerName: "신한투자증권",
+      sector: "화학/철강/소재",
+      totalScore: 89.50,
+      metrics: { targetPriceAccuracy: 57.6, dartAlignment: 95.2, weightedErrorRatePct: "4.80%", logicScore: 89.5, riskScore: 89.2, reportCount: 26, snsAndMediaScore: 89.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "글로벌 탄소국경조정제도(CBAM) 철강 마진 스프레드와 전기로 전환",
+      comment: "화학/철강 섹터 2위 (공식 시상 대상 24개사 최우수)"
+    },
+    {
+      sectorRank: 3,
+      name: "윤재성",
+      brokerName: "하나증권",
+      sector: "화학/철강/소재",
+      totalScore: 88.90,
+      metrics: { targetPriceAccuracy: 56.8, dartAlignment: 94.6, weightedErrorRatePct: "5.40%", logicScore: 89.0, riskScore: 88.5, reportCount: 27, snsAndMediaScore: 89.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "정유사 정제마진(복합마진) 바닥 통과와 항공유 수요 회복",
+      comment: "화학/철강 섹터 3위"
+    },
+    {
+      sectorRank: 4,
+      name: "이동욱",
+      brokerName: "IBK투자증권",
+      sector: "화학/철강/소재",
+      totalScore: 88.30,
+      metrics: { targetPriceAccuracy: 56.0, dartAlignment: 94.0, weightedErrorRatePct: "6.00%", logicScore: 88.2, riskScore: 88.0, reportCount: 25, snsAndMediaScore: 88.5 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "스페셜티 고기능성 합성고무 및 친환경 바이오 플라스틱 마진",
+      comment: "화학/철강 섹터 4위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 5,
+      name: "이진명",
+      brokerName: "신한투자증권",
+      sector: "화학/철강/소재",
+      totalScore: 87.70,
+      metrics: { targetPriceAccuracy: 55.2, dartAlignment: 93.4, weightedErrorRatePct: "6.60%", logicScore: 87.6, riskScore: 87.2, reportCount: 24, snsAndMediaScore: 88.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "중국 부동산 부양책에 따른 열연·철근 유통가격 반등 강도",
+      comment: "화학/철강 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "백영찬",
+      brokerName: "상상인증권",
+      sector: "화학/철강/소재",
+      totalScore: 87.10,
+      metrics: { targetPriceAccuracy: 54.5, dartAlignment: 92.8, weightedErrorRatePct: "7.20%", logicScore: 87.0, riskScore: 86.8, reportCount: 23, snsAndMediaScore: 87.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "에틸렌-나프타 스프레드 손익분기점(BEP) 250달러 돌파 시기",
+      comment: "화학/철강 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "박현욱",
+      brokerName: "현대차증권",
+      sector: "화학/철강/소재",
+      totalScore: 86.50,
+      metrics: { targetPriceAccuracy: 53.8, dartAlignment: 92.2, weightedErrorRatePct: "7.80%", logicScore: 86.5, riskScore: 86.2, reportCount: 22, snsAndMediaScore: 87.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "후판 가격 조선사 공급 단가 협상 결과와 자동차용 강판 ASP",
+      comment: "화학/철강 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "이유진",
+      brokerName: "유진투자증권",
+      sector: "화학/철강/소재",
+      totalScore: 85.90,
+      metrics: { targetPriceAccuracy: 53.0, dartAlignment: 91.6, weightedErrorRatePct: "8.40%", logicScore: 86.0, riskScore: 85.5, reportCount: 21, snsAndMediaScore: 86.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "비철금속(구리·알루미늄) LME 재고량과 AI 데이터센터 구리 수요",
+      comment: "화학/철강 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "이현욱",
+      brokerName: "IBK투자증권",
+      sector: "화학/철강/소재",
+      totalScore: 85.30,
+      metrics: { targetPriceAccuracy: 52.2, dartAlignment: 91.0, weightedErrorRatePct: "9.00%", logicScore: 85.5, riskScore: 85.0, reportCount: 20, snsAndMediaScore: 86.0 },
+      isSectorChampion: false,
+      isAwardExcluded: true,
+      keyReportTitle: "태양광 폴리실리콘 공급 과잉과 페로브스카이트 탠덤 셀 효율",
+      comment: "화학/철강 섹터 9위 (시상 제외 5개사)"
+    },
+    {
+      sectorRank: 10,
+      name: "전우제",
+      brokerName: "KB증권",
+      sector: "화학/철강/소재",
+      totalScore: 84.70,
+      metrics: { targetPriceAccuracy: 51.5, dartAlignment: 90.4, weightedErrorRatePct: "9.60%", logicScore: 85.0, riskScore: 84.5, reportCount: 19, snsAndMediaScore: 85.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "탄소 포집·활용(CCU) 블루수소 전환 비용과 탄소배출권 가격",
+      comment: "화학/철강 섹터 10위"
+    }
+  ],
+  "건설/물류/기타": [
+    {
+      sectorRank: 1,
+      name: "김인",
+      brokerName: "현대차증권",
+      sector: "건설/물류/기타",
+      totalScore: 83.15,
+      metrics: { targetPriceAccuracy: 62.5, dartAlignment: 93.8, weightedErrorRatePct: "6.20%", logicScore: 79.8, riskScore: 79.5, reportCount: 26, snsAndMediaScore: 86.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "PF 우발채무 잔존 리스크와 준공 후 미분양 사업장의 원가율 해소",
+      comment: "건설/물류/기타 섹터 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
+      name: "이은상",
+      brokerName: "NH투자증권",
+      sector: "건설/물류/기타",
+      totalScore: 82.60,
+      metrics: { targetPriceAccuracy: 61.8, dartAlignment: 93.2, weightedErrorRatePct: "6.80%", logicScore: 79.2, riskScore: 79.0, reportCount: 25, snsAndMediaScore: 85.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "체코 원전 및 중동 가스 플랜트 EPC 해외 수주 파이프라인",
+      comment: "건설/물류 섹터 2위"
+    },
+    {
+      sectorRank: 3,
+      name: "문경원",
+      brokerName: "메리츠증권",
+      sector: "건설/물류/기타",
+      totalScore: 82.00,
+      metrics: { targetPriceAccuracy: 61.0, dartAlignment: 92.6, weightedErrorRatePct: "7.40%", logicScore: 78.8, riskScore: 78.5, reportCount: 24, snsAndMediaScore: 85.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "한국전력 적자 해소와 송배전 전력망 신규 인프라 발주",
+      comment: "건설/물류 섹터 3위"
+    },
+    {
+      sectorRank: 4,
+      name: "배세호",
+      brokerName: "하이투자증권",
+      sector: "건설/물류/기타",
+      totalScore: 81.40,
+      metrics: { targetPriceAccuracy: 60.2, dartAlignment: 92.0, weightedErrorRatePct: "8.00%", logicScore: 78.2, riskScore: 78.0, reportCount: 23, snsAndMediaScore: 84.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "해운 컨테이너 운임지수(SCFI) 변동성과 홍해 물류 희망봉 우회",
+      comment: "건설/물류 섹터 4위"
+    },
+    {
+      sectorRank: 5,
+      name: "송유림",
+      brokerName: "한화투자증권",
+      sector: "건설/물류/기타",
+      totalScore: 80.80,
+      metrics: { targetPriceAccuracy: 59.5, dartAlignment: 91.5, weightedErrorRatePct: "8.50%", logicScore: 77.8, riskScore: 77.5, reportCount: 22, snsAndMediaScore: 84.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "주요 정비사업장 공사비 증액 협상 타결률과 주택 도급 마진",
+      comment: "건설/물류 섹터 5위"
+    },
+    {
+      sectorRank: 6,
+      name: "신동현",
+      brokerName: "현대차증권",
+      sector: "건설/물류/기타",
+      totalScore: 80.20,
+      metrics: { targetPriceAccuracy: 58.8, dartAlignment: 91.0, weightedErrorRatePct: "9.00%", logicScore: 77.2, riskScore: 77.0, reportCount: 21, snsAndMediaScore: 83.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "수도권 광역급행철도(GTX) 및 철도 인프라 민자사업 착공률",
+      comment: "건설/물류 섹터 6위"
+    },
+    {
+      sectorRank: 7,
+      name: "김기룡",
+      brokerName: "미래에셋증권",
+      sector: "건설/물류/기타",
+      totalScore: 79.60,
+      metrics: { targetPriceAccuracy: 58.0, dartAlignment: 90.4, weightedErrorRatePct: "9.60%", logicScore: 76.8, riskScore: 76.5, reportCount: 20, snsAndMediaScore: 83.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "데이터센터 전력 인프라 및 신재생 해상풍력 하부구조물 수주",
+      comment: "건설/물류 섹터 7위"
+    },
+    {
+      sectorRank: 8,
+      name: "박세라",
+      brokerName: "신영증권",
+      sector: "건설/물류/기타",
+      totalScore: 79.00,
+      metrics: { targetPriceAccuracy: 57.2, dartAlignment: 89.8, weightedErrorRatePct: "10.20%", logicScore: 76.2, riskScore: 76.0, reportCount: 19, snsAndMediaScore: 82.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "시멘트·레미콘 가격 인상 합의와 원자재 유연탄 수입 단가",
+      comment: "건설/물류 섹터 8위"
+    },
+    {
+      sectorRank: 9,
+      name: "장문준",
+      brokerName: "KB증권",
+      sector: "건설/물류/기타",
+      totalScore: 78.40,
+      metrics: { targetPriceAccuracy: 56.5, dartAlignment: 89.2, weightedErrorRatePct: "10.80%", logicScore: 75.8, riskScore: 75.5, reportCount: 18, snsAndMediaScore: 82.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "종합 물류 기업의 풀필먼트 자동화 로봇 도입과 택배 단가",
+      comment: "건설/물류 섹터 9위"
+    },
+    {
+      sectorRank: 10,
+      name: "백광제",
+      brokerName: "교보증권",
+      sector: "건설/물류/기타",
+      totalScore: 77.80,
+      metrics: { targetPriceAccuracy: 55.8, dartAlignment: 88.6, weightedErrorRatePct: "11.40%", logicScore: 75.2, riskScore: 75.0, reportCount: 17, snsAndMediaScore: 81.5 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "국내 건설사 토지신탁 사업장 리스크와 분양보증 사고율",
+      comment: "건설/물류 섹터 10위"
+    }
+  ]
+};
+
