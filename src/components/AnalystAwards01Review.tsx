@@ -98,7 +98,7 @@ export const AnalystAwards01Review: React.FC = () => {
           <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-slate-400 border-t border-slate-800/80 pt-4">
             <div><span className="text-slate-500 font-medium">검증 표본 리포트:</span> <strong className="text-white">7,842건 (1~9월 마스터 DB 전수)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
-            <div><span className="text-slate-500 font-medium">평가 대상 애널리스트:</span> <strong className="text-white">681명 (24개사+5개사 전수)</strong></div>
+            <div><span className="text-slate-500 font-medium">평가 대상 애널리스트:</span> <strong className="text-white">303명 (성명+전문섹터 기준 전수)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
             <div><span className="text-slate-500 font-medium">참여 증권사:</span> <strong className="text-white">공식 대상 24개사 · 평가 5개사</strong></div>
             <div className="h-3 w-px bg-slate-800" />
@@ -236,26 +236,31 @@ export const AnalystAwards01Review: React.FC = () => {
       {/* 2. 하단: 10대 표준 섹터별 최우수 애널리스트 개별 심사평 리포트집 */}
       {/* ======================================================== */}
       <section className="space-y-6 pt-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <FileText size={20} />
+        <div className="space-y-4 border-b border-slate-800 pb-4">
+          {/* 타이틀 영역: 독립된 행으로 full width를 확보하여 글자가 1글자씩 세로로 줄바꿈되는 현상 완전 방지 */}
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+              <FileText size={22} />
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">2. 10대 표준 섹터별 최우수 애널리스트 개별 심사평 리포트집</h2>
-              <p className="text-xs text-slate-400">각 섹터 1위 수상자 전원의 정량·정성 성과 분석, 시장 기여 통찰 및 공식 심사위원단 헌정사</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                2. 10대 표준 섹터별 최우수 애널리스트 개별 심사평 리포트집
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                각 섹터 1위 수상자 전원의 정량·정성 성과 분석, 시장 기여 통찰 및 공식 심사위원단 헌정사
+              </p>
             </div>
           </div>
 
-          {/* 필터 행: 섹터 필터 + 시상 적격 퀵 필터 */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-            {/* 섹터 필터 탭 */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+          {/* 필터 툴바 영역: 섹터 탭과 시상 적격 필터를 하단에 여유 있게 배치 */}
+          <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 pt-1">
+            {/* 섹터 필터 탭 (가로 스크롤 가능) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full w-full xl:w-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {sectors.map((sec) => (
                 <button
                   key={sec}
                   onClick={() => setSectorFilter(sec)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition cursor-pointer shrink-0 ${
                     sectorFilter === sec
                       ? 'bg-indigo-600 text-white shadow-md'
                       : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
@@ -267,7 +272,7 @@ export const AnalystAwards01Review: React.FC = () => {
             </div>
 
             {/* v1.8.1 시상 적격 퀵 필터 */}
-            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0">
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 shrink-0 self-start xl:self-auto">
               <button
                 onClick={() => setAwardEligibilityFilter('ALL')}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
