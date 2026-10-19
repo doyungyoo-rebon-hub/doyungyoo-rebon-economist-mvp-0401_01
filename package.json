@@ -30,6 +30,7 @@
     "express": "^4.21.2",
     "firebase": "^12.17.0",
     "firebase-admin": "^14.2.0",
+    "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "iconv-lite": "^0.7.3",
     "jspdf": "^4.2.1",
@@ -43,7 +44,8 @@
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "vite": "^6.2.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/pdf-parse": "^1.1.5",

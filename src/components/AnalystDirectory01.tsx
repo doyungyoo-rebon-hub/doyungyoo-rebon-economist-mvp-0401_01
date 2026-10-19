@@ -136,7 +136,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
     return matchBroker && matchSector && matchSearch && matchCategory;
   });
 
-  const totalRegistered = loading ? 681 : analysts.length;
+  const totalRegistered = loading ? 200 : analysts.length;
   const totalBrokers = 24; // v1.8.1 공식 대상 24개사
   const isAwardWinnersOnly = !loading && analysts.length <= 10;
   const avgCoverage = analysts.length > 0
@@ -162,7 +162,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
                 애널리스트조회_01
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                {loading ? '전수 681명 로딩 중...' : isAwardWinnersOnly ? '🏆 10대 섹터 1위 수상자 (10명)' : `전수 ${totalRegistered.toLocaleString()}명 애널리스트 프로파일`}
+                {loading ? '연구원 프로필 로딩 중...' : isAwardWinnersOnly ? '🏆 10대 섹터 1위 수상자 (10명)' : `전수 ${totalRegistered.toLocaleString()}명 애널리스트 프로파일 (1인 1사 단일화)`}
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 {isAwardWinnersOnly ? '9개 증권사' : '공식 대상 24개사 · 평가 5개사'}
@@ -334,7 +334,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
       {loading ? (
         <div className="p-16 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-3">
           <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-slate-400 text-sm">32개 증권사 {totalRegistered > 0 ? totalRegistered : 681}명 연구원 프로필을 로딩 중입니다...</p>
+          <p className="text-slate-400 text-sm">24개 대상 증권사 {totalRegistered > 0 ? totalRegistered : 200}명 연구원 프로필을 로딩 중입니다...</p>
         </div>
       ) : filtered.length === 0 ? (
         <div className="p-16 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-3">

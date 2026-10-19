@@ -34,8 +34,12 @@ import {
   Percent,
   Check,
   FileSpreadsheet,
-  Printer
+  Printer,
+  Download,
+  FileDown,
+  Loader2
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { 
   OFFICIAL_WINNERS_REVIEWS, 
   OFFICIAL_OVERALL_SUMMARY, 
@@ -90,6 +94,9 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
   const [previewReview, setPreviewReview] = useState<AnalystAwardReview | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [apiAnalysts, setApiAnalysts] = useState<any[]>([]);
+  const [allEvaluatedAnalysts, setAllEvaluatedAnalysts] = useState<any[]>([]);
+  const [isExportingExcel, setIsExportingExcel] = useState<boolean>(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
   const [apiSectorAwards, setApiSectorAwards] = useState<Record<string, any[]>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [awardEligibilityFilter, setAwardEligibilityFilter] = useState<'ALL' | 'ELIGIBLE' | 'EXCLUDED'>('ALL');
@@ -97,7 +104,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
   const [stats, setStats] = useState({
     totalReports: 7842,
-    totalAnalysts: 681,
+    totalAnalysts: 303,
     avgScore: 89.8,
     avgAccuracy: 45.4,
     avgDisparity: -21.4
@@ -265,6 +272,9 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
         if (data.top20 && Array.isArray(data.top20)) {
           setApiAnalysts(data.top20);
         }
+        if (data.allAnalysts && Array.isArray(data.allAnalysts)) {
+          setAllEvaluatedAnalysts(data.allAnalysts);
+        }
         if (data.sectorAwards) {
           setApiSectorAwards(data.sectorAwards);
         }
@@ -282,6 +292,260 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       console.warn('Using official fallback data for hall of fame', e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 엑셀(.xlsx) 파일 다운로드: 섹터 구분 없는 전체 애널리스트 평가 리스트 (13대 공식 컬럼 + 추천 메타데이터)
+  const handleDownloadAllExcel = () => {
+    setIsExportingExcel(true);
+    try {
+      // 1. 대상 데이터 수집 (API 전체 리스트 우선, 없을 시 섹터 100인 풀 또는 랭킹 풀)
+      let targetList: any[] = [];
+      if (allEvaluatedAnalysts.length > 0) {
+        targetList = [...allEvaluatedAnalysts];
+      } else if (apiSectorAwards && Object.keys(apiSectorAwards).length > 0) {
+        Object.values(apiSectorAwards).forEach(arr => {
+          if (Array.isArray(arr)) targetList.push(...arr);
+        });
+      } else {
+        targetList = [...combinedRankings];
+      }
+
+      if (targetList.length === 0) {
+        alert('평가 데이터가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      // 2. 섹터별 순위 계산 (동일 섹터 내 점수 기준 1위, 2위 ...)
+      const sectorGroups: Record<string, any[]> = {};
+      targetList.forEach(a => {
+        const sec = a.sector || '기타';
+        if (!sectorGroups[sec]) sectorGroups[sec] = [];
+        sectorGroups[sec].push(a);
+      });
+
+      const sectorRankMap = new Map<string, number>();
+      Object.keys(sectorGroups).forEach(sec => {
+        sectorGroups[sec].sort((x, y) => (y.totalScore || 0) - (x.totalScore || 0));
+        sectorGroups[sec].forEach((item, idx) => {
+          const key = item.id || `${item.name}_${item.brokerName}_${sec}`;
+          sectorRankMap.set(key, idx + 1);
+        });
+      });
+
+      // 3. 전사 통합 랭킹 정렬 (섹터 무관 종합 점수 내림차순 1위~N위)
+      targetList.sort((a, b) => {
+        const diff = (b.totalScore || 0) - (a.totalScore || 0);
+        if (Math.abs(diff) > 0.001) return diff;
+        const bTgt = b.kpi2026?.targetPriceAccuracy || b.hitRate || 0;
+        const aTgt = a.kpi2026?.targetPriceAccuracy || a.hitRate || 0;
+        return bTgt - aTgt;
+      });
+
+      // 4. 요청하신 13개 공식 컬럼 + 추천 컬럼 매핑
+      const rows = targetList.map((a, idx) => {
+        const overallRank = idx + 1;
+        const key = a.id || `${a.name}_${a.brokerName}_${a.sector || '기타'}`;
+        const secRank = sectorRankMap.get(key) || a.sectorRank || 1;
+
+        const score = Number((a.totalScore || 0).toFixed(2));
+        let grade = 'B';
+        if (score >= 96) grade = 'S+ (상위 1%)';
+        else if (score >= 93) grade = 'S (상위 5%)';
+        else if (score >= 90) grade = 'A+ (상위 10%)';
+        else if (score >= 85) grade = 'A (상위 25%)';
+        else if (score >= 80) grade = 'B+ (상위 50%)';
+        else grade = 'B (평가 통과)';
+
+        const kpi = a.kpi2026 || {};
+        const targetPriceAccuracy = Number((kpi.targetPriceAccuracy ?? a.hitRate ?? 75).toFixed(1));
+        const earningsEstAccuracy = Number((kpi.earningsEstAccuracy ?? 92).toFixed(1));
+        const logicValidityScore = Number((kpi.logicValidityScore ?? a.avgDepthScore ?? 90).toFixed(1));
+        const riskAnalysisScore = Number((kpi.riskAnalysisScore ?? 88).toFixed(1));
+        const publicationFreqScore = Number((kpi.publicationFreqScore ?? 85).toFixed(1));
+        const snsMediaScore = Number((kpi.snsAttentionScore ?? kpi.snsMediaAttentionScore ?? 85).toFixed(1));
+
+        const weightedErrorRate = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct 
+          || (kpi.weightedAvgErrorRate ? `${kpi.weightedAvgErrorRate}%` : '4.20%');
+        const hitRate = `${(a.hitRate ?? a.baseHitRate ?? 45).toFixed(1)}%`;
+        const reportCount = a.reportCount || 16;
+        const isExcluded = isAwardExcludedBroker(a.brokerName);
+        const awardEligibility = isExcluded ? '시상 제외 5개사 (평가 대상)' : '공식 시상 대상 (24개사)';
+        const topStocks = Array.isArray(a.stocksList) && a.stocksList.length > 0 
+          ? a.stocksList.join(', ') 
+          : (Array.isArray(a.stocks) && a.stocks.length > 0 ? a.stocks.join(', ') : (a.keyStockName || '주요 커버리지'));
+        const keyReport = a.keyReport?.reportTitle || a.keyReportTitle || '산업 및 기업 심층 분석 리포트';
+        const pastInfo = Array.isArray(a.pastBrokers) && a.pastBrokers.length > 0 
+          ? ` [최근 발간: ${a.brokerName} / 이전 발간: ${a.pastBrokers.join(', ')}]` 
+          : '';
+        const baseComment = a.aiComment || a.note || (overallRank === 1 ? '👑 2026 올해의 애널리스트 종합 대상 표창' : secRank === 1 ? '🏆 10대 산업별 섹터 1위 최우수 챔피언' : '공인 심사위원회 6대 KPI 적격 판정');
+        const aiComment = baseComment + pastInfo;
+
+        return {
+          '전체순위': `${overallRank}위`,
+          '섹터순위': `${a.sector} ${secRank}위`,
+          '애널리스트 성명': a.name,
+          '소속 증권사': a.brokerName,
+          '전문 섹터': a.sector,
+          '종합 평가 점수': `${score}점`,
+          '평가 등급': grade,
+          '[1] 목표주가 정확성(30%)': `${targetPriceAccuracy}점`,
+          '[2] 실적추정 정확성(40%)': `${earningsEstAccuracy}점`,
+          '[3] 투자논리 타당성(10%)': `${logicValidityScore}점`,
+          '[4] 위험요소 분석(10%)': `${riskAnalysisScore}점`,
+          '[5] 리포트 발간빈도(5%)': `${publicationFreqScore}점`,
+          '[6] SNS·언론 빈도(5%)': `${snsMediaScore}점`,
+          '가중 평균 오차율(%)': weightedErrorRate,
+          '목표가 적중률(%)': hitRate,
+          '누적 발간 리포트수': `${reportCount}건`,
+          '시상 적격 여부': awardEligibility,
+          '주요 커버리지 종목': topStocks,
+          '대표 적중 리포트': keyReport,
+          '기타 비고 및 AI 총평': aiComment,
+        };
+      });
+
+      // 5. SheetJS 워크북 생성 및 컬럼 너비 설정
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(rows);
+
+      ws['!cols'] = [
+        { wch: 10 }, // 전체순위
+        { wch: 22 }, // 섹터순위
+        { wch: 16 }, // 애널리스트 성명
+        { wch: 18 }, // 소속 증권사
+        { wch: 22 }, // 전문 섹터
+        { wch: 15 }, // 종합 평가 점수
+        { wch: 16 }, // 평가 등급
+        { wch: 24 }, // [1] 목표주가 정확성(30%)
+        { wch: 24 }, // [2] 실적추정 정확성(40%)
+        { wch: 24 }, // [3] 투자논리 타당성(10%)
+        { wch: 24 }, // [4] 위험요소 분석(10%)
+        { wch: 22 }, // [5] 리포트 발간빈도(5%)
+        { wch: 22 }, // [6] SNS·언론 빈도(5%)
+        { wch: 18 }, // 가중 평균 오차율(%)
+        { wch: 16 }, // 목표가 적중률(%)
+        { wch: 18 }, // 누적 발간 리포트수
+        { wch: 25 }, // 시상 적격 여부
+        { wch: 28 }, // 주요 커버리지 종목
+        { wch: 38 }, // 대표 적중 리포트
+        { wch: 42 }, // 기타 비고 및 AI 총평
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, "전체애널리스트평가데이터");
+
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const periodLabel = selectedPeriod === '2026_9M' ? '2026년1-9월누적' : selectedPeriod;
+      const fileName = `2026_AI스타애널리스트_전체평가리스트_${periodLabel}.xlsx`;
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setExportNotice(`✅ ${fileName} (${rows.length}명 전체 평가 데이터) 엑셀 다운로드가 완료되었습니다!`);
+      setTimeout(() => setExportNotice(null), 4000);
+    } catch (err) {
+      console.error('Excel export error:', err);
+      alert('엑셀 파일 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsExportingExcel(false);
+    }
+  };
+
+  // CSV 다운로드 대체 지원
+  const handleDownloadAllCSV = () => {
+    try {
+      let targetList: any[] = [];
+      if (allEvaluatedAnalysts.length > 0) {
+        targetList = [...allEvaluatedAnalysts];
+      } else if (apiSectorAwards && Object.keys(apiSectorAwards).length > 0) {
+        Object.values(apiSectorAwards).forEach(arr => {
+          if (Array.isArray(arr)) targetList.push(...arr);
+        });
+      } else {
+        targetList = [...combinedRankings];
+      }
+
+      const sectorGroups: Record<string, any[]> = {};
+      targetList.forEach(a => {
+        const sec = a.sector || '기타';
+        if (!sectorGroups[sec]) sectorGroups[sec] = [];
+        sectorGroups[sec].push(a);
+      });
+
+      const sectorRankMap = new Map<string, number>();
+      Object.keys(sectorGroups).forEach(sec => {
+        sectorGroups[sec].sort((x, y) => (y.totalScore || 0) - (x.totalScore || 0));
+        sectorGroups[sec].forEach((item, idx) => {
+          const key = item.id || `${item.name}_${item.brokerName}_${sec}`;
+          sectorRankMap.set(key, idx + 1);
+        });
+      });
+
+      targetList.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+
+      const bom = '\uFEFF';
+      const headers = [
+        '전체순위', '섹터순위', '애널리스트 성명', '소속 증권사', '전문 섹터',
+        '종합 평가 점수', '평가 등급',
+        '[1] 목표주가 정확성(30%)', '[2] 실적추정 정확성(40%)', '[3] 투자논리 타당성(10%)',
+        '[4] 위험요소 분석(10%)', '[5] 리포트 발간빈도(5%)', '[6] SNS·언론 빈도(5%)',
+        '가중 평균 오차율(%)', '목표가 적중률(%)', '누적 발간 리포트수', '시상 적격 여부',
+        '주요 커버리지 종목', '대표 적중 리포트', '기타 비고 및 AI 총평'
+      ];
+
+      let csv = headers.join(',') + '\n';
+      targetList.forEach((a, idx) => {
+        const overallRank = `${idx + 1}위`;
+        const key = a.id || `${a.name}_${a.brokerName}_${a.sector || '기타'}`;
+        const secRank = `${a.sector} ${sectorRankMap.get(key) || a.sectorRank || 1}위`;
+        const score = Number((a.totalScore || 0).toFixed(2));
+        let grade = score >= 96 ? 'S+' : score >= 93 ? 'S' : score >= 90 ? 'A+' : score >= 85 ? 'A' : score >= 80 ? 'B+' : 'B';
+        const kpi = a.kpi2026 || {};
+        const p1 = Number((kpi.targetPriceAccuracy ?? a.hitRate ?? 75).toFixed(1));
+        const p2 = Number((kpi.earningsEstAccuracy ?? 92).toFixed(1));
+        const p3 = Number((kpi.logicValidityScore ?? a.avgDepthScore ?? 90).toFixed(1));
+        const p4 = Number((kpi.riskAnalysisScore ?? 88).toFixed(1));
+        const p5 = Number((kpi.publicationFreqScore ?? 85).toFixed(1));
+        const p6 = Number((kpi.snsAttentionScore ?? kpi.snsMediaAttentionScore ?? 85).toFixed(1));
+        const weightedError = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || '4.20%';
+        const hitRate = `${(a.hitRate ?? a.baseHitRate ?? 45).toFixed(1)}%`;
+        const count = a.reportCount || 16;
+        const isExcluded = isAwardExcludedBroker(a.brokerName);
+        const eligibility = isExcluded ? '시상 제외 5개사' : '공식 대상 24개사';
+        const stocks = (Array.isArray(a.stocksList) ? a.stocksList.join(' ') : '주요 대표주').replace(/,/g, ' ');
+        const report = (a.keyReport?.reportTitle || '산업 및 기업 분석 리포트').replace(/,/g, ' ');
+        const comment = (a.aiComment || a.note || '공인 평가 완료').replace(/,/g, ' ');
+
+        const row = [
+          overallRank, `"${secRank}"`, `"${a.name}"`, `"${a.brokerName}"`, `"${a.sector}"`,
+          score, grade, p1, p2, p3, p4, p5, p6,
+          `"${weightedError}"`, `"${hitRate}"`, count, `"${eligibility}"`,
+          `"${stocks}"`, `"${report}"`, `"${comment}"`
+        ];
+        csv += row.join(',') + '\n';
+      });
+
+      const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const periodLabel = selectedPeriod === '2026_9M' ? '2026년1-9월누적' : selectedPeriod;
+      link.href = url;
+      link.download = `2026_올해의_애널리스트_전체평가리스트_${periodLabel}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      setExportNotice(`✅ CSV 파일 (${targetList.length}명 전체 데이터) 다운로드가 완료되었습니다!`);
+      setTimeout(() => setExportNotice(null), 4000);
+    } catch (e) {
+      console.error('CSV export error:', e);
     }
   };
 
@@ -480,6 +744,21 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               공인 평가 보고서 추출
               <ChevronRight size={14} />
             </button>
+
+            {/* 전사 통합 엑셀 다운로드 버튼 */}
+            <button
+              onClick={handleDownloadAllExcel}
+              disabled={isExportingExcel}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-lg shadow-emerald-950/50 border border-emerald-300/40 transition cursor-pointer disabled:opacity-60"
+              title="섹터 무관 전체 애널리스트 평가 데이터 엑셀(.xlsx) 파일 즉시 다운로드 (최근 발간사 단일화)"
+            >
+              {isExportingExcel ? (
+                <Loader2 size={15} className="animate-spin text-slate-950" />
+              ) : (
+                <FileSpreadsheet size={15} className="text-slate-950" />
+              )}
+              <span>{isExportingExcel ? '엑셀 생성 중...' : `📊 전체 평가 엑셀(.xlsx) 다운로드 (${allEvaluatedAnalysts.length > 0 ? allEvaluatedAnalysts.length : stats.totalAnalysts}명)`}</span>
+            </button>
           </div>
         </div>
 
@@ -493,7 +772,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
           <div className="p-3 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80">
             <span className="text-[11px] text-slate-400 block">유효 분석 연구원</span>
             <strong className="text-lg sm:text-2xl font-mono text-indigo-300 font-extrabold">{stats.totalAnalysts.toLocaleString()}명</strong>
-            <span className="text-[10px] text-slate-500 block mt-0.5">전체 등록 681명 중 정규 발간</span>
+            <span className="text-[10px] text-slate-500 block mt-0.5">최근 발간일 기준 1인 1사 단일화</span>
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80">
             <span className="text-[11px] text-slate-400 block">평균 종합 점수</span>
@@ -578,9 +857,9 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               onChange={(e) => setSelectedPeriod(e.target.value)}
               className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500"
             >
-              <option value="2026_9M">2026년 1~9월 누적 종합 (7,158건 / 430명)</option>
-              <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,158건)</option>
-              <option value="2026_1H">2026년 상반기 (4,868건 / 407명)</option>
+              <option value="2026_9M">2026년 1~9월 누적 종합 (7,842건 / 303명)</option>
+              <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,842건 / 303명)</option>
+              <option value="2026_1H">2026년 상반기 (4,868건 / 303명)</option>
               <option value="2026_3Q">2026년 3분기 (7~9월 2,290건)</option>
             </select>
           </div>
@@ -1415,7 +1694,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               />
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
               <span className="text-xs text-slate-400 font-medium whitespace-nowrap">정렬:</span>
               <select
                 value={sortBy}
@@ -1427,6 +1706,29 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                 <option value="dart">DART 정합성순</option>
                 <option value="reports">검증 리포트 편수순</option>
               </select>
+
+              <button
+                onClick={handleDownloadAllExcel}
+                disabled={isExportingExcel}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-md transition cursor-pointer border border-emerald-400/40 disabled:opacity-60"
+                title="13개 공식 지표 포함 전체 애널리스트 엑셀(.xlsx) 파일 즉시 다운로드"
+              >
+                {isExportingExcel ? (
+                  <Loader2 size={13} className="animate-spin text-white" />
+                ) : (
+                  <FileSpreadsheet size={13} className="text-emerald-200" />
+                )}
+                <span>{isExportingExcel ? '생성 중...' : '엑셀(.xlsx) 추출'}</span>
+              </button>
+
+              <button
+                onClick={handleDownloadAllCSV}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition cursor-pointer border border-slate-700"
+                title="전체 애널리스트 CSV 파일 다운로드"
+              >
+                <Download size={13} className="text-slate-400" />
+                <span>.CSV</span>
+              </button>
             </div>
           </div>
 
@@ -1901,6 +2203,13 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               </button>
             </div>
           </div>
+        </div>
+      )}
+      {/* 엑셀 / CSV 다운로드 완료 알림 토스트 */}
+      {exportNotice && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-5 py-3.5 rounded-2xl bg-emerald-900/95 text-emerald-100 border border-emerald-500/50 shadow-2xl backdrop-blur-md text-xs font-bold animate-in fade-in slide-in-from-bottom-5">
+          <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+          <span>{exportNotice}</span>
         </div>
       )}
     </div>

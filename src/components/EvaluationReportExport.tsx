@@ -29,8 +29,9 @@ import {
   Loader2,
   AlertTriangle
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import * as htmlToImage from 'html-to-image';
 import { jsPDF } from 'jspdf';
+import * as XLSX from 'xlsx';
 import { 
   OFFICIAL_OVERALL_SUMMARY, 
   OFFICIAL_WINNERS_REVIEWS
@@ -269,7 +270,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 
 ## 1. 심사 개요 및 총평
 - **검증 데이터**: 2026년 1~9월 국내 증권사 리포트 7,842건 전수 분석
-- **평가 대상**: 유효 발간 407명 (전체 등록 681명)
+- **평가 대상**: 성명 및 전문섹터 스마트 식별 기준 유효 303명 (최신 소속 증권사 실적 통합)
 - **공시 팩트체크**: 금융감독원 전자공시(Open DART) 실적 정합성 99.8% 크로스체크 완료
 - **적용 모형**: 가중 평균 오차율(Weighted Average Error Rate) 결합 6대 결정론적 평가 알고리즘
 
@@ -346,7 +347,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
     return md;
   }, [grandPrizeWinner, sectorChampions, all100SectorAnalysts]);
 
-  // Handle Direct PDF Download using html2canvas & jsPDF (실제 PDF 파일 직접 다운로드)
+  // Handle Direct PDF Download using html-to-image & jsPDF (실제 PDF 파일 직접 다운로드)
   const handleDirectDownloadPDF = async () => {
     if (!printableRef.current) return;
     setIsGeneratingPdf(true);
@@ -358,20 +359,89 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       setPaperTheme('official_white');
     }
 
-    // Give React time to update DOM to white paper theme
-    await new Promise((resolve) => setTimeout(resolve, 250));
+    // Give React and CSS transition time to update DOM to white paper theme
+    await new Promise((resolve) => setTimeout(resolve, 350));
+
+    const element = printableRef.current;
+    const origWidth = element.style.width;
+    const origMaxWidth = element.style.maxWidth;
+    const origOverflow = element.style.overflow;
+    const savedStyles = new Map<HTMLElement, string>();
 
     try {
-      setPdfProgress('고해상도 PDF 벡터 및 데이터 표 캡처 중 (약 2초 소요)...');
-      const element = printableRef.current;
+      setPdfProgress('고해상도 PDF 벡터 및 데이터 표 캡처 중 (스크롤바 제거 및 전체 확장)...');
 
-      const canvas = await html2canvas(element, {
-        scale: 2, // 2x retina clarity for crystal sharp typography & graphics
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowWidth: 1024,
+      // Temporarily expand width to standard desktop document width (960px) and disable any scrollbars
+      element.style.width = '960px';
+      element.style.maxWidth = '960px';
+      element.style.overflow = 'visible';
+
+      // Ensure all child tables/scroll containers are fully expanded with overflow visible
+      const scrollContainers = element.querySelectorAll<HTMLElement>('.overflow-x-auto, .overflow-y-auto, [class*="overflow-"]');
+      scrollContainers.forEach((el) => {
+        savedStyles.set(el, el.style.overflow);
+        el.style.overflow = 'visible';
       });
+
+      let canvas: HTMLCanvasElement;
+      try {
+        canvas = await htmlToImage.toCanvas(element, {
+          backgroundColor: '#ffffff',
+          pixelRatio: 1.5,
+          skipFonts: true,
+          cacheBust: true,
+          style: {
+            borderRadius: '0px',
+            boxShadow: 'none',
+            border: 'none',
+            transform: 'none',
+            width: '960px',
+            maxWidth: '960px',
+            overflow: 'visible',
+          },
+          filter: (node) => {
+            if (node instanceof HTMLElement && (node.classList?.contains('print:hidden') || node.hasAttribute('data-no-pdf'))) {
+              return false;
+            }
+            return true;
+          }
+        });
+      } catch (firstErr) {
+        console.warn('htmlToImage.toCanvas initial attempt failed, trying toPng fallback...', firstErr);
+        setPdfProgress('대체 렌더링 엔진으로 PDF 래스터화 중...');
+        const pngDataUrl = await htmlToImage.toPng(element, {
+          backgroundColor: '#ffffff',
+          pixelRatio: 1.2,
+          skipFonts: true,
+          style: {
+            borderRadius: '0px',
+            boxShadow: 'none',
+            border: 'none',
+            width: '960px',
+            maxWidth: '960px',
+            overflow: 'visible',
+          }
+        });
+        const img = new Image();
+        img.src = pngDataUrl;
+        await new Promise((resolve, reject) => {
+          img.onload = () => resolve(null);
+          img.onerror = (e) => reject(new Error('Failed to load converted PNG image: ' + String(e)));
+        });
+        canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || 960;
+        canvas.height = img.naturalHeight || 1200;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+        }
+      }
+
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas render resulted in empty image');
+      }
 
       setPdfProgress('A4 페이지 자동 분할 및 PDF 문서 패키징 중...');
 
@@ -379,8 +449,8 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       const pageWidth = 210;
       const pageHeight = 297;
       const margin = 8;
-      const contentWidth = pageWidth - margin * 2;
-      const contentHeight = pageHeight - margin * 2;
+      const contentWidth = pageWidth - margin * 2; // 194mm
+      const contentHeight = pageHeight - margin * 2; // 281mm
 
       // Slice height on canvas corresponding to A4 printable content height
       const pageSliceHeightPx = Math.floor(canvas.width * (contentHeight / contentWidth));
@@ -412,7 +482,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             sliceHeight
           );
 
-          const imgData = pageCanvas.toDataURL('image/jpeg', 0.95);
+          const imgData = pageCanvas.toDataURL('image/jpeg', 0.92);
           if (pageIndex > 0) {
             pdf.addPage();
           }
@@ -425,15 +495,28 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       }
 
       setPdfProgress('PDF 파일 저장 완료!');
-      const fileName = `2026_AI_스타_애널리스트_공인_평가결과_보고서_${selectedPeriod}.pdf`;
+      const typeLabel = 
+        reportType === 'summary' ? '총괄의결서' :
+        reportType === 'sector_top100' ? '10대섹터TOP100' :
+        reportType === 'consumer_special' ? '소비재유통특별심사서' : '전수데이터북';
+      const fileName = `2026_AI스타애널리스트_공인평가보고서_${typeLabel}_${selectedPeriod}.pdf`;
       pdf.save(fileName);
       showNotice(`✅ ${fileName} 파일이 정상 다운로드되었습니다!`);
-    } catch (err) {
+    } catch (err: any) {
       console.error('PDF export error:', err);
-      showNotice('⚠️ PDF 파일 직접 생성 중 오류가 발생했습니다. 브라우저 인쇄 또는 HTML 다운로드를 이용해 주세요.');
+      const errMsg = err?.message || '알 수 없는 오류';
+      showNotice(`⚠️ PDF 생성 중 오류가 발생했습니다 (${errMsg.slice(0, 50)}). [HTML 다운로드] 또는 브라우저 인쇄를 이용해 주세요.`);
     } finally {
       setIsGeneratingPdf(false);
       setPdfProgress('');
+      if (printableRef.current) {
+        printableRef.current.style.width = origWidth;
+        printableRef.current.style.maxWidth = origMaxWidth;
+        printableRef.current.style.overflow = origOverflow;
+      }
+      savedStyles.forEach((val, el) => {
+        el.style.overflow = val;
+      });
       if (prevTheme !== 'official_white') {
         setPaperTheme(prevTheme);
       }
@@ -445,14 +528,20 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
     if (paperTheme !== 'official_white') {
       setPaperTheme('official_white');
     }
-    showNotice('🖨️ 브라우저 인쇄를 호출합니다. 인쇄창이 뜨지 않는 경우 [📄 PDF 파일 다운로드] 버튼을 이용하세요.');
+    const isIframe = window.self !== window.top;
+    if (isIframe) {
+      showNotice('ℹ️ 미리보기(iFrame) 환경에서는 팝업 인쇄창이 브라우저에 의해 차단될 수 있습니다. [📄 PDF 파일 다운로드]를 누르시면 즉시 .pdf 파일이 저장됩니다.');
+    } else {
+      showNotice('🖨️ 브라우저 인쇄를 호출합니다. 대상을 [PDF로 저장]으로 선택하세요.');
+    }
     setTimeout(() => {
       try {
         window.print();
       } catch (e) {
         console.warn('window.print error:', e);
+        showNotice('ℹ️ 브라우저 보안으로 인쇄창 호출이 차단되었습니다. [📄 PDF 파일 다운로드]를 이용해 주세요.');
       }
-    }, 200);
+    }, 300);
   };
 
   // Handle Markdown Download
@@ -469,43 +558,197 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
     showNotice('마크다운(.md) 보고서 파일이 다운로드되었습니다.');
   };
 
+  // Handle Excel (.xlsx) Download (섹터 무관 전체 리스트 13대 지표 + 추천 메타데이터)
+  const handleDownloadExcelXLSX = () => {
+    try {
+      let targetList: any[] = [];
+      if (apiData?.allAnalysts && Array.isArray(apiData.allAnalysts) && apiData.allAnalysts.length > 0) {
+        targetList = [...apiData.allAnalysts];
+      } else {
+        targetList = [...all100SectorAnalysts];
+      }
+
+      if (targetList.length === 0) {
+        showNotice('평가 데이터가 준비되지 않았습니다.');
+        return;
+      }
+
+      // Group and sort by sector for sector ranking
+      const sectorGroups: Record<string, any[]> = {};
+      targetList.forEach(a => {
+        const sec = a.sector || '기타';
+        if (!sectorGroups[sec]) sectorGroups[sec] = [];
+        sectorGroups[sec].push(a);
+      });
+
+      const sectorRankMap = new Map<string, number>();
+      Object.keys(sectorGroups).forEach(sec => {
+        sectorGroups[sec].sort((x, y) => (y.totalScore || 0) - (x.totalScore || 0));
+        sectorGroups[sec].forEach((item, idx) => {
+          const key = item.id || `${item.name}_${item.brokerName}_${sec}`;
+          sectorRankMap.set(key, idx + 1);
+        });
+      });
+
+      // Sort global rank by totalScore descending
+      targetList.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+
+      const rows = targetList.map((a, idx) => {
+        const overallRank = idx + 1;
+        const key = a.id || `${a.name}_${a.brokerName}_${a.sector || '기타'}`;
+        const secRank = sectorRankMap.get(key) || a.sectorRank || 1;
+
+        const score = Number((a.totalScore || 0).toFixed(2));
+        let grade = 'B';
+        if (score >= 96) grade = 'S+ (상위 1%)';
+        else if (score >= 93) grade = 'S (상위 5%)';
+        else if (score >= 90) grade = 'A+ (상위 10%)';
+        else if (score >= 85) grade = 'A (상위 25%)';
+        else if (score >= 80) grade = 'B+ (상위 50%)';
+        else grade = 'B (평가 통과)';
+
+        const kpi = a.kpi2026 || {};
+        const p1 = Number((kpi.targetPriceAccuracy ?? a.hitRate ?? 75).toFixed(1));
+        const p2 = Number((kpi.earningsEstAccuracy ?? 92).toFixed(1));
+        const p3 = Number((kpi.investmentLogicValidity ?? kpi.logicValidityScore ?? 90).toFixed(1));
+        const p4 = Number((kpi.riskAnalysisAdequacy ?? kpi.riskAnalysisScore ?? 88).toFixed(1));
+        const p5 = Number((kpi.reportPublicationFreq ?? kpi.publicationFreqScore ?? 85).toFixed(1));
+        const p6 = Number((kpi.snsAttention ?? kpi.snsMediaAttentionScore ?? 85).toFixed(1));
+
+        const weightedError = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct 
+          || (kpi.weightedAvgErrorRate ? `${kpi.weightedAvgErrorRate}%` : '4.20%');
+        const hitRate = `${(a.hitRate ?? a.baseHitRate ?? 45).toFixed(1)}%`;
+        const count = a.reportCount || 16;
+        const isExcluded = isAwardExcludedBroker(a.brokerName);
+        const eligibility = isExcluded ? '시상 제외 5개사 (평가 대상)' : '공식 시상 대상 (24개사)';
+        const topStocks = Array.isArray(a.stocksList) && a.stocksList.length > 0 
+          ? a.stocksList.join(', ') 
+          : (Array.isArray(a.stocks) && a.stocks.length > 0 ? a.stocks.join(', ') : '주요 대표 커버리지');
+        const keyReport = a.keyReport?.reportTitle || a.keyReportTitle || '산업 및 기업 심층 분석 리포트';
+        const pastInfo = Array.isArray(a.pastBrokers) && a.pastBrokers.length > 0 
+          ? ` [최근 발간: ${a.brokerName} / 이전 발간: ${a.pastBrokers.join(', ')}]` 
+          : '';
+        const baseComment = a.aiComment || a.note || (overallRank === 1 ? '👑 2026 올해의 애널리스트 종합 대상 표창' : secRank === 1 ? '🏆 10대 산업별 섹터 1위 최우수 챔피언' : '공인 심사위원회 6대 KPI 적격 판정');
+        const aiComment = baseComment + pastInfo;
+
+        return {
+          '전체순위': `${overallRank}위`,
+          '섹터순위': `${a.sector} ${secRank}위`,
+          '애널리스트 성명': a.name,
+          '소속 증권사': a.brokerName,
+          '전문 섹터': a.sector,
+          '종합 평가 점수': `${score}점`,
+          '평가 등급': grade,
+          '[1] 목표주가 정확성(30%)': `${p1}점`,
+          '[2] 실적추정 정확성(40%)': `${p2}점`,
+          '[3] 투자논리 타당성(10%)': `${p3}점`,
+          '[4] 위험요소 분석(10%)': `${p4}점`,
+          '[5] 리포트 발간빈도(5%)': `${p5}점`,
+          '[6] SNS·언론 빈도(5%)': `${p6}점`,
+          '가중 평균 오차율(%)': weightedError,
+          '목표가 적중률(%)': hitRate,
+          '누적 발간 리포트수': `${count}건`,
+          '시상 적격 여부': eligibility,
+          '주요 커버리지 종목': topStocks,
+          '대표 적중 리포트': keyReport,
+          '기타 비고 및 AI 총평': aiComment,
+        };
+      });
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(rows);
+
+      ws['!cols'] = [
+        { wch: 10 }, { wch: 22 }, { wch: 16 }, { wch: 18 }, { wch: 22 },
+        { wch: 15 }, { wch: 16 }, { wch: 24 }, { wch: 24 }, { wch: 24 },
+        { wch: 24 }, { wch: 22 }, { wch: 22 }, { wch: 18 }, { wch: 16 },
+        { wch: 18 }, { wch: 25 }, { wch: 28 }, { wch: 38 }, { wch: 42 },
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, "전체애널리스트평가데이터");
+
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const fileName = `2026_AI스타애널리스트_공인평가_전체데이터_${selectedPeriod}.xlsx`;
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showNotice(`✅ ${fileName} (${rows.length}명 전체 데이터) 엑셀 다운로드가 완료되었습니다!`);
+    } catch (e) {
+      console.error('Excel export error:', e);
+      showNotice('엑셀 파일 생성 중 오류가 발생했습니다.');
+    }
+  };
+
   // Handle CSV Download
   const handleDownloadCSV = () => {
     // Generate UTF-8 BOM CSV
     const bom = '\uFEFF';
-    let csv = '섹터,섹터순위,성명,소속증권사,종합점수,가중평균오차율(%),목표주가정확성(30%),실적추정정확성(40%),투자논리타당성(10%),위험분석적절성(10%),발간빈도(5%),SNS언론(5%),발간리포트수,시상적격여부\n';
+    const headers = [
+      '전체순위', '섹터순위', '애널리스트 성명', '소속 증권사', '전문 섹터',
+      '종합 평가 점수', '평가 등급',
+      '[1] 목표주가 정확성(30%)', '[2] 실적추정 정확성(40%)', '[3] 투자논리 타당성(10%)',
+      '[4] 위험요소 분석(10%)', '[5] 리포트 발간빈도(5%)', '[6] SNS·언론 빈도(5%)',
+      '가중 평균 오차율(%)', '목표가 적중률(%)', '누적 발간 리포트수', '시상 적격 여부',
+      '주요 커버리지 종목', '대표 적중 리포트', '기타 비고 및 AI 총평'
+    ];
 
-    all100SectorAnalysts.forEach(a => {
+    let targetList: any[] = [];
+    if (apiData?.allAnalysts && Array.isArray(apiData.allAnalysts) && apiData.allAnalysts.length > 0) {
+      targetList = [...apiData.allAnalysts];
+    } else {
+      targetList = [...all100SectorAnalysts];
+    }
+
+    targetList.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
+
+    let csv = headers.join(',') + '\n';
+    targetList.forEach((a, idx) => {
+      const overallRank = `${idx + 1}위`;
+      const secRank = `${a.sector} ${a.sectorRank || 1}위`;
+      const score = Number((a.totalScore || 0).toFixed(2));
+      let grade = score >= 96 ? 'S+' : score >= 93 ? 'S' : score >= 90 ? 'A+' : score >= 85 ? 'A' : score >= 80 ? 'B+' : 'B';
+      const kpi = a.kpi2026 || {};
+      const p1 = Number((kpi.targetPriceAccuracy ?? a.hitRate ?? 75).toFixed(1));
+      const p2 = Number((kpi.earningsEstAccuracy ?? 92).toFixed(1));
+      const p3 = Number((kpi.investmentLogicValidity ?? kpi.logicValidityScore ?? 90).toFixed(1));
+      const p4 = Number((kpi.riskAnalysisAdequacy ?? kpi.riskAnalysisScore ?? 88).toFixed(1));
+      const p5 = Number((kpi.reportPublicationFreq ?? kpi.publicationFreqScore ?? 85).toFixed(1));
+      const p6 = Number((kpi.snsAttention ?? kpi.snsMediaAttentionScore ?? 85).toFixed(1));
+      const weightedError = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || '4.20%';
+      const hitRate = `${(a.hitRate ?? a.baseHitRate ?? 45).toFixed(1)}%`;
+      const count = a.reportCount || 16;
       const isExcluded = isAwardExcludedBroker(a.brokerName);
+      const eligibility = isExcluded ? '시상 제외 5개사' : '공식 대상 24개사';
+      const stocks = (Array.isArray(a.stocksList) ? a.stocksList.join(' ') : '주요 대표주').replace(/,/g, ' ');
+      const report = (a.keyReport?.reportTitle || '산업 및 기업 분석 리포트').replace(/,/g, ' ');
+      const comment = (a.aiComment || a.note || '공인 평가 완료').replace(/,/g, ' ');
+
       const row = [
-        `"${a.sector}"`,
-        a.sectorRank || 1,
-        `"${a.name}"`,
-        `"${a.brokerName}"`,
-        a.totalScore,
-        a.kpi2026?.weightedAvgErrorRate || '8.5',
-        a.kpi2026?.targetPriceAccuracy || a.hitRate || 95,
-        a.kpi2026?.earningsEstAccuracy || 96,
-        a.kpi2026?.investmentLogicValidity || 92,
-        a.kpi2026?.riskAnalysisAdequacy || 93,
-        a.kpi2026?.reportPublicationFreq || 90,
-        a.kpi2026?.snsAttention || 91,
-        a.reportCount || 20,
-        isExcluded ? '"시상 제외 5개사"' : '"공식 대상 24개사"'
-      ].join(',');
-      csv += row + '\n';
+        overallRank, `"${secRank}"`, `"${a.name}"`, `"${a.brokerName}"`, `"${a.sector}"`,
+        score, grade, p1, p2, p3, p4, p5, p6,
+        `"${weightedError}"`, `"${hitRate}"`, count, `"${eligibility}"`,
+        `"${stocks}"`, `"${report}"`, `"${comment}"`
+      ];
+      csv += row.join(',') + '\n';
     });
 
     const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `AI_Star_Analyst_Awards_100_Evaluated_${selectedPeriod}.csv`;
+    link.download = `AI_Star_Analyst_Awards_All_Evaluated_${selectedPeriod}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    showNotice('100인 전체 평가 데이터 CSV가 다운로드되었습니다.');
+    showNotice(`${targetList.length}인 전체 평가 데이터 CSV가 다운로드되었습니다.`);
   };
 
   // Handle HTML standalone download
@@ -514,21 +757,23 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>2026 AI 스타 애널리스트 어워즈 공인 심사 결과 보고서</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 960px; margin: 40px auto; padding: 20px; }
-    h1 { color: #0f172a; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
-    h2 { color: #1e3a8a; margin-top: 30px; border-left: 4px solid #3b82f6; padding-left: 10px; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
-    th, td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
-    th { background: #f8fafc; font-weight: bold; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 12px; font-weight: bold; background: #fef3c7; color: #92400e; }
-    .seal-box { margin-top: 40px; padding: 20px; border: 2px dashed #94a3b8; border-radius: 8px; text-align: right; }
-    @media print { body { max-width: 100%; margin: 0; padding: 15mm; } }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Pretendard Variable", Pretendard, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #1e293b; background: #f8fafc; }
+    .report-wrap { max-width: 960px; margin: 30px auto; padding: 30px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
+    @media print { 
+      body { background: #ffffff !important; }
+      .report-wrap { max-width: 100% !important; margin: 0 !important; padding: 10mm !important; border: none !important; box-shadow: none !important; }
+      .print\\:hidden { display: none !important; }
+    }
   </style>
 </head>
-<body>
-  ${printableRef.current ? printableRef.current.innerHTML : '보고서 내용'}
+<body class="p-4 sm:p-8">
+  <div class="report-wrap">
+    ${printableRef.current ? printableRef.current.innerHTML : '보고서 내용'}
+  </div>
 </body>
 </html>`;
 
@@ -846,13 +1091,23 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               <span>.MD 다운</span>
             </button>
 
+            {/* 4. 전사 통합 엑셀 (.xlsx) 다운로드 버튼 */}
+            <button
+              onClick={handleDownloadExcelXLSX}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border border-emerald-400/50 text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow"
+              title="13개 공인 항목 전체 애널리스트 엑셀(.xlsx) 파일 즉시 다운로드"
+            >
+              <FileSpreadsheet size={14} className="text-white" />
+              <span>전체 엑셀(.xlsx) 다운</span>
+            </button>
+
             <button
               onClick={handleDownloadCSV}
-              className="px-3 py-1.5 rounded-xl bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow"
-              title="엑셀 호환 CSV 파일 저장 (UTF-8 BOM)"
+              className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow"
+              title="CSV 포맷 저장 (UTF-8 BOM)"
             >
-              <FileSpreadsheet size={14} className="text-emerald-400" />
-              <span>Excel/CSV 다운</span>
+              <Download size={13} className="text-slate-400" />
+              <span>.CSV</span>
             </button>
 
             <button
@@ -987,7 +1242,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       {/* ========================================================================= */}
       <div 
         ref={printableRef}
-        className={`transition-all duration-300 ${
+        className={`printable-report transition-all duration-300 ${
           paperTheme === 'official_white'
             ? 'bg-white text-slate-900 border border-slate-300 shadow-2xl rounded-3xl p-8 sm:p-14 print:p-0 print:border-none print:shadow-none'
             : 'bg-slate-900 text-slate-100 border border-slate-800 shadow-2xl rounded-3xl p-8 sm:p-12'
@@ -1033,7 +1288,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">검증 리포트 / 인원</span>
-              <strong className="font-bold">7,842건 / 유효 407명</strong>
+              <strong className="font-bold">7,842건 / 유효 303명</strong>
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">시상 규정</span>
@@ -1055,14 +1310,14 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             본 심사는 투자자 신뢰 회복을 위해 <strong>목표주가 정확성(30%)</strong>과 분기별·지표별 중요도를 차등 반영하는 <strong>실적 추정 정확성(40% - 가중 평균 오차율 모델)</strong>을 양대 기둥으로 삼고, 투자 논리(10%), 위험 분석(10%), 발간 빈도(5%), SNS·언론(5%)을 종합 합산했습니다.
           </p>
 
-          {/* 6대 가중치 테이블 */}
-          <div className="overflow-x-auto">
-            <table className={`w-full text-left text-xs border-collapse ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
+          {/* 6대 가중치 테이블 - 스크롤바 없는 완전 확장형 테이블 */}
+          <div className="w-full overflow-x-auto print:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <table className={`w-full text-left text-xs border-collapse table-auto ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
               <thead>
                 <tr className={paperTheme === 'official_white' ? 'bg-slate-100 text-slate-800' : 'bg-slate-800 text-slate-200'}>
-                  <th className="p-2.5 border border-slate-300 font-bold w-12 text-center">번호</th>
-                  <th className="p-2.5 border border-slate-300 font-bold">평가 항목</th>
-                  <th className="p-2.5 border border-slate-300 font-bold text-center w-24">가중치</th>
+                  <th className="p-2.5 border border-slate-300 font-bold w-12 text-center shrink-0">번호</th>
+                  <th className="p-2.5 border border-slate-300 font-bold w-36 sm:w-44 shrink-0">평가 항목</th>
+                  <th className="p-2.5 border border-slate-300 font-bold text-center w-20 shrink-0">가중치</th>
                   <th className="p-2.5 border border-slate-300 font-bold">핵심 산출 로직 및 계산 수식</th>
                 </tr>
               </thead>
@@ -1129,7 +1384,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-amber-500 text-slate-950">
-                  전체 407명 중 종합 1위 단독 표창
+                  전체 303명 중 종합 1위 단독 표창
                 </span>
                 <h4 className="text-2xl font-black mt-1">
                   한유정 수석연구위원 <span className="text-base font-semibold text-slate-500">({grandPrizeWinner.brokerName} · 소비재/유통/음식료)</span>
@@ -1189,8 +1444,9 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className={`w-full text-left text-xs border-collapse ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
+          {/* 10대 섹터 챔피언 테이블 - 스크롤바 없는 완전 확장형 테이블 */}
+          <div className="w-full overflow-x-auto print:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <table className={`w-full text-left text-xs border-collapse table-auto ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
               <thead>
                 <tr className={paperTheme === 'official_white' ? 'bg-slate-100 text-slate-800' : 'bg-slate-800 text-slate-200'}>
                   <th className="p-2.5 border border-slate-300 font-bold text-center w-12">순위</th>
@@ -1339,8 +1595,9 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className={`w-full text-left text-xs border-collapse ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
+            {/* 10대 섹터 100인 풀 테이블 - 스크롤바 없는 완전 확장형 테이블 */}
+            <div className="w-full overflow-x-auto print:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <table className={`w-full text-left text-xs border-collapse table-auto ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
                 <thead>
                   <tr className={paperTheme === 'official_white' ? 'bg-slate-100 text-slate-800' : 'bg-slate-800 text-slate-200'}>
                     <th className="p-2 border border-slate-300 text-center w-10">순위</th>

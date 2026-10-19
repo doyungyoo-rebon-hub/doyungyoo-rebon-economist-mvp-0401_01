@@ -30,4 +30,28 @@
   .print\:hidden {
     display: none !important;
   }
+  * {
+    overflow: visible !important;
+    max-height: none !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* Report Export Suite: Never render browser scrollbars or clip content */
+.printable-report,
+.printable-report * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.printable-report ::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
