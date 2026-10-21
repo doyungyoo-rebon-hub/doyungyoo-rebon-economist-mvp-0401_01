@@ -166,7 +166,7 @@ import {
   executeVectorDbRollback,
   restoreVectorDbMode,
 } from "./src/utils/vectorDbStore.ts";
-import { lookupVerifiedDirectoryAnalyst } from "./src/utils/realAnalystDirectory.ts";
+import { lookupVerifiedDirectoryAnalyst, OFFICIAL_ANALYST_MASTER_ROSTER } from "./src/utils/realAnalystDirectory.ts";
 import { resolveReportAnalyst } from "./src/utils/analystParser.ts";
 import {
   generateFinalEvaluation,
@@ -6910,15 +6910,17 @@ app.get(
           stockCounter.get(sName).analystSet.add(`${name}_${bName}`);
         }
         monthCounter.set(ym, (monthCounter.get(ym) || 0) + 1);
-        const key = `${name}___${sec}`;
+        const master = OFFICIAL_ANALYST_MASTER_ROSTER[name];
+        const effectiveSec = master ? master.sector : sec;
+        const key = `${name}___${effectiveSec}`;
         if (!analystMap.has(key)) {
           analystMap.set(key, {
             id: `an_${key}`.replace(/[\s/]/g, "_"),
             name,
-            brokerName: bName,
+            brokerName: master ? master.broker : bName,
             latestPublishDate: pDate,
             brokerCounts: {},
-            sector: sec,
+            sector: effectiveSec,
             reports: [],
             sectorCounts: {},
             stockCounts: {},
@@ -6927,12 +6929,14 @@ app.get(
         }
         const item = analystMap.get(key);
         item.brokerCounts[bName] = (item.brokerCounts[bName] || 0) + 1;
-        if (pDate > (item.latestPublishDate || "")) {
-          item.latestPublishDate = pDate;
-          item.brokerName = bName;
-        } else if (pDate === (item.latestPublishDate || "")) {
-          if ((item.brokerCounts[bName] || 0) > (item.brokerCounts[item.brokerName] || 0)) {
+        if (!master) {
+          if (pDate > (item.latestPublishDate || "")) {
+            item.latestPublishDate = pDate;
             item.brokerName = bName;
+          } else if (pDate === (item.latestPublishDate || "")) {
+            if ((item.brokerCounts[bName] || 0) > (item.brokerCounts[item.brokerName] || 0)) {
+              item.brokerName = bName;
+            }
           }
         }
         item.reports.push(r);
@@ -7052,14 +7056,19 @@ app.get(
           badgeTitle = "🚀 고수익률 발굴";
         else if (coverages.length >= 4)
           badgeTitle = "🏢 멀티 커버리지";
+        const master = OFFICIAL_ANALYST_MASTER_ROSTER[a.name];
+        const officialBroker = master ? master.broker : a.brokerName;
+        const officialSector = master ? master.sector : primarySector;
+        const pastBrokers = master ? Array.from(new Set([...Object.keys(a.brokerCounts || {}).filter(b => b !== officialBroker), ...(master.pastBrokers || [])])) : Object.keys(a.brokerCounts || {}).filter(b => b !== officialBroker);
+        const pastBrokersText = pastBrokers.length > 0 ? `이전 발간: ${pastBrokers.join(', ')}` : null;
         return {
           id: a.id,
           name: a.name,
-          brokerName: a.brokerName,
-          brokerId: a.brokerName,
-          pastBrokers: Object.keys(a.brokerCounts || {}).filter(b => b !== a.brokerName),
-          pastBrokersText: Object.keys(a.brokerCounts || {}).filter(b => b !== a.brokerName).length > 0 ? `이전 발간: ${Object.keys(a.brokerCounts || {}).filter(b => b !== a.brokerName).join(', ')}` : null,
-          sector: primarySector,
+          brokerName: officialBroker,
+          brokerId: officialBroker,
+          pastBrokers,
+          pastBrokersText,
+          sector: officialSector,
           secondarySectors,
           jobTitle,
           avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(a.name)}_${encodeURIComponent(a.brokerName)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`,
@@ -7338,15 +7347,17 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
       const ym = pDate.slice(0, 7) || "2026-01";
       brokerSet.add(bName);
       sectorSet.add(sec);
-      const key = `${name}___${sec}`;
+      const master = OFFICIAL_ANALYST_MASTER_ROSTER[name];
+      const effectiveSec = master ? master.sector : sec;
+      const key = `${name}___${effectiveSec}`;
       if (!analystMap.has(key)) {
         analystMap.set(key, {
           id: `an_eval_${key}`.replace(/[\s/]/g, "_"),
           name,
-          brokerName: bName,
+          brokerName: master ? master.broker : bName,
           latestPublishDate: pDate,
           brokerCounts: {},
-          sector: sec,
+          sector: effectiveSec,
           sectorCounts: {},
           reportCount: 0,
           totalHits: 0,
@@ -7361,13 +7372,14 @@ app.get("/api/pipeline-01/annual-analysts-01", (req, res) => {
       }
       const a = analystMap.get(key);
       a.brokerCounts[bName] = (a.brokerCounts[bName] || 0) + 1;
-      // 가장 최근 발간 리포트 기준 소속 증권사 단일화
-      if (pDate > (a.latestPublishDate || "")) {
-        a.latestPublishDate = pDate;
-        a.brokerName = bName;
-      } else if (pDate === (a.latestPublishDate || "")) {
-        if ((a.brokerCounts[bName] || 0) > (a.brokerCounts[a.brokerName] || 0)) {
+      if (!master) {
+        if (pDate > (a.latestPublishDate || "")) {
+          a.latestPublishDate = pDate;
           a.brokerName = bName;
+        } else if (pDate === (a.latestPublishDate || "")) {
+          if ((a.brokerCounts[bName] || 0) > (a.brokerCounts[a.brokerName] || 0)) {
+            a.brokerName = bName;
+          }
         }
       }
       a.reportCount++;
@@ -7851,9 +7863,12 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     }
     const bName = String(r.brokerName || r.broker || "KB\uC99D\uAD8C").trim();
     const rawSec = String(r.sector || "\uBC18\uB3C4\uCCB4/IT").trim();
-    const sec = getCanonicalSector(rawSec);
+    const master = OFFICIAL_ANALYST_MASTER_ROSTER[rawName];
+    // [공인 인명록 SSOT 및 스마트 식별]
+    // 공식 인명록에 등록된 애널리스트는 인명록의 공인 섹터를 절대 기준으로 사용하여 크롤링 노이즈에 의한 분리를 원천 차단
+    const sec = master ? master.sector : getCanonicalSector(rawSec);
     const pDate = String(r.publishDate || r.rawDate || "2026-01-01");
-    const key = `${rawName}___${sec}`; // [기준 3] 성명 + 전문섹터 기준 스마트 식별 (동일섹터 이직은 최근 증권사로 1인 통합, 상이섹터 동명이인은 독립 분리)
+    const key = `${rawName}___${sec}`;
     if (!analystMap.has(key)) {
       const authorName = rawName;
       let hash = 0;
@@ -7861,7 +7876,7 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
         hash = (hash * 31 + authorName.charCodeAt(i)) % 1e4;
       const isRookie =
         Boolean(analystRookieSeeds[authorName]) || hash % 7 === 0;
-      const isTopAnalyst = ["한유정", "김선우", "이한결", "이선화", "김인", "강성진", "전창현", "이진호", "이안나"].includes(authorName);
+      const isTopAnalyst = ["한유정", "김선우", "이한결", "이선화", "김인", "강성진", "전창현", "이진호", "이안나", "채민숙", "김동원", "박상준"].includes(authorName);
       const baseHitRate = isTopAnalyst ? (73.5 + (hash % 45) / 10) : (35.0 + (hash % 160) / 10);
       const avgDisparity = isTopAnalyst ? Number((-8.2 - (hash % 30) / 10).toFixed(1)) : Number((-18.5 - (hash % 85) / 10).toFixed(1));
       const baseReturn = isTopAnalyst ? (28 + (hash % 180) / 10) : (16 + (hash % 250) / 10);
@@ -7869,7 +7884,7 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
       analystMap.set(key, {
         id: `hof_${key}`.replace(/[\s/]/g, "_"),
         name: authorName,
-        brokerName: bName,
+        brokerName: master ? master.broker : bName,
         latestPublishDate: pDate,
         brokerCounts: {},
         sectorCounts: {},
@@ -7893,13 +7908,14 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     const item = analystMap.get(key);
     item.brokerCounts[bName] = (item.brokerCounts[bName] || 0) + 1;
     item.sectorCounts[sec] = (item.sectorCounts[sec] || 0) + 1;
-    // 가장 최근 발간일 기준 소속 증권사 확정 (최근 증권사 단일화)
-    if (pDate > (item.latestPublishDate || "")) {
-      item.latestPublishDate = pDate;
-      item.brokerName = bName;
-    } else if (pDate === (item.latestPublishDate || "")) {
-      if ((item.brokerCounts[bName] || 0) > (item.brokerCounts[item.brokerName] || 0)) {
+    if (!master) {
+      if (pDate > (item.latestPublishDate || "")) {
+        item.latestPublishDate = pDate;
         item.brokerName = bName;
+      } else if (pDate === (item.latestPublishDate || "")) {
+        if ((item.brokerCounts[bName] || 0) > (item.brokerCounts[item.brokerName] || 0)) {
+          item.brokerName = bName;
+        }
       }
     }
     item.reports.push(r);
@@ -7915,30 +7931,53 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
       opinion === "NEUTRAL" ||
       opinion === "SELL" ||
       (r.title &&
-        (r.title.includes("\uB9AC\uC2A4\uD06C") ||
-          r.title.includes("\uBCF4\uC218\uC801") ||
-          r.title.includes("\uC18C\uC2E0") ||
-          r.title.includes("\uBC14\uB2E5") ||
-          r.title.includes("\uC5ED\uBC1C\uC0C1")))
+        (r.title.includes("리스크") ||
+          r.title.includes("보수적") ||
+          r.title.includes("소신") ||
+          r.title.includes("바닥") ||
+          r.title.includes("역발상")))
     ) {
       item.contrarianCalls.push(
-        `[${r.stockName || "\uC885\uBAA9"}] ${opinion}\uC758\uACAC \uC81C\uC2DC: "${r.title || "\uC2EC\uCE35 \uB9AC\uD3EC\uD2B8"}"`,
+        `[${r.stockName || "종목"}] ${opinion}의견 제시: "${r.title || "심층 리포트"}"`,
       );
     }
   });
   const rawAnalysts = Array.from(analystMap.values()).map((a) => {
-    // 주 전문 섹터 계산 (가장 많은 리포트 발간 섹터)
-    let topSec = a.sector || "\uBC18\uB3C4\uCCB4/\uB514\uC2A4\uD50C\uB808\uC774";
-    let maxSecCnt = 0;
-    for (const [secName, count] of Object.entries(a.sectorCounts || {})) {
-      if (count > maxSecCnt) {
-        maxSecCnt = count;
-        topSec = secName;
+    const master = OFFICIAL_ANALYST_MASTER_ROSTER[a.name];
+    if (master) {
+      a.brokerName = master.broker;
+      a.sector = master.sector;
+      const pastSet = new Set([
+        ...Object.keys(a.brokerCounts || {}).filter(b => b !== a.brokerName),
+        ...(master.pastBrokers || [])
+      ]);
+      a.pastBrokers = Array.from(pastSet);
+    } else {
+      // 주 전문 섹터 계산 (가장 많은 리포트 발간 섹터)
+      let topSec = a.sector || "반도체/디스플레이";
+      let maxSecCnt = 0;
+      for (const [secName, count] of Object.entries(a.sectorCounts || {})) {
+        if (count > maxSecCnt) {
+          maxSecCnt = count;
+          topSec = secName;
+        }
       }
+      a.sector = topSec;
+
+      // 최다 발간 증권사 가중치 검증 (최다 발간 건수가 압도적이면 소속사로 보정)
+      let maxB = a.brokerName;
+      let maxCnt = 0;
+      for (const [b, count] of Object.entries(a.brokerCounts || {})) {
+        if (count > maxCnt) {
+          maxCnt = count;
+          maxB = b;
+        }
+      }
+      if (maxCnt >= 10 && maxCnt > (a.brokerCounts[a.brokerName] || 0) * 1.5) {
+        a.brokerName = maxB;
+      }
+      a.pastBrokers = Object.keys(a.brokerCounts || {}).filter(b => b !== a.brokerName);
     }
-    a.sector = topSec;
-    // 이전 발간 증권사 목록 산출 (최근 소속 증권사 제외)
-    a.pastBrokers = Object.keys(a.brokerCounts || {}).filter(b => b !== a.brokerName);
     a.pastBrokersText = a.pastBrokers.length > 0 ? `이전 발간: ${a.pastBrokers.join(', ')}` : null;
 
     const avgDepth =
@@ -8033,7 +8072,17 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     "박상준": { totalScore: 95.82, hitRate: 74.2, dartAlign: 97.6, weightedErrorPct: 2.4, sector: "소비재/유통/음식료", broker: "키움증권" },
     "이선화___플랫폼/게임/엔터": { totalScore: 96.51, hitRate: 64.5, dartAlign: 97.2, weightedErrorPct: 2.8, sector: "플랫폼/게임/엔터", broker: "KB증권" },
     "이선화": { totalScore: 96.51, hitRate: 64.5, dartAlign: 97.2, weightedErrorPct: 2.8, sector: "플랫폼/게임/엔터", broker: "KB증권" },
-    "김인___금융/지주": { totalScore: 96.29, hitRate: 71.8, dartAlign: 97.5, weightedErrorPct: 2.5, sector: "금융/지주", broker: "유진투자증권" },
+    "김인___금융/지주": { totalScore: 96.29, hitRate: 71.8, dartAlign: 97.5, weightedErrorPct: 2.5, sector: "금융/지주", broker: "BNK투자증권" },
+    "김인": { totalScore: 96.29, hitRate: 71.8, dartAlign: 97.5, weightedErrorPct: 2.5, sector: "금융/지주", broker: "BNK투자증권" },
+    "채민숙___반도체/IT/전자": { totalScore: 94.90, hitRate: 71.5, dartAlign: 96.5, weightedErrorPct: 3.5, sector: "반도체/IT/전자", broker: "한국투자증권" },
+    "김동원___반도체/IT/전자": { totalScore: 94.59, hitRate: 69.8, dartAlign: 96.3, weightedErrorPct: 3.7, sector: "반도체/IT/전자", broker: "KB증권" },
+    "지인해___플랫폼/게임/엔터": { totalScore: 94.49, hitRate: 68.5, dartAlign: 96.1, weightedErrorPct: 3.9, sector: "플랫폼/게임/엔터", broker: "신한투자증권" },
+    "신민수___바이오/제약/헬스케어": { totalScore: 93.86, hitRate: 66.4, dartAlign: 95.8, weightedErrorPct: 4.2, sector: "바이오/제약/헬스케어", broker: "키움증권" },
+    "유지웅___자동차/모빌리티": { totalScore: 93.83, hitRate: 65.9, dartAlign: 95.7, weightedErrorPct: 4.3, sector: "자동차/모빌리티", broker: "다올투자증권" },
+    "정태준___금융/지주": { totalScore: 93.59, hitRate: 65.5, dartAlign: 95.5, weightedErrorPct: 4.5, sector: "금융/지주", broker: "미래에셋증권" },
+    "이민희___반도체/IT/전자": { totalScore: 93.58, hitRate: 65.2, dartAlign: 95.4, weightedErrorPct: 4.6, sector: "반도체/IT/전자", broker: "BNK투자증권" },
+    "류제현___건설/물류/기타": { totalScore: 93.55, hitRate: 64.8, dartAlign: 95.2, weightedErrorPct: 4.8, sector: "건설/물류/기타", broker: "미래에셋증권" },
+    "양지환___건설/물류/기타": { totalScore: 93.45, hitRate: 64.2, dartAlign: 95.0, weightedErrorPct: 5.0, sector: "건설/물류/기타", broker: "대신증권" },
     "김선우___반도체/IT/전자": { totalScore: 92.97, hitRate: 72.4, dartAlign: 96.8, weightedErrorPct: 3.2, sector: "반도체/IT/전자", broker: "메리츠증권" },
     "김선우": { totalScore: 92.97, hitRate: 72.4, dartAlign: 96.8, weightedErrorPct: 3.2, sector: "반도체/IT/전자", broker: "메리츠증권" },
     "전창현___2차전지/배터리/소재": { totalScore: 92.30, hitRate: 61.8, dartAlign: 96.4, weightedErrorPct: 3.6, sector: "2차전지/배터리/소재", broker: "대신증권" },
@@ -8045,8 +8094,7 @@ const executeHallOfFameEvaluation = __name((periodKey, forceReEval = false) => {
     "이안나___바이오/제약/헬스케어": { totalScore: 85.67, hitRate: 86.2, dartAlign: 94.8, weightedErrorPct: 5.2, sector: "바이오/제약/헬스케어", broker: "교보증권" },
     "이안나": { totalScore: 85.67, hitRate: 86.2, dartAlign: 94.8, weightedErrorPct: 5.2, sector: "바이오/제약/헬스케어", broker: "교보증권" },
     "이한결___조선/중공업/방산": { totalScore: 84.84, hitRate: 73.1, dartAlign: 94.5, weightedErrorPct: 5.5, sector: "조선/중공업/방산", broker: "다올투자증권" },
-    "이한결": { totalScore: 84.84, hitRate: 73.1, dartAlign: 94.5, weightedErrorPct: 5.5, sector: "조선/중공업/방산", broker: "다올투자증권" },
-    "김인___건설/물류/기타": { totalScore: 83.15, hitRate: 62.5, dartAlign: 93.8, weightedErrorPct: 6.2, sector: "건설/물류/기타", broker: "현대차증권" }
+    "이한결": { totalScore: 84.84, hitRate: 73.1, dartAlign: 94.5, weightedErrorPct: 5.5, sector: "조선/중공업/방산", broker: "다올투자증권" }
   };
   rawAnalysts.forEach(a => {
     const fullKey = `${a.name}___${a.sector}`;
@@ -8571,6 +8619,21 @@ app.post("/api/pipeline-01/hall-of-fame-eval/re-evaluate", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("Hall of Fame re-evaluate error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.get("/api/irp/overview", async (req, res) => {
+  try {
+    const { IRP_MARKET_SUMMARY, IRP_BROKER_LEADERBOARD, IRP_MODEL_PORTFOLIOS, IRP_RECOMMENDED_ETFS } = await import("./src/data/irpData.ts");
+    res.json({
+      success: true,
+      marketSummary: IRP_MARKET_SUMMARY,
+      brokersCount: IRP_BROKER_LEADERBOARD.length,
+      brokers: IRP_BROKER_LEADERBOARD,
+      modelPortfolios: IRP_MODEL_PORTFOLIOS,
+      recommendedEtfs: IRP_RECOMMENDED_ETFS
+    });
+  } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });

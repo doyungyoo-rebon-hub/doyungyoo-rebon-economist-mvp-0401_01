@@ -10,7 +10,8 @@ import {
   GitBranch,
   Sparkles,
   TrendingUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Wallet
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -86,6 +87,15 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       icon: TrendingUp,
       badge: '적중률·괴리율',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      highlight: true
+    },
+    {
+      id: 'irp_dashboard',
+      label: 'IRP 퇴직연금 분석',
+      shortLabel: 'IRP 연금',
+      icon: Wallet,
+      badge: '성과·세액공제',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
       highlight: true
     },
     {

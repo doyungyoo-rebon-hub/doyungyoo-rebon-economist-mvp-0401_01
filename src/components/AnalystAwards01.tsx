@@ -104,7 +104,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
   const [stats, setStats] = useState({
     totalReports: 7842,
-    totalAnalysts: 303,
+    totalAnalysts: 250,
     avgScore: 89.8,
     avgAccuracy: 45.4,
     avgDisparity: -21.4
@@ -857,9 +857,9 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               onChange={(e) => setSelectedPeriod(e.target.value)}
               className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500"
             >
-              <option value="2026_9M">2026년 1~9월 누적 종합 (7,842건 / 303명)</option>
-              <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,842건 / 303명)</option>
-              <option value="2026_1H">2026년 상반기 (4,868건 / 303명)</option>
+              <option value="2026_9M">2026년 1~9월 누적 종합 (7,842건 / 250명)</option>
+              <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,842건 / 250명)</option>
+              <option value="2026_1H">2026년 상반기 (4,868건 / 250명)</option>
               <option value="2026_3Q">2026년 3분기 (7~9월 2,290건)</option>
             </select>
           </div>

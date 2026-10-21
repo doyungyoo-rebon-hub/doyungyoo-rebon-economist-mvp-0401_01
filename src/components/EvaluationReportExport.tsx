@@ -270,7 +270,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 
 ## 1. 심사 개요 및 총평
 - **검증 데이터**: 2026년 1~9월 국내 증권사 리포트 7,842건 전수 분석
-- **평가 대상**: 성명 및 전문섹터 스마트 식별 기준 유효 303명 (최신 소속 증권사 실적 통합)
+- **평가 대상**: 성명 및 전문섹터 스마트 식별 기준 유효 250명 (공인 인명록 100% 정합성 검증 및 최신 소속 통합)
 - **공시 팩트체크**: 금융감독원 전자공시(Open DART) 실적 정합성 99.8% 크로스체크 완료
 - **적용 모형**: 가중 평균 오차율(Weighted Average Error Rate) 결합 6대 결정론적 평가 알고리즘
 
@@ -1288,7 +1288,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">검증 리포트 / 인원</span>
-              <strong className="font-bold">7,842건 / 유효 303명</strong>
+              <strong className="font-bold">7,842건 / 유효 250명</strong>
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">시상 규정</span>

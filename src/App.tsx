@@ -10,6 +10,7 @@ import { DartFactCheck } from './components/DartFactCheck';
 import { TargetPriceAccuracyChart } from './components/TargetPriceAccuracyChart';
 import { VersionManager } from './components/VersionManager';
 import { EvaluationReportExport } from './components/EvaluationReportExport';
+import { IRPDashboard } from './components/IRPDashboard';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('analysts_01');
@@ -77,6 +78,10 @@ export const App: React.FC = () => {
               setCurrentTab('report_analysis_01');
             }}
           />
+        )}
+
+        {currentTab === 'irp_dashboard' && (
+          <IRPDashboard />
         )}
 
         {currentTab === 'analyst_directory_01' && (
