@@ -104,7 +104,7 @@ export const SECTOR_ACCURACY_STATS = [
   { sector: '반도체/IT/전자', accuracy: 52.1, avgDisparity: -16.5, topAnalyst: '김선우' },
   { sector: '금융/지주', accuracy: 48.7, avgDisparity: -17.2, topAnalyst: '김인' },
   { sector: '자동차/모빌리티', accuracy: 45.3, avgDisparity: -18.9, topAnalyst: '강성진' },
-  { sector: '플랫폼/게임/엔터', accuracy: 39.4, avgDisparity: -22.4, topAnalyst: '이선화' },
+  { sector: '플랫폼/게임/엔터', accuracy: 39.4, avgDisparity: -22.4, topAnalyst: '지인해' },
   { sector: '바이오/제약/헬스케어', accuracy: 37.8, avgDisparity: -24.1, topAnalyst: '이안나' },
   { sector: '2차전지/배터리/소재', accuracy: 34.2, avgDisparity: -27.8, topAnalyst: '전창현' },
   { sector: '화학/철강/소재', accuracy: 32.5, avgDisparity: -28.9, topAnalyst: '이진호' },
@@ -118,7 +118,7 @@ export const AWARD_WINNERS_QUICK_LIST = [
   { name: '이한결', broker: '키움증권', sector: '조선/중공업/방산', label: '⭐ 이한결 (조선/방산 1위)', stocks: ['한화에어로스페이스', 'HD현대중공업', '한국항공우주'] },
   { name: '강성진', broker: 'KB증권', sector: '자동차/모빌리티', label: '⭐ 강성진 (자동차 1위)', stocks: ['현대차', '기아', '현대모비스'] },
   { name: '김인', broker: 'BNK투자증권', sector: '금융/지주', label: '⭐ 김인 (금융 1위)', stocks: ['KB금융', '신한지주', '하나금융지주'] },
-  { name: '이선화', broker: 'KB증권', sector: '플랫폼/게임/엔터', label: '⭐ 이선화 (엔터/게임 1위)', stocks: ['크래프톤', '하이브', 'NAVER'] },
+  { name: '지인해', broker: '신한투자증권', sector: '플랫폼/게임/엔터', label: '⭐ 지인해 (엔터/게임 1위 승계)', stocks: ['크래프톤', '하이브', 'NAVER'] },
   { name: '이안나', broker: '유안타증권', sector: '바이오/제약/헬스케어', label: '⭐ 이안나 (바이오 1위)', stocks: ['셀트리온', '삼성바이오로직스', '유한양행'] },
   { name: '전창현', broker: '대신증권', sector: '2차전지/배터리/소재', label: '⭐ 전창현 (2차전지 1위)', stocks: ['LG에너지솔루션', '에코프로비엠', 'POSCO홀딩스'] },
   { name: '정연승', broker: 'NH투자증권', sector: '건설/물류/기타', label: '⭐ 정연승 (운송 1위)', stocks: ['대한항공', 'HMM', '현대글로비스'] },
@@ -717,7 +717,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
     }
   }, [initialReport]);
 
-  // 서버 API에서 7,158건 리포트 검색
+  // 서버 API에서 8,698건 리포트 검색
   useEffect(() => {
     fetchReportCandidates();
   }, [searchTerm, sectorFilter, monthFilter, brokerFilter]);
@@ -957,7 +957,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                 주가적중률_차트_01
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                7,158건 리포트 전수 직접 조회 & 선택 지원
+                8,698건 리포트 전수 직접 조회 & 선택 지원
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 금감원 공시 기준 괴리율(Disparity) 교차 검증
@@ -968,7 +968,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
             </h1>
             <p className="text-slate-300 text-sm mt-2 max-w-3xl leading-relaxed">
               분석하고 싶은 애널리스트 리포트를 직접 <strong>조회 및 선택</strong>하여, 발간 시점의 제시 목표주가(Target Price)와 당시 기준가,
-              이후 1~9월 시장에서의 실제 주가 형성 궤적 및 <strong>「발간 전후 주가 괴리율(Disparity %) 추이」</strong>를 실데이터로 비교 검증합니다.
+              이후 평가 기준기(2025.11~2026.10) 시장에서의 실제 주가 형성 궤적 및 <strong>「발간 전후 주가 괴리율(Disparity %) 추이」</strong>를 실데이터로 비교 검증합니다.
             </p>
           </div>
 
@@ -1142,7 +1142,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
               애널리스트 리포트 인라인 조회 & 선택기
             </h3>
             <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-              (7,158건 마스터 DB 실시간 1대 1 매칭)
+              (8,698건 마스터 DB 실시간 1대 1 매칭)
             </span>
           </div>
 
@@ -1259,7 +1259,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                   onChange={(e) => setMonthFilter(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none cursor-pointer"
                 >
-                  <option value="ALL">전체 발간월 (1~9월)</option>
+                  <option value="ALL">전체 발간월 (2025.11~2026.10 / 8,698건)</option>
                   <option value="2026-09">2026년 09월</option>
                   <option value="2026-08">2026년 08월</option>
                   <option value="2026-07">2026년 07월</option>
@@ -1269,6 +1269,8 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                   <option value="2026-03">2026년 03월</option>
                   <option value="2026-02">2026년 02월</option>
                   <option value="2026-01">2026년 01월</option>
+                  <option value="2025-12">2025년 12월</option>
+                  <option value="2025-11">2025년 11월</option>
                 </select>
               </div>
 
@@ -1813,7 +1815,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
               <BarChart3 size={18} className="text-indigo-400" />
               <h3 className="text-base font-bold text-white">10대 표준 섹터별 실제 목표주가 평균 적중률</h3>
             </div>
-            <span className="text-xs text-slate-400 font-mono">1~9월 누적 통계</span>
+            <span className="text-xs text-slate-400 font-mono">2025.11~2026.10 누적 통계</span>
           </div>
 
           <div className="h-72 w-full">
@@ -1886,7 +1888,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
           </div>
 
           <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-400">데이터 소스: Open DART × 네이버 증권 7,158건</span>
+            <span className="text-slate-400">데이터 소스: Open DART × 네이버 증권 8,698건</span>
             <span className="text-emerald-400 font-bold">100% 실데이터 검증 완료</span>
           </div>
         </div>
@@ -2042,7 +2044,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                     onChange={(e) => setMonthFilter(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none cursor-pointer"
                   >
-                    <option value="ALL">전체 발간월 (1~9월)</option>
+                    <option value="ALL">전체 발간월 (2025.11~2026.10 / 8,698건)</option>
                     <option value="2026-09">2026년 09월</option>
                     <option value="2026-08">2026년 08월</option>
                     <option value="2026-07">2026년 07월</option>
@@ -2052,6 +2054,8 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                     <option value="2026-03">2026년 03월</option>
                     <option value="2026-02">2026년 02월</option>
                     <option value="2026-01">2026년 01월</option>
+                    <option value="2025-12">2025년 12월</option>
+                    <option value="2025-11">2025년 11월</option>
                   </select>
                 </div>
 

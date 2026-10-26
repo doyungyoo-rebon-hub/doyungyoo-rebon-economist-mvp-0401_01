@@ -1,0 +1,33 @@
+{
+  "totalTargetPeriod": "2025년 11월 1일 ~ 2026년 10월 31일",
+  "currentCollectionPeriod": "2025년 11월 1일 ~ 2026년 9월 30일",
+  "minAllowedDate": "2025-11-01",
+  "maxAllowedDate": "2026-09-30",
+  "blockPostJuly": false,
+  "totalReports": 8698,
+  "activeAnalystsCount": 261,
+  "activeBrokersCount": 29,
+  "boundaryCheck": {
+    "startDate": "2025-11-01",
+    "startDateIncluded": true,
+    "endDate": "2026-09-30",
+    "endDateIncluded": true
+  },
+  "allowedMonths": [
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03",
+    "2026-04",
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08",
+    "2026-09"
+  ],
+  "pendingMonths": [
+    "2026-10"
+  ],
+  "lastUpdated": "2026-10-21T04:19:07.656Z"
+}

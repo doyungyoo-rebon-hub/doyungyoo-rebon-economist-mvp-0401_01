@@ -1,5 +1,5 @@
 /**
- * AI가 뽑은 스타 애널리스트 평가 엔진 (2026 1~9월 누적 7,842건 전수 데이터 기준)
+ * AI가 뽑은 스타 애널리스트 평가 엔진 (2025.11~2026.10 8,698건 전수 데이터 기준)
  * 
  * [공식 평가 항목 및 가중치]
  * 1. 목표주가 정확성 30% : 괴리율 ((실제주가 - 목표주가)/목표주가 * 100) 절댓값 기준
@@ -269,7 +269,7 @@ export function generateFinalEvaluation(params: FinalEvaluationParams) {
       peakDisparity: Math.round(peakDisparity * 10) / 10,
       absDisparity: Math.round(absDisparity * 10) / 10,
       weightedAverageErrorRatePct: earningsResult.weightedAverageErrorRatePct,
-      evaluationStandard: "2026 AI 스타 애널리스트 공인 평가 규정 (가중 평균 오차율 모델 1~9월 누적)"
+      evaluationStandard: "2026 AI 스타 애널리스트 공인 평가 규정 (가중 평균 오차율 모델 2025.11~2026.10 전수)"
     }
   };
 }

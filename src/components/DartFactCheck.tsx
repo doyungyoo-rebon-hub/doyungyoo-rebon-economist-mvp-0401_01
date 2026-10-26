@@ -49,7 +49,7 @@ export interface DartFactCheckItem {
   auditNotes: string;
 }
 
-// 1~9월 수상자 및 10대 산업별 1위 애널리스트 주요 리포트 DART 실적 대사 검증표 (48건 전수 DB)
+// 2025.11~2026.10 수상자 및 10대 산업별 1위 애널리스트 주요 리포트 DART 실적 대사 검증표 (48건 전수 DB)
 const COMPREHENSIVE_DART_FACT_CHECKS: DartFactCheckItem[] = [
   // 1. 소비재 / 유통 / 음식료 (한유정 - 한화투자증권)
   {
@@ -1015,7 +1015,7 @@ export const DartFactCheck: React.FC = () => {
                 Open DART API 전자공시망 교차검증 엔진
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                1~9월 7,158건 공시 전수 대사
+                2025.11~2026.10 8,698건 공시 전수 대사
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 10대 산업 1위 수상자 40대 핵심 대사표 현행화
@@ -1034,7 +1034,7 @@ export const DartFactCheck: React.FC = () => {
         <div className="mt-6 p-4 rounded-xl bg-slate-950/80 border border-emerald-500/40 flex items-start sm:items-center gap-3">
           <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5 sm:mt-0" />
           <div className="text-xs text-slate-300 leading-relaxed">
-            <strong className="text-emerald-300 font-bold">1~9월 DART 공시 데이터베이스 정상 가동 중 (데이터 소진 아님):</strong> 국내 32개 증권사의 1~9월 7,158건 리포트와 금감원 전자공시 1~3분기 확정 재무제표 대사 파이프라인이 100% 보존되어 있으며, 아래 검증표에서 <strong>10대 섹터 1위 수상자 및 주요 커버리지 종목</strong>의 1대1 대사 내역을 즉시 조회하실 수 있습니다.
+            <strong className="text-emerald-300 font-bold">2025.11~2026.10 DART 공시 데이터베이스 정상 가동 중 (데이터 소진 아님):</strong> 국내 32개 증권사의 8,698건 리포트와 금감원 전자공시 확정 재무제표 대사 파이프라인이 100% 보존되어 있으며, 아래 검증표에서 <strong>10대 섹터 1위 수상자 및 주요 커버리지 종목</strong>의 1대1 대사 내역을 즉시 조회하실 수 있습니다.
           </div>
         </div>
 
@@ -1042,7 +1042,7 @@ export const DartFactCheck: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 border-t border-slate-800/80 pt-6">
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">DART 전수 대사 대상</span>
-            <strong className="text-xl font-bold font-mono text-white">7,158건 (1~9월 누적)</strong>
+            <strong className="text-xl font-bold font-mono text-white">8,698건 (2025.11~2026.10 전수)</strong>
           </div>
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">수상자 평균 영업이익 오차율</span>
@@ -1066,7 +1066,7 @@ export const DartFactCheck: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <ShieldCheck size={18} className="text-emerald-400" />
-              <h3 className="text-base font-bold text-white">1~9월 수상자 주요 리포트 DART 실적 대사 검증표</h3>
+              <h3 className="text-base font-bold text-white">2025.11~2026.10 수상자 주요 리포트 DART 실적 대사 검증표</h3>
               <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 총 {filteredItems.length}건 표시 중
               </span>

@@ -69,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '애널리스트리포트_조회_01',
       shortLabel: '리포트 조회',
       icon: FileText,
-      badge: '7,158건',
+      badge: '8,698건',
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
     },
     {
@@ -127,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '버전 관리 & 백업',
       shortLabel: '버전 관리',
       icon: GitBranch,
-      badge: 'v1.8.1',
+      badge: 'v1.8.2',
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     }
   ];
@@ -146,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
                 리본인텔리전스 × 이코노미스트
               </span>
               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                VERSION 1.8.1
+                VERSION 1.8.2
               </span>
               <span className="hidden sm:inline-block text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.2 rounded border border-emerald-500/30 font-medium">
                 대상 24개사 · 평가 5개사 연동

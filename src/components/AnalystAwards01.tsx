@@ -87,7 +87,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
   onNavigateToAnalysis
 }) => {
   const [activeView, setActiveView] = useState<'spotlight' | 'sector_top10' | 'all_rankings' | 'criteria' | 'report_export'>('spotlight');
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('2026_9M');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('2025_11_TO_2026_10');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sectorFilter, setSectorFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'score' | 'accuracy' | 'dart' | 'reports'>('score');
@@ -103,8 +103,8 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
   const [showBrokerPolicyModal, setShowBrokerPolicyModal] = useState<boolean>(false);
 
   const [stats, setStats] = useState({
-    totalReports: 7842,
-    totalAnalysts: 250,
+    totalReports: 8698,
+    totalAnalysts: 261,
     avgScore: 89.8,
     avgAccuracy: 45.4,
     avgDisparity: -21.4
@@ -124,7 +124,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-blue-400",
       borderColor: "border-blue-500/40",
       bgGradient: "from-blue-950/30 via-slate-900 to-indigo-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_semicon_kim") || OFFICIAL_WINNERS_REVIEWS[1],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "반도체/IT/전자") || OFFICIAL_WINNERS_REVIEWS[1],
       sectorAvgHitRate: 52.1,
       keyStockName: "SK하이닉스",
       keyStockCode: "000660",
@@ -138,7 +138,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-emerald-400",
       borderColor: "border-emerald-500/40",
       bgGradient: "from-emerald-950/30 via-slate-900 to-teal-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_battery_jeon") || OFFICIAL_WINNERS_REVIEWS[2],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "2차전지/배터리/소재") || OFFICIAL_WINNERS_REVIEWS[2],
       sectorAvgHitRate: 34.2,
       keyStockName: "에코프로비엠",
       keyStockCode: "247540",
@@ -152,7 +152,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-purple-400",
       borderColor: "border-purple-500/40",
       bgGradient: "from-purple-950/30 via-slate-900 to-pink-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_platform_lee") || OFFICIAL_WINNERS_REVIEWS[5],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "플랫폼/게임/엔터") || OFFICIAL_WINNERS_REVIEWS[6],
       sectorAvgHitRate: 39.4,
       keyStockName: "NAVER",
       keyStockCode: "035420",
@@ -166,7 +166,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-amber-400",
       borderColor: "border-amber-500/40",
       bgGradient: "from-amber-950/30 via-slate-900 to-yellow-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_finance_kim") || OFFICIAL_WINNERS_REVIEWS[6],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "금융/지주") || OFFICIAL_WINNERS_REVIEWS[7],
       sectorAvgHitRate: 48.7,
       keyStockName: "KB금융",
       keyStockCode: "105560",
@@ -180,7 +180,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-rose-400",
       borderColor: "border-rose-500/40",
       bgGradient: "from-rose-950/30 via-slate-900 to-red-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_bio_lee") || OFFICIAL_WINNERS_REVIEWS[3],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "바이오/제약/헬스케어") || OFFICIAL_WINNERS_REVIEWS[3],
       sectorAvgHitRate: 41.5,
       keyStockName: "셀트리온",
       keyStockCode: "068270",
@@ -194,7 +194,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-cyan-400",
       borderColor: "border-cyan-500/40",
       bgGradient: "from-cyan-950/30 via-slate-900 to-blue-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_auto_kang") || OFFICIAL_WINNERS_REVIEWS[4],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "자동차/모빌리티") || OFFICIAL_WINNERS_REVIEWS[4],
       sectorAvgHitRate: 45.3,
       keyStockName: "현대차",
       keyStockCode: "005380",
@@ -208,7 +208,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-indigo-400",
       borderColor: "border-indigo-500/40",
       bgGradient: "from-indigo-950/30 via-slate-900 to-slate-900",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_ship_lee") || OFFICIAL_WINNERS_REVIEWS[5],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "조선/중공업/방산") || OFFICIAL_WINNERS_REVIEWS[5],
       sectorAvgHitRate: 54.8,
       keyStockName: "HD현대중공업",
       keyStockCode: "329180",
@@ -222,26 +222,12 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-orange-400",
       borderColor: "border-orange-500/40",
       bgGradient: "from-orange-950/30 via-slate-900 to-amber-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_chemical_lee") || OFFICIAL_WINNERS_REVIEWS[7],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "화학/철강/소재") || OFFICIAL_WINNERS_REVIEWS[8],
       sectorAvgHitRate: 32.5,
       keyStockName: "POSCO홀딩스",
       keyStockCode: "005490",
       targetPrice: 480000,
       currentPrice: 395000
-    },
-    {
-      sector: "소비재/유통/음식료",
-      category: "K-Food 글로벌 구조적 확장 / 수출 마진 최우수 (1위)",
-      icon: ShoppingBag,
-      color: "text-amber-300",
-      borderColor: "border-amber-400/50",
-      bgGradient: "from-amber-950/40 via-yellow-950/20 to-slate-900",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_consumer_park") || OFFICIAL_WINNERS_REVIEWS[1],
-      sectorAvgHitRate: 43.8,
-      keyStockName: "삼양식품",
-      keyStockCode: "003230",
-      targetPrice: 820000,
-      currentPrice: 710000
     },
     {
       sector: "건설/물류/기타",
@@ -250,7 +236,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       color: "text-slate-300",
       borderColor: "border-slate-500/40",
       bgGradient: "from-slate-800/40 via-slate-900 to-zinc-950/20",
-      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.id === "winner_construction_kim") || OFFICIAL_WINNERS_REVIEWS[8],
+      analyst: OFFICIAL_WINNERS_REVIEWS.find(w => w.sector === "건설/물류/기타") || OFFICIAL_WINNERS_REVIEWS[9],
       sectorAvgHitRate: 30.1,
       keyStockName: "현대건설",
       keyStockCode: "000720",
@@ -549,7 +535,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
     }
   };
 
-  // Filtered sector champions (v1.8.1 시상 적격 필터 적용)
+  // Filtered sector champions (v1.8.2 시상 적격 필터 적용)
   const filteredChampions = useMemo(() => {
     let list = sectorChampions;
     if (sectorFilter !== 'ALL') {
@@ -630,7 +616,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       list = list.filter(item => item.sector === sectorFilter);
     }
 
-    // v1.8.1 시상 적격/제외 필터
+    // v1.8.2 시상 적격/제외 필터
     if (awardEligibilityFilter === 'ELIGIBLE') {
       list = list.filter(item => !isAwardExcludedBroker(item.brokerName));
     } else if (awardEligibilityFilter === 'EXCLUDED') {
@@ -699,8 +685,11 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                 금감원 DART 팩트체크 교차검증 완료
               </span>
-              <span className="px-3 py-1 rounded-full text-xs font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                1~9월 7,158건 전수 산출
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                평가 기준기: 2025.11.01 ~ 2026.10.31 (수집: 2025.11.01 ~ 2026.09.30)
+              </span>
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                총 8,698건 누적 전수 산출 (경계값 포함)
               </span>
             </div>
 
@@ -855,11 +844,16 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500"
+              className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="2026_9M">2026년 1~9월 누적 종합 (7,842건 / 250명)</option>
-              <option value="2026_ANNUAL">2026년 연간 종합 (전수 7,842건 / 250명)</option>
-              <option value="2026_1H">2026년 상반기 (4,868건 / 250명)</option>
+              <option value="2025_11_TO_2026_10" className="font-bold text-amber-300">
+                2025년 11월 1일 ~ 2026년 10월 31일 전수 종합 (8,698건 / 261명)
+              </option>
+              <option value="2026_9M">
+                2025년 11월 ~ 2026년 9월 누적 종합 (8,698건 전수 / 261명)
+              </option>
+              <option value="2026_ANNUAL">2026년 연간 종합 (7,838건 / 261명)</option>
+              <option value="2026_1H">2026년 상반기 (4,868건 / 261명)</option>
               <option value="2026_3Q">2026년 3분기 (7~9월 2,290건)</option>
             </select>
           </div>
@@ -885,7 +879,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
             </select>
           </div>
 
-          {/* v1.8.1 시상 적격 퀵 필터 */}
+          {/* v1.8.2 시상 적격 퀵 필터 */}
           <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-700">
             <button
               onClick={() => setAwardEligibilityFilter('ALL')}
@@ -922,12 +916,12 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
         </div>
       </div>
 
-      {/* v1.8.1 증권사 선정 & 시상 운영 규정 요약 알림 바 */}
+      {/* v1.8.2 증권사 선정 & 시상 운영 규정 요약 알림 바 */}
       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2.5">
           <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1 shrink-0">
             <ShieldCheck size={13} className="text-amber-400" />
-            v1.8.1 규정 시행
+            v1.8.2 규정 시행
           </span>
           <p className="text-slate-300 leading-snug">
             <strong>공식 대상 24개 증권사</strong> 중심 평가 체계 확립 | <strong>5개 증권사(IBK·삼성·한국투자·대신·iM)</strong>는 7대 KPI 성과 평가는 100% 동일 집계하되 사내 컴플라이언스 기준에 따라 시상 대상에서는 제외됩니다.
@@ -1301,7 +1295,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
                         {isAwardExcludedBroker(rev.brokerName) && (
                           <div className="mt-1.5 p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300">
-                            ※ v1.8.1 시상 제외 규정사: 성과 평가는 객관적으로 동일 산정(1위)되나 컴플라이언스 기준상 공식 시상에서 제외됩니다.
+                            ※ v1.8.2 시상 제외 규정사: 성과 평가는 객관적으로 동일 산정(1위)되나 컴플라이언스 기준상 공식 시상에서 제외됩니다.
                           </div>
                         )}
 
@@ -1411,7 +1405,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-mono">
-                  평가 기준: 2026 1~9월 누적 7,842건 전수
+                  평가 기준: 2025.11 ~ 2026.09 누적 8,698건 전수 (타겟: ~2026.10.31)
                 </span>
                 <span className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300 font-bold">
                   가중 평균 오차율 모델 40%
@@ -1424,9 +1418,9 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               <Sparkles size={16} className="text-amber-400 shrink-0 mt-0.5" />
               <div>
                 <strong className="text-amber-300 font-bold block mb-1">
-                  👑 종합 대상 단독 표창 및 섹터 1위 승계 규정:
+                  👑 종합 대상 단독 표창 및 시상 대상 체계 (대상 포함 최종 10인):
                 </strong>
-                소비재/유통/음식료 섹터에서 1위를 기록한 <strong className="text-white font-bold">한유정 연구원(한화투자증권, 종합 97.15점)</strong>은 전체 평가 1위로 <strong className="text-amber-300">2026 종합 대상 1명</strong>으로 단독 표창되며, 종합 대상 단독 분리 원칙에 따라 해당 섹터 차순위(2위)였던 <strong className="text-emerald-300 font-bold">박상준 연구원(키움증권, 종합 95.82점)</strong>이 소비재/유통/음식료 부문 1위 최우수 챔피언으로 공식 승계 선정되었습니다.
+                소비재/유통/음식료 섹터에서 1위를 기록한 <strong className="text-white font-bold">한유정 연구원(한화투자증권, 종합 97.15점)</strong>은 전체 평가 1위로 <strong className="text-amber-300">2026 종합 대상 1명</strong>으로 단독 표창되며, 대상을 배출한 섹터는 2위를 1위로 대체하지 않고 대상 부문으로 단독 흡수 통합(별도 섹터 챔피언 미시상)하여 <strong className="text-emerald-300 font-bold">종합 대상 1명 + 9개 산업 섹터 챔피언 9명 = 대상 포함 최종 10인의 수상자</strong> 체계로 시상이 진행됩니다. (섹터 분석 데이터는 기존과 동일하게 전수 유지)
               </div>
             </div>
           </div>
@@ -1450,7 +1444,11 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
               if (filteredList.length === 0) return null;
 
-              const champion = defaultList.find(a => a.sectorRank === 1) || defaultList[0];
+              const champion = (sectorAnalysts.find((a: any) => a.isSectorChampion) 
+                || sectorAnalysts.find((a: any) => !isAwardExcludedBroker(a.brokerName))
+                || defaultList.find((a: any) => a.isSectorChampion)
+                || defaultList.find((a: any) => !isAwardExcludedBroker(a.brokerName))
+                || defaultList[0]);
 
               return (
                 <div key={secName} className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-8 space-y-5 shadow-xl">
@@ -1467,7 +1465,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                       </div>
                       <p className="text-xs text-slate-400">
                         {secName === "소비재/유통/음식료"
-                          ? "종합 대상(한유정) 제외 후 섹터 순위 산정 (섹터 1위: 박상준 연구원 / 키움증권)"
+                          ? `섹터 1위 최우수 챔피언: 👑 한유정 연구원 (한화투자증권, 97.15점 / 2026 종합 대상)`
                           : `섹터 1위 최우수 챔피언: ${champion.name} 연구원 (${champion.brokerName}, ${champion.totalScore}점)`}
                       </p>
                     </div>
@@ -1498,9 +1496,11 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                       </thead>
                       <tbody className="divide-y divide-slate-800/60 font-medium">
                         {filteredList.map((a: any, idx: number) => {
-                          const rank = a.sectorRank || idx + 1;
-                          const isRank1 = rank === 1;
+                          const isFirstExcluded = sectorAnalysts.length > 0 && isAwardExcludedBroker(sectorAnalysts[0].brokerName);
                           const isExcluded = isAwardExcludedBroker(a.brokerName);
+                          const isChamp = Boolean(a.isSectorChampion || (champion && champion.name === a.name && champion.brokerName === a.brokerName));
+                          const isExcludedRank1 = isExcluded && (a.sectorRank === '시상제외' || a.sectorRank === 1 || (idx === 0 && isFirstExcluded));
+                          const rank = isChamp ? 1 : a.sectorRank || idx + 1;
                           const totalScore = a.totalScore ? Number(a.totalScore).toFixed(2) : "88.00";
                           const targetAcc = a.metrics?.targetPriceAccuracy || a.kpi2026?.targetPriceAccuracy || 68.5;
                           const dartAlign = a.metrics?.dartAlignment || a.kpi2026?.earningsEstAccuracy || 94.0;
@@ -1514,16 +1514,22 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                             <tr 
                               key={a.name + rank}
                               className={`transition hover:bg-slate-800/40 ${
-                                isRank1 
-                                  ? 'bg-amber-950/20 font-bold' 
+                                isChamp 
+                                  ? 'bg-amber-950/30 font-bold border-l-4 border-l-amber-500' 
+                                  : isExcludedRank1
+                                  ? 'bg-slate-950/40 text-slate-500'
                                   : idx % 2 === 1 ? 'bg-slate-900/20' : 'bg-transparent'
                               }`}
                             >
                               {/* 순위 */}
                               <td className="py-3.5 px-4 text-center">
-                                {isRank1 ? (
-                                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 font-black shadow-md shadow-amber-500/20 text-xs">
-                                    1위
+                                {isChamp ? (
+                                  <span className="inline-flex items-center justify-center px-2 py-1 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 font-black shadow-md shadow-amber-500/20 text-xs gap-0.5">
+                                    🏆 1위
+                                  </span>
+                                ) : isExcludedRank1 ? (
+                                  <span className="inline-flex items-center justify-center px-2 py-1 rounded-lg bg-slate-800 text-slate-400 font-bold text-[10px] border border-slate-700">
+                                    시상제외
                                   </span>
                                 ) : rank === 2 ? (
                                   <span className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-slate-300 text-slate-950 font-bold text-xs">
@@ -1545,11 +1551,24 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                                 <div className="space-y-0.5">
                                   <div className="flex items-center gap-1.5">
                                     <strong className="text-sm font-extrabold text-white">
-                                      {a.name}
+                                      {isExcludedRank1 ? (
+                                        <span className="inline-flex items-center gap-1.5">
+                                          <span className="text-slate-400 font-mono text-xs font-bold">
+                                            [성명 비공개]
+                                          </span>
+                                        </span>
+                                      ) : (
+                                        a.name
+                                      )}
                                     </strong>
-                                    {isRank1 && (
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                        섹터 1위
+                                    {isChamp && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                                        {a.isAwardSuccessor ? '🏆 공식 1위 (승계)' : '🏆 공식 1위'}
+                                      </span>
+                                    )}
+                                    {isExcludedRank1 && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                                        시상 제외 (2위 공식 수상)
                                       </span>
                                     )}
                                   </div>
@@ -1570,7 +1589,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
                               {/* 종합 점수 */}
                               <td className="py-3.5 px-4 text-center">
-                                <strong className={`font-mono text-sm ${isRank1 ? 'text-amber-400 font-black' : 'text-emerald-400 font-extrabold'}`}>
+                                <strong className={`font-mono text-sm ${isChamp ? 'text-amber-400 font-black' : 'text-emerald-400 font-extrabold'}`}>
                                   {totalScore}
                                 </strong>
                                 <span className="text-[10px] text-slate-500 block">점</span>
@@ -1640,7 +1659,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                                           logicImpact: logicScore
                                         },
                                         summaryKeywords: [secName, "정량검증"],
-                                        quantitativeQualitativeAnalysis: `${a.name} 연구원은 ${secName} 분야에서 1~9월 누적 가중 평균 오차율 ${errorPct}의 뛰어난 정합성을 달성하였습니다.`,
+                                        quantitativeQualitativeAnalysis: `${a.name} 연구원은 ${secName} 분야에서 평가 기준기(2025.11~2026.10) 누적 가중 평균 오차율 ${errorPct}의 뛰어난 정합성을 달성하였습니다.`,
                                         marketContributionInsight: "철저한 DART 공시 데이터 교차검증과 시장 밸류에이션 추적으로 투자자 자산 보호에 기여했습니다.",
                                         honorCitation: `${secName} 분야에서 데이터의 엄밀함과 객관적 분석을 입증한 공로를 치하합니다.`,
                                         fullReport: {
@@ -1856,7 +1875,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               AI가 뽑은 스타 애널리스트 6대 평가 항목 및 가중 평균 오차율 산출 공식
             </h3>
             <p className="text-slate-400 text-xs sm:text-sm">
-              본 평가는 정성적 주관을 완전히 배제하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 7,842건(1~9월 누적 전수) 실제 발간 리서치 리포트를 100% 결정론적 AI 심사 알고리즘으로 평가하였습니다.
+              본 평가는 정성적 주관을 완전히 배제하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 8,698건(2025년 11월 1일 ~ 2026년 9월 30일 누적 전수) 실제 발간 리서치 리포트를 100% 결정론적 AI 심사 알고리즘으로 평가하였습니다. (전체 타겟 기준기: 2025년 11월 1일 ~ 2026년 10월 31일)
             </p>
           </div>
 
@@ -2044,7 +2063,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
               {isAwardExcludedBroker(previewReview.brokerName) && (
                 <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200 mt-2 space-y-1">
-                  <strong className="text-amber-300 font-bold block">※ v1.8.1 시상 운영 규정 준수 안내</strong>
+                  <strong className="text-amber-300 font-bold block">※ v1.8.2 시상 운영 규정 준수 안내</strong>
                   <p>
                     {previewReview.brokerName}은(는) 2026 어워즈 운영 규정에 따라 성과 지표(종합 {previewReview.score}점)는 공정하게 전수 평가되나, 사내 컴플라이언스 및 자체 규정에 따라 공식 시상(트로피/상패) 대상에서는 제외됩니다.
                   </p>
@@ -2124,7 +2143,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       )}
 
       {/* ======================================================== */}
-      {/* 5. 모달: v1.8.1 증권사 선정 및 평가·시상 운영 규정 팝업 */}
+      {/* 5. 모달: v1.8.2 증권사 선정 및 평가·시상 운영 규정 팝업 */}
       {/* ======================================================== */}
       {showBrokerPolicyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
@@ -2140,7 +2159,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-amber-400 text-xs font-bold">
                 <ShieldCheck size={16} />
-                <span>VERSION 1.8.1 공식 증권사 선정 및 평가·시상 운영 규정</span>
+                <span>VERSION 1.8.2 공식 증권사 선정 및 평가·시상 운영 규정</span>
               </div>
               <h3 className="text-xl font-bold text-white">
                 {BROKER_POLICY_V181.title}

@@ -52,7 +52,7 @@ interface AnalystProfile {
 }
 
 export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = ({ onNavigateToReview }) => {
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('2026_9M');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('2025_11_TO_2026_10');
   const [analysts, setAnalysts] = useState<AnalystProfile[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
@@ -84,7 +84,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
             profileViews: a.profileViews || (3500 - idx * 5),
             coverageCount: a.coverages?.length || a.coverageCount || 14,
             reportCount: a.reportCount || 12,
-            totalScore: a.toBeRankScore ? Number(a.toBeRankScore.toFixed(1)) : 88,
+            totalScore: a.toBeRankScore ? Number(a.toBeRankScore.toFixed(1)) : (a.toBeScore ? Number(a.toBeScore.toFixed(1)) : (a.kpi2026Total ? Number(a.kpi2026Total.toFixed(1)) : (a.totalScore || 88))),
             salesAmount: a.dataLineage?.table4_Pipeline?.value ? parseInt(a.dataLineage.table4_Pipeline.value, 10) : 2400,
             rank: a.toBeRank || idx + 1,
             coverages: a.coverages || [],
@@ -137,7 +137,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
   });
 
   const totalRegistered = loading ? 200 : analysts.length;
-  const totalBrokers = 24; // v1.8.1 공식 대상 24개사
+  const totalBrokers = 24; // v1.8.2 공식 대상 24개사
   const isAwardWinnersOnly = !loading && analysts.length <= 10;
   const avgCoverage = analysts.length > 0
     ? (analysts.reduce((acc, a) => acc + (a.coverageCount || 0), 0) / analysts.length).toFixed(1)
@@ -188,7 +188,10 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
               onChange={(e) => setSelectedPeriod(e.target.value)}
               className="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer pr-2"
             >
-              <option value="2026_9M" className="bg-slate-900 text-white font-bold">
+              <option value="2025_11_TO_2026_10" className="bg-slate-900 text-white font-bold text-amber-300">
+                2025.11 ~ 2026.10 전수 평가 (681명 등록)
+              </option>
+              <option value="2026_9M" className="bg-slate-900 text-white">
                 2026년 1~9월 누적 종합 (681명 등록)
               </option>
               <option value="2026_1H" className="bg-slate-900 text-white">
@@ -221,7 +224,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">누적 검증 리포트</span>
             <strong className="text-xl font-bold font-mono text-amber-300">
-              {totalReportsEvaluated > 0 ? `${totalReportsEvaluated.toLocaleString()}편` : '7,842편'}
+              {totalReportsEvaluated > 0 ? `${totalReportsEvaluated.toLocaleString()}편` : '8,698편'}
             </strong>
           </div>
         </div>
@@ -285,9 +288,9 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
           </div>
         </div>
 
-        {/* v1.8.1 증권사 구분 탭 */}
+        {/* v1.8.2 증권사 구분 탭 */}
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
-          <span className="text-slate-400 text-[11px] font-medium">증권사 구분 (v1.8.1):</span>
+          <span className="text-slate-400 text-[11px] font-medium">증권사 구분 (v1.8.2):</span>
           <button
             onClick={() => setBrokerCategoryFilter('ALL')}
             className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
@@ -447,8 +450,8 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
 
                 {isAwardExcludedBroker(selectedAnalyst.brokerName) && (
                   <div className="mt-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
-                    <strong className="text-amber-300 font-bold block mb-0.5">※ v1.8.1 시상 운영 규정 준수</strong>
-                    {selectedAnalyst.brokerName}은(는) v1.8.1 증권사 운영 규정에 따라 성과 평가는 객관적으로 동일 집계(종합 {selectedAnalyst.totalScore}점)되나 컴플라이언스 기준상 공식 시상 대상에서는 제외됩니다.
+                    <strong className="text-amber-300 font-bold block mb-0.5">※ v1.8.2 시상 운영 규정 준수</strong>
+                    {selectedAnalyst.brokerName}은(는) v1.8.2 증권사 운영 규정에 따라 성과 평가는 객관적으로 동일 집계(종합 {selectedAnalyst.totalScore}점)되나 컴플라이언스 기준상 공식 시상 대상에서는 제외됩니다.
                   </div>
                 )}
               </div>

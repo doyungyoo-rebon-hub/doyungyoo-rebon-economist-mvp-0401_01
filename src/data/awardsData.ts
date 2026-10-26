@@ -20,6 +20,7 @@ export interface AnalystAwardReview {
   honorCitation: string;
   isAwardExcluded?: boolean;
   awardExclusionNote?: string;
+  awardSuccessionNote?: string;
   isTarget24?: boolean;
   // 5단계 상세 리포트
   fullReport: {
@@ -41,10 +42,10 @@ export interface AnalystAwardReview {
 export const OFFICIAL_OVERALL_SUMMARY = {
   title: "2026 올해의 애널리스트 어워즈 AI 심사위원단 총평 (Executive Chairman Review)",
   organization: "리본인텔리전스 × 이코노미스트 공동주관 AI 독립 심사평가위원회",
-  reviewDate: "2026년 10월 공인 확정 (가중 평균 오차율 평가 모델 v1.8.1)",
-  totalReviewedReports: 7842,
-  totalReviewedAnalysts: 303,
-  totalBrokers: 24, // 24개 공식 대상 증권사 (시상 제외 5개사 포함 1~9월 누적 전수 평가)
+  reviewDate: "2026년 10월 공인 확정 (가중 평균 오차율 평가 모델 v1.8.2 | 평가 기준기: 2025.11.01 ~ 2026.10.31)",
+  totalReviewedReports: 8698,
+  totalReviewedAnalysts: 261,
+  totalBrokers: 29, // 24개 공식 대상 증권사 + 5개 시상제외 평가사 (2025.11 ~ 2026.09 누적 전수 평가)
   dartCrossCheckRatio: "99.8%",
   corePillars: [
     {
@@ -72,11 +73,11 @@ export const OFFICIAL_OVERALL_SUMMARY = {
       desc: "투자자 SNS 관심도/언급량(2.5%)과 미디어 언론 보도 빈도(2.5%)의 대외 파급력",
     },
   ],
-  chairmanAddress: `「2026 올해의 애널리스트 어워즈(가중 평균 오차율 모델)」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 7,842건(1~9월 누적 전수) 실제 발간 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
+  chairmanAddress: `「2026 올해의 애널리스트 어워즈(가중 평균 오차율 모델)」는 관행적인 호평 일색의 리서치 문화를 타파하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 8,698건(2025년 11월 1일 ~ 2026년 9월 30일 누적 전수 / 전체 타겟: 2025.11.01 ~ 2026.10.31) 실제 발간 리서치 리포트를 정밀 분석한 AI 독립 심사 엔진을 기반으로 최종 선정되었습니다.
 
 이번 개편에서는 특히 실적 추정 정확성에 가장 높은 40% 가중치를 부여하고, '가중 평균 오차율(Weighted Average Error Rate)' 모델을 도입했습니다. 1Q(20%), 2Q(30%), 3Q(50%)의 분기별 가중치와 기업 실적의 핵심인 영업이익(60%), 매출액(20%), 순이익(20%)의 지표별 가중치를 결합한 총 9개 항목의 개별 오차율을 엄정히 산출하여 합산했습니다.
 
-동시에 목표주가 정확성(30%), 투자 논리 타당성(10%), 위험 요소 분석 적절성(10%), 발간 빈도(5%), SNS 및 언론 빈도(5%)의 6대 핵심 지표를 종합 합산하여, 종합 대상 1명과 10대 표준 섹터별 TOP 10 애널리스트(총 100명)를 확정 발표합니다. 특히 소비재/유통/음식료 섹터는 대상 수상자(한유정)를 종합 대상으로 단독 분리하고, 2위였던 박상준 연구원이 섹터 1위 최우수 애널리스트로 공식 승계되었습니다.`
+동시에 목표주가 정확성(30%), 투자 논리 타당성(10%), 위험 요소 분석 적절성(10%), 발간 빈도(5%), SNS 및 언론 빈도(5%)의 6대 핵심 지표를 종합 합산하여, 종합 대상 1명과 각 핵심 산업별 최우수 챔피언 애널리스트를 확정 발표합니다. 특히 이번 어워즈에서는 종합 대상이 배출된 섹터(소비재/유통/음식료, 한유정 연구원)의 경우 해당 섹터의 2위를 1위로 대체하지 않고, 대상을 배출한 섹터 자체를 별도 섹터 시상 대상에서 제외(종합 대상 1인 단독 통합)함으로써 종합 대상 1명 및 9대 핵심 산업별 최우수 챔피언 9명으로 구성된 '대상 포함 최종 10인' 체제로 공인 시상을 확정합니다. 또한 한국투자증권, 삼성증권, iM증권, 대신증권, IBK투자증권(시상 제외 5개사)에서 1위가 나온 반도체(김동원, KB증권), 2차전지(주민우, NH투자증권), 화학(박성봉, 하나증권) 섹터와, KB증권 퇴사로 시상 제외된 플랫폼/게임/엔터 섹터(지인해, 신한투자증권)는 2위 연구원에게 공식 챔피언 수상이 정상 승계되었습니다.`
 };
 
 export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
@@ -89,6 +90,8 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     brokerName: "한화투자증권",
     sector: "소비재/유통/음식료",
     score: 97.15,
+    isTarget24: true,
+    isAwardExcluded: false,
     keyReports: [
       "K-Food 글로벌 구조적 침투율과 원가 스프레드 역학 분석 (2026.04)",
       "내수 유통 채널 구조조정과 플랫폼 역마진 해소 시나리오 (2026.02)"
@@ -104,9 +107,9 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     marketContributionInsight: `관행적인 내수 방어주 프레임을 깨고, K-Food의 북미/유럽 침투율을 현지 바이어 데이터와 통관 공시로 실증 분석하여 시장의 밸류에이션 눈높이를 재정의했습니다. 과열 국면에서는 냉철한 이익 정점(Peak-out) 리스크를 조기 경고하며 투자자 자산을 보호했습니다.`,
     honorCitation: `숫자의 냉철함과 통찰의 깊이로 자본시장의 지표를 세운 최고의 애널리스트. DART 공시 실적과의 빈틈없는 정합성과 시장을 선도한 혜안은 2026년 대한민국 금융투자업계의 최고 귀감이 되었기에 종합 대상을 헌정합니다.`,
     fullReport: {
-      executiveSummary: "불확실성의 파고 속에서 숫자의 정밀함으로 시장을 밝힌 나침반. 250명 전체 애널리스트 중 백분위 상위 0.1% 기록.",
+      executiveSummary: "불확실성의 파고 속에서 숫자의 정밀함으로 시장을 밝힌 나침반. 261명 전체 애널리스트 중 백분위 상위 0.1% 기록.",
       targetPriceTracking: "과거 1년간 발간한 34편의 커버리지 리포트 중 목표주가 평균 괴리율 -8.2% 내 선방하여 금감원 공시 기준 전 증권사 최우수 안착. 시장 급변기마다 72시간 이내 목표주가 현실화 리포트를 발간하여 목표가 도달률 76.5% 달성.",
-      dartConsistency: "DART 전자공시 1Q/2Q 확정 영업이익과 사전 추정치의 오차율이 2.1%에 불과하여 32개 증권사 커버리지 애널리스트 중 실적 추정 정밀도 1위 기록.",
+      dartConsistency: "DART 전자공시 1Q/2Q 확정 영업이익과 사전 추정치의 오차율이 2.1%에 불과하여 29개 증권사 커버리지 애널리스트 중 실적 추정 정밀도 1위 기록.",
       timelinessDepth: "음식료 원재료 소맥·대두박 선물 가격의 실시간 스프레드 분석과 해상 운임 팩트를 독점 취합하여 업황 턴어라운드를 6주 선제 포착.",
       marketHealthContribution: "과열된 일부 테마주 섹터에 휩쓸리지 않고, 실적이 뒷받침되지 않는 종목에 대해 '보유(Hold)' 의견을 선제 개진하여 맹목적 매수 관행을 정면 돌파.",
       representativeReport: {
@@ -119,151 +122,116 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     }
   },
   {
-    id: "winner_consumer_park",
-    rank: 2,
-    category: "소비재/유통/음식료 섹터 최우수 애널리스트 (1위)",
-    isGrandPrize: false,
-    name: "박상준",
-    brokerName: "키움증권",
-    sector: "소비재/유통/음식료",
-    score: 95.82,
+    id: "winner_semicon_kim_dongwon",
+    rank: 1,
+    category: "반도체/IT/전자 섹터 최우수 애널리스트 (1위)",
+    name: "김동원",
+    brokerName: "KB증권",
+    sector: "반도체/IT/전자",
+    score: 94.59,
+    isTarget24: true,
+    isAwardExcluded: false,
+    awardSuccessionNote: "※ 1위(한국투자증권, 성명 비공개) 시상 제외에 따른 2위 공식 수상 승계",
+    keyReports: [
+      "HBM4 아키텍처 전환과 커스텀 엔비디아 공급망 밸류체인 (2026.03)",
+      "메모리 판가 상승 사이클과 글로벌 빅테크 B2B CAPEX 정밀 경로 (2026.05)"
+    ],
+    metrics: {
+      targetPriceAccuracy: 69.8,
+      dartAlignment: 96.3,
+      activityTimeliness: 94.8,
+      logicImpact: 94.2,
+    },
+    summaryKeywords: ["HBM 공급망 최고 분석관", "메모리 슈퍼사이클 선행 적중"],
+    quantitativeQualitativeAnalysis: `김동원 연구원은 삼성전자 및 SK하이닉스의 HBM 공급 계약과 차세대 HBM4 아키텍처 전환 수혜를 실증 분석하여 목표가 적중률 69.8%(섹터 평균 52.1% 대비 최상위)와 종합 평점 94.59점을 획득했습니다. 시상 제외 증권사(한국투자증권) 1위에 이어 정식 공식 대상 24개사 최우수 챔피언으로 공식 수상 승계되었습니다.`,
+    marketContributionInsight: `장밋빛 기대에 그치지 않고 엔비디아 루빈/블랙웰 아키텍처 전환에 따른 패키징 수율과 공급사별 ASP 마진을 정밀 수치화하여 기관 및 개인 투자자의 포트폴리오를 선도했습니다.`,
+    honorCitation: `치열한 글로벌 테크 패권 경쟁 속에서 HBM과 메모리 공급망의 정밀한 실증 데이터로 자본시장의 이정표를 세운 공로로 최우수 애널리스트 상을 헌정합니다.`,
+    fullReport: {
+      executiveSummary: "HBM4와 빅테크 CSP의 AI 인프라 투자 경로를 DART 재무제표와 공급망 실사로 입증한 반도체 최고 분석관.",
+      targetPriceTracking: "SK하이닉스, 삼성전자 등 커버리지 34편에서 목표주가 괴리율 -9.8% 내 선방, 목표가 적중률 69.8% 달성.",
+      dartConsistency: "DART 전자공시 1Q/2Q 확정 시설투자(CAPEX) 및 재고자산 회전율 정밀 대사로 실적 정합도 96.3% 확보.",
+      timelinessDepth: "차세대 HBM4 16단 전환과 하이브리드 본딩 도입 주기를 글로벌 장비 수주잔고 데이터로 선제 분석.",
+      marketHealthContribution: "과열된 테마성 중소형 부품주에 대해 엄격한 기술 진입장벽 유무 기준을 제시하여 건전한 가치투자 유도.",
+      representativeReport: {
+        title: "HBM4 아키텍처 전환과 커스텀 엔비디아 공급망 밸류체인",
+        date: "2026-03-22",
+        keyThesis: "커스텀 HBM 베이스 다이 협업 모델의 영업이익률 레버리지를 증명하고 판가 상승 곡선 사전 제시."
+      },
+      h2OutlookAdvice: "빅테크 CSP의 잉여현금흐름 대비 AI CAPEX 지출 비율과 추론용 NPU 칩 다변화 추세를 면밀히 모니터링해야 함.",
+      citationText: "정확한 기술 로드맵과 흔들림 없는 실적 추정으로 한국 반도체 리서치의 신뢰를 드높인 공로를 기려 본 상을 수여합니다."
+    }
+  },
+  {
+    id: "winner_battery_joo_minwoo",
+    rank: 1,
+    category: "2차전지/배터리/소재 섹터 최우수 애널리스트 (1위)",
+    name: "주민우",
+    brokerName: "NH투자증권",
+    sector: "2차전지/배터리/소재",
+    score: 93.40,
     isTarget24: true,
     isAwardExcluded: false,
     keyReports: [
-      "K-Food 글로벌 구조적 침투율과 해외 법인 공헌이익률 분석 (2026.04)",
-      "음식료 원가 래깅 효과 소멸과 판가 수혜의 스프레드 구조 (2026.02)"
+      "미국 인플레이션감축법(IRA) 보조금 현금흐름과 완성차 재고 소진 (2026.03)",
+      "전기차 캐즘 국면 양극재 가동률과 북미 OEM 합작법인(JV) 램프업 (2026.05)"
     ],
     metrics: {
-      targetPriceAccuracy: 74.2,
-      dartAlignment: 96.8,
-      activityTimeliness: 94.5,
-      logicImpact: 95.1,
+      targetPriceAccuracy: 60.5,
+      dartAlignment: 95.8,
+      activityTimeliness: 95.0,
+      logicImpact: 94.0,
     },
-    summaryKeywords: ["K-Food 글로벌 확장 선도", "원가-판가 스프레드 정밀 타격"],
-    quantitativeQualitativeAnalysis: `박상준 연구원은 2026년 원자재 가격 안정화와 K-Food 글로벌 수출 급증 국면에서 삼양식품, 농심, 오리온의 해외 현지 채널 침투율과 수출액 통관 데이터를 실증 분석하여 목표가 적중률 74.2%(섹터 평균 43.8% 대비 압도적 우위)를 달성했습니다. 종합 대상(한유정)에 이은 소비재/유통 섹터 2위의 독보적 실적으로, 종합 대상 단독 분리 원칙에 따라 소비재/유통/음식료 섹터 1위 최우수 애널리스트로 공식 선정되었습니다.`,
-    marketContributionInsight: `관행적인 내수 방어주 시각에서 탈피하여 북미 및 유럽 메인스트림 채널 입점률과 분기별 선적 통계를 결합 분석함으로써 K-Food 기업들의 밸류에이션 리레이팅을 시장에 선제 제시했습니다.`,
-    honorCitation: `데이터의 빈틈없는 정합성과 산업 패러다임 변화를 꿰뚫는 통찰력으로 음식료/소비재 섹터의 새로운 지평을 열었기에 소비재/유통/음식료 부문 최우수 애널리스트 상을 헌정합니다.`,
+    summaryKeywords: ["IRA 보조금 현금흐름 추적", "북미 JV 가동률 팩트체크", "2차전지 최다 발간 챔피언"],
+    quantitativeQualitativeAnalysis: `주민우 연구원은 북미 IRA 첨단제조생산세액공제(AMPC) 보조금의 실제 수취 시점과 국내 배터리 셀·소재사의 분기별 DART 연결 현금흐름표를 정밀 대사하여, 실적 정합도 95.8%, 목표가 적중률 60.5%, 종합 93.40점을 기록하며 2차전지/배터리/소재 섹터 공식 1위 챔피언으로 최종 확정되었습니다. (53편의 연간 전수 리서치 발간 및 DART 정밀 대사)`,
+    marketContributionInsight: `전기차 캐즘 속에서 맹목적인 케파 증설 낙관론을 경계하고, 북미 OEM 고객사들의 실제 재고 소진 주기와 라인 가동률을 철저한 현장 실사 데이터로 검증하여 투자자들에게 가장 균형 잡힌 가이드라인을 제시했습니다.`,
+    honorCitation: `격변하는 글로벌 배터리 공급망 속에서 냉철한 회계적 현금흐름과 엄격한 DART 공시 분석으로 자본시장에 정밀한 지표를 제공한 공로로 최우수 애널리스트 상을 수여합니다.`,
     fullReport: {
-      executiveSummary: "불확실한 글로벌 매크로 환경 속에서 K-Food의 수출 경로를 실증 데이터로 정밀 추적한 소비재 최고 분석관.",
-      targetPriceTracking: "삼양식품, 농심 등 28편의 커버리지 리포트에서 해외 법인 실적과 수출 통관 데이터 교차검증을 통해 목표주가 적중률 74.2% 달성.",
-      dartConsistency: "DART 전자공시 1Q/2Q 확정 영업이익과의 추정 오차율 2.4% 기록하여 전 증권사 음식료 커버리지 중 최상위 정합성 입증.",
-      timelinessDepth: "소맥·유지류 글로벌 선물 가격 하향 안정화와 환율 효과를 선제 반영하여 이익 서프라이즈 시점을 2개월 앞서 포착.",
-      marketHealthContribution: "과열된 테마성 외식주에 대한 무분별한 매수 추천을 지양하고, 실질 수출 현금흐름이 창출되는 종목군으로 시장의 건전한 투자 방향 유도.",
+      executiveSummary: "북미 IRA 정책 변동성과 전기차 캐즘 국면을 DART 연결재무제표와 공급망 실사로 정확히 짚어낸 2차전지 최고 분석관.",
+      targetPriceTracking: "에코프로비엠, LG에너지솔루션, SK아이이테크놀로지 등 53편(2026 누적 6편 및 배치 전수 집계)의 커버리지에서 메탈가 연동 ASP 하락폭을 선반영하여 목표주가 적중률 60.5% 기록.",
+      dartConsistency: "DART 공시 재고자산평가손익 및 북미 합작법인 지분법 손익 인식을 95.8% 정합도로 일치시킴.",
+      timelinessDepth: "미국 ESS 전력망용 배터리 수주 급증과 LFP 전환 사이클을 국내외 밸류체인 데이터를 통해 2개월 선제 분석.",
+      marketHealthContribution: "비현실적인 장기 멀티플 산정을 지양하고 실제 잉여현금흐름(FCF) 기반의 보수적 밸류에이션 모델을 제시하여 시장 과열 진정에 기여.",
       representativeReport: {
-        title: "K-Food 글로벌 구조적 침투율과 해외 법인 공헌이익률 분석",
-        date: "2026-04-18",
-        keyThesis: "미국 및 유럽 대형 유통 체인 입점률 확대와 원가 하향 안정화에 따른 해외 영업이익률 20% 상회 경로 입증."
-      },
-      h2OutlookAdvice: "하반기는 해외 현지 공장 증설에 따른 고정비 증가와 마케팅비 집행 추이를 모니터링하며 영업이익률 방어 여부를 핵심 지표로 점검해야 함.",
-      citationText: "뛰어난 정량 분석과 산업 구조 변화를 포착한 탁월한 통찰력으로 소비재/음식료 리서치의 위상을 높였기에 본 상을 수여합니다."
-    }
-  },
-  {
-    id: "winner_semicon_kim",
-    rank: 2,
-    category: "반도체/IT/전자 섹터 최우수 애널리스트 (1위)",
-    name: "김선우",
-    brokerName: "메리츠증권",
-    sector: "반도체/IT/전자",
-    score: 92.97,
-    keyReports: [
-      "HBM4 아키텍처 전환과 커스텀 파운드리 수율 변곡점 (2026.03)",
-      "메모리 사이클 3단계: 범용 D램 공급 제약과 B2B CAPEX 경로 (2026.05)"
-    ],
-    metrics: {
-      targetPriceAccuracy: 72.4,
-      dartAlignment: 92.4,
-      activityTimeliness: 93.1,
-      logicImpact: 92.6,
-    },
-    summaryKeywords: ["HBM 생태계 정밀 타격", "반도체 사이클의 냉철한 메스"],
-    quantitativeQualitativeAnalysis: `AI 반도체 밸류체인의 기술적 전환기 속에서 HBM 패키징 수율과 공급사별 ASP를 DART 설비투자 공시와 교차 검증하여 목표가 적중률 72.4%(섹터 평균 52.1% 대비 최상위)를 기록했습니다. 분기 실적 컨센서스가 흔들릴 때마다 오차율 3.2% 미만의 정교한 실적 모델을 제시했습니다.`,
-    marketContributionInsight: `시장 전반의 장밋빛 AI 환상에 매몰되지 않고, 범용 메모리 레거시 공정의 가동률 회복 지연 및 테크 마이그레이션 병목 현상을 가감 없이 경고하여 기관 투자자의 헤지 전략에 결정적 기여를 했습니다.`,
-    honorCitation: `초미세 공정의 복잡한 퍼즐을 명쾌한 실적 데이터로 풀어낸 반도체 섹터의 나침반. 기술과 숫자를 결합한 입체적 분석력으로 시장의 신뢰를 확립하였기에 최우수 애널리스트 상을 헌정합니다.`,
-    fullReport: {
-      executiveSummary: "글로벌 테크 패권 경쟁 속에서 기술 격차와 DART 재무제표를 결합한 최고의 반도체 분석관.",
-      targetPriceTracking: "HBM 가격 상승분과 레거시 D램 재고평가손익 환입 효과를 분리 산출하여 연간 목표주가 평균 괴리율 -9.5%로 선방(적중률 72.4%).",
-      dartConsistency: "삼성전자 및 SK하이닉스의 분기 보고서 내 시설투자(CAPEX) 집행률 및 재고자산 회전율을 정확히 역산하여 실적 정합성 92.4% 기록.",
-      timelinessDepth: "차세대 HBM4 16단 적층 전환에 따른 하이브리드 본딩 도입 시점을 글로벌 장비사 수주잔고 데이터로 3개월 앞서 적시 발간.",
-      marketHealthContribution: "단순 테마성 중소형 부품주에 대해 무분별한 Buy 의견을 자제하고, 기술 진입장벽 유무에 따른 철저한 차별화 전략 권고.",
-      representativeReport: {
-        title: "HBM4 아키텍처 전환과 커스텀 파운드리 수율 변곡점",
+        title: "미국 인플레이션감축법(IRA) 보조금 현금흐름과 완성차 재고 소진",
         date: "2026-03-18",
-        keyThesis: "메모리-파운드리 간 베이스 다이 협업 모델의 마진 구조를 정량화하여 2026년 하반기 실적 레버리지를 증명."
+        keyThesis: "북미 완성차 OEM의 배터리 재고 일수 추이와 분기별 AMPC 보조금의 회계적 실현 가능성을 모델화하여 실질 수익성 궤적 입증."
       },
-      h2OutlookAdvice: "빅테크 CSP의 AI 인프라 투자 지속 여부와 추론용 ASIC 칩 다변화에 따른 메모리 탑재 용량 변화를 모니터링해야 함.",
-      citationText: "치열한 반도체 전쟁 속에서 정확한 기술 로드맵과 실적 교차 검증으로 시장의 눈을 밝힌 공로를 기립니다."
+      h2OutlookAdvice: "북미 대선 전후 친환경 보조금 축소 리스크와 ESS 그리드향 신규 수주 전환 속도를 가장 중요한 변수로 점검해야 함.",
+      citationText: "혼돈의 2차전지 시장에서 흔들리지 않는 팩트와 정밀한 현금흐름 데이터로 신뢰의 기준을 확립한 공로를 기려 본 상을 수여합니다."
     }
   },
   {
-    id: "winner_battery_jeon",
-    rank: 3,
-    category: "2차전지/배터리/소재 섹터 최우수 애널리스트 (1위)",
-    name: "전창현",
-    brokerName: "대신증권",
-    sector: "2차전지/배터리/소재",
-    score: 92.30,
-    isAwardExcluded: true,
-    awardExclusionNote: "※ 본 증권사(대신증권)는 2026 어워즈 [평가 대상이나 시상 제외 5개사] 규정에 해당하여, 성과 지표(종합 92.30점/적중률 61.8%)는 공정하게 공개되나 공식 시상(트로피) 대상에서는 제외됩니다.",
-    keyReports: [
-      "캐즘(Chasm) 탈출의 조건: ESS 그리드 수요와 LFP 양산 원가 곡선 (2026.03)",
-      "양극재 판가 스프레드 바닥 확인과 북미 AMPC 귀속 이익 (2026.06)"
-    ],
-    metrics: {
-      targetPriceAccuracy: 61.8,
-      dartAlignment: 93.1,
-      activityTimeliness: 91.5,
-      logicImpact: 92.7,
-    },
-    summaryKeywords: ["캐즘을 관통한 밸류에이션 정밀타격", "배터리 팩트 체크 수호자"],
-    quantitativeQualitativeAnalysis: `전기차 캐즘 장기화 속에서도 리튬·니켈 메탈가와 연동된 판가 하락을 선제적으로 재무제표에 반영, 증권가 2차전지 평균 괴리율(-27.8%) 대비 현저히 우수한 -13.5%의 목표가 괴리율과 적중률 61.8%(섹터 평균 34.2%)를 달성하며 점수 92.30점을 획득했습니다.`,
-    marketContributionInsight: `시장 과열기의 무조건적 반등 기대감을 배제하고, 미국 AMPC 보조금의 현금 유입 시차와 완성차 재고 소진 속도를 DART 연결재무제표로 낱낱이 해부하여 투자자들에게 현실적인 바닥 통과 시점을 제시했습니다.`,
-    honorCitation: `감정이 지배하던 2차전지 시장에 냉철한 원가 스프레드와 공시 데이터의 잣대를 들이댄 용기 있는 연구자. 시장의 과열과 비관 속에서 균형 잡힌 시각을 견지한 공로로 본 상을 수여합니다.`,
-    fullReport: {
-      executiveSummary: "변동성의 소용돌이 속에서 오직 메탈 가격과 DART 연결공시 수치로 캐즘을 돌파한 정통파 애널리스트.",
-      targetPriceTracking: "메탈 가격 래깅 타임(Lagging Time)을 수식화하여 분기별 ASP 궤적을 추적, 목표가 평균 괴리율 -13.5%로 방어.",
-      dartConsistency: "배터리 3사 및 양극재 4사의 DART 공시 재고자산평가손실 규모를 사전 추정치와 93.1% 정합도로 일치시킴.",
-      timelinessDepth: "미국 ESS 프로젝트 발주 급증과 그리드향 배터리 전환 흐름을 선제적으로 감지하여 연초 섹터 리밸런싱 근거 제공.",
-      marketHealthContribution: "과거 관행화되었던 먼 미래(2030년) 실적을 무리하게 당겨온 밸류에이션 방식을 지양하고, 현금흐름할인(DCF) 엄격 적용.",
-      representativeReport: {
-        title: "캐즘(Chasm) 탈출의 조건: ESS 그리드 수요와 LFP 양산 원가 곡선",
-        date: "2026-03-24",
-        keyThesis: "전기차 수요 정체를 상쇄하는 전력망용 ESS 배터리 수주잔고와 DART 수주상황 공시의 상관관계를 최초로 모델화."
-      },
-      h2OutlookAdvice: "북미 인플레이션감축법(IRA) 규정 변경 여부와 유럽 배터리 여권제 시행에 따른 탄소발자국 인증 비용을 면밀히 관찰해야 함.",
-      citationText: "혼돈의 배터리 시장에서 냉엄한 팩트와 정밀한 재무 분석으로 신뢰의 기준점을 세운 공로를 높이 평가합니다."
-    }
-  },
-  {
-    id: "winner_bio_lee",
-    rank: 4,
+    id: "winner_bio_shin_minsu",
+    rank: 1,
     category: "바이오/제약/헬스케어 섹터 최우수 애널리스트 (1위)",
-    name: "이안나",
-    brokerName: "교보증권",
+    name: "신민수",
+    brokerName: "키움증권",
     sector: "바이오/제약/헬스케어",
-    score: 85.67,
+    score: 93.86,
+    isTarget24: true,
+    isAwardExcluded: false,
     keyReports: [
-      "ADC 차세대 플랫폼의 임상 마일스톤과 기술수출 계약의 실질 가치 (2026.02)",
-      "바이오시밀러 북미 PBM 등재 현황과 오리지널 대체율 추적 (2026.05)"
+      "ADC 플랫폼 기술이전 마일스톤 및 글로벌 임상 3상 데이터 객관적 대사 (2026.02)",
+      "바이오시밀러 북미 PBM 처방집 등재와 오리지널 대체율 실증 추적 (2026.05)"
     ],
     metrics: {
-      targetPriceAccuracy: 86.2,
-      dartAlignment: 85.4,
-      activityTimeliness: 85.9,
-      logicImpact: 85.2,
+      targetPriceAccuracy: 66.4,
+      dartAlignment: 95.8,
+      activityTimeliness: 93.9,
+      logicImpact: 94.2,
     },
-    summaryKeywords: ["임상 데이터의 냉철한 해독", "K-바이오 실질 가치 감별사"],
-    quantitativeQualitativeAnalysis: `바이오 임상 파이프라인의 성공 확률(LoA)을 임상 단계별·적응증별로 정밀 계량화하여 목표주가를 도출했습니다. 계약금(Upfront)과 마일스톤의 실제 DART 수령 공시를 확인하여 매출 인식 오차를 최소화했습니다.`,
-    marketContributionInsight: `단순 기술이전 총액(헤드라인 넘버)에 현혹되지 않고, 반환 불가 계약금 비율과 마일스톤 지급 조건을 분리 공시 기반으로 검증하여 바이오 버블을 예방하는 방파제 역할을 완수했습니다.`,
-    honorCitation: `임상 파이프라인의 환상을 걷어내고 실제 현금흐름과 마일스톤의 엄정한 데이터로 바이오 신뢰를 구축한 연구자. 정밀한 과학적 분석과 금융 밸류에이션을 결합한 성과를 기려 본 상을 수여합니다.`,
+    summaryKeywords: ["ADC 플랫폼 임상 해독", "K-바이오 실질 가치 감별사"],
+    quantitativeQualitativeAnalysis: `신민수 연구원은 글로벌 빅파마와의 기술수출 계약에서 반환 불가 계약금 비율과 마일스톤 지급 조건을 DART 공시 데이터와 1대1 대사하여 실적 정합도 95.8%, 목표가 적중률 66.4%, 종합 점수 93.86점으로 바이오 섹터 1위를 차지했습니다.`,
+    marketContributionInsight: `단순 기술이전 총액(헤드라인 넘버)에 현혹되지 않고, 단계별 성공 확률(LoA)을 엄격히 적용한 rNPV 모델로 K-바이오의 진정한 옥석을 가려냈습니다.`,
+    honorCitation: `임상 파이프라인의 환상을 걷어내고 실제 현금흐름과 마일스톤의 엄정한 데이터로 바이오 신뢰를 구축한 연구자에게 최우수 애널리스트 상을 수여합니다.`,
     fullReport: {
-      executiveSummary: "과학적 임상 데이터와 냉엄한 현금흐름 밸류에이션을 결합하여 K-바이오의 진정한 옥석을 가려낸 최고 권위자.",
-      targetPriceTracking: "임상 1/2/3상 단계별 성공 확률을 반영한 rNPV(Risk-adjusted NPV) 모델로 목표주가 오차율 7.8% 달성.",
-      dartConsistency: "DART 단일판매·공급계약 체결 공시의 분기별 회계상 안분 인식 기준을 완벽 분석하여 실적 정합도 85.4% 확보.",
-      timelinessDepth: "ASCO 및 AACR 등 글로벌 암학회 발표 초록(Abstract)을 현장 분석하여 유효성 지표의 통계적 유의성을 즉각 평가.",
+      executiveSummary: "과학적 임상 데이터와 냉엄한 현금흐름 밸류에이션을 결합하여 K-바이오의 옥석을 가려낸 최고 권위자.",
+      targetPriceTracking: "임상 단계별 성공 확률을 반영한 rNPV 모델로 목표주가 오차율 최소화(적중률 66.4%).",
+      dartConsistency: "DART 단일판매·공급계약 체결 공시의 분기별 회계상 안분 인식 기준을 완벽 분석하여 실적 정합도 95.8% 확보.",
+      timelinessDepth: "글로벌 암학회(ASCO/AACR) 발표 초록(Abstract)을 현장 분석하여 유효성 지표의 통계적 유의성을 즉각 평가.",
       marketHealthContribution: "과도한 기대감만으로 주가가 폭등하던 종목들의 전환사채(CB) 오버행 물량과 임상 지연 리스크를 선제적으로 경고.",
       representativeReport: {
-        title: "ADC 차세대 플랫폼의 임상 마일스톤과 기술수출 계약의 실질 가치",
+        title: "ADC 플랫폼 기술이전 마일스톤 및 글로벌 임상 3상 데이터 객관적 대사",
         date: "2026-02-19",
         keyThesis: "항체-약물 접합체(ADC) 페이로드 독성 관리 지표와 실제 글로벌 빅파마의 판권 계약금 구조를 전수 분해."
       },
@@ -272,226 +240,238 @@ export const OFFICIAL_WINNERS_REVIEWS: AnalystAwardReview[] = [
     }
   },
   {
-    id: "winner_auto_kang",
-    rank: 5,
+    id: "winner_auto_yoo_jiwoong",
+    rank: 1,
     category: "자동차/모빌리티 섹터 최우수 애널리스트 (1위)",
-    name: "강성진",
-    brokerName: "KB증권",
+    name: "유지웅",
+    brokerName: "다올투자증권",
     sector: "자동차/모빌리티",
-    score: 87.91,
+    score: 93.83,
+    isTarget24: true,
+    isAwardExcluded: false,
     keyReports: [
-      "하이브리드(HEV) 믹스 개선에 따른 완성차 영업이익률 피크아웃 논쟁 종결 (2026.04)",
-      "SDV 전환 비용과 완성차 자사주 매입·소각의 주주환원 수익률 (2026.06)"
+      "하이브리드(HEV) 고수익 믹스 개선 및 북미 IRA 보조금 인센티브 방어 추정 (2026.04)",
+      "완성차 자사주 매입·소각과 TSR 35% 달성 밸류업 경로 (2026.06)"
     ],
     metrics: {
-      targetPriceAccuracy: 68.2,
-      dartAlignment: 89.2,
-      activityTimeliness: 86.8,
-      logicImpact: 87.1,
+      targetPriceAccuracy: 65.9,
+      dartAlignment: 95.7,
+      activityTimeliness: 93.5,
+      logicImpact: 93.8,
     },
-    summaryKeywords: ["완성차 피크아웃 반박의 선구자", "주주환원 밸류업의 선봉장"],
-    quantitativeQualitativeAnalysis: `글로벌 완성차의 피크아웃 우려 속에서도 HEV(하이브리드) 비중 확대에 따른 평균판매단가(ASP) 방어를 DART 분기 매출원가율로 증명, 목표주가 적중률 68.2%(섹터 평균 45.3% 대비 1위)와 점수 87.91점을 달성했습니다.`,
-    marketContributionInsight: `단순 판매 대수 지표에 얽매이지 않고, 인센티브(판매장려금) 집행 추이와 완성차의 밸류업 프로그램(자사주 소각, 배당성향)을 종합 연계하여 국내 자동차 섹터의 재평가(Re-rating)를 주도했습니다.`,
-    honorCitation: `글로벌 자동차 산업의 격변기 속에서 믹스 개선과 현금흐름의 본질을 짚어내며 시장의 편견을 뒤집은 모빌리티 분야 최고 권위자에게 최우수 애널리스트 상을 수여합니다.`,
+    summaryKeywords: ["하이브리드 고수익 믹스 분석", "TSR 밸류업의 선봉장"],
+    quantitativeQualitativeAnalysis: `유지웅 연구원은 글로벌 전기차 캐즘 국면에서 HEV(하이브리드) 비중 확대에 따른 평균판매단가(ASP) 방어를 DART 분기 매출원가율로 증명, 목표주가 적중률 65.9%와 종합 93.83점으로 자동차/모빌리티 섹터 1위를 차지했습니다.`,
+    marketContributionInsight: `단순 완성차 판매 대수 지표에 얽매이지 않고, 인센티브(판매장려금) 절감 추이와 주주환원 밸류업 프로그램(자사주 소각, 배당성향)을 종합 연계하여 섹터 재평가를 주도했습니다.`,
+    honorCitation: `글로벌 자동차 산업의 격변기 속에서 믹스 개선과 현금흐름의 본질을 짚어내며 시장의 편견을 뒤집은 최고 권위자에게 최우수 애널리스트 상을 수여합니다.`,
     fullReport: {
-      executiveSummary: "시장 컨센서스를 선도하는 하이브리드 고수익성 모델링과 주주환원율 계량 분석의 일인자.",
-      targetPriceTracking: "북미/인도 시장 현지 생산 거점별 마진율을 반영하여 목표가 평균 괴리율을 -11.4%로 안정적 유지(적중률 68.2%).",
-      dartConsistency: "현대차·기아의 DART 분기 실적 공시와 글로벌 리테일 재고 일수를 대조하여 실적 정합성 89.2% 기록.",
-      timelinessDepth: "전기차 전환 지연 국면에서 하이브리드 파워트레인의 캐시카우 역할을 8개월 전부터 확신 있게 설파.",
-      marketHealthContribution: "과거 트라우마에 갇힌 저PBR 할인율 적용 관행을 비판하고, 잉여현금흐름(FCF) 기반의 정밀 밸류에이션 제시.",
+      executiveSummary: "하이브리드 고수익성 모델링과 주주환원율 계량 분석으로 시장 컨센서스를 선도한 모빌리티 최고 분석관.",
+      targetPriceTracking: "북미/인도 생산 거점별 마진율을 반영하여 목표가 평균 괴리율을 안정적으로 유지(적중률 65.9%).",
+      dartConsistency: "현대차·기아의 DART 분기 실적 공시와 글로벌 리테일 재고 일수를 대조하여 실적 정합성 95.7% 기록.",
+      timelinessDepth: "전기차 전환 지연 국면에서 하이브리드 파워트레인의 캐시카우 역할을 선제적으로 설파.",
+      marketHealthContribution: "과거 저PBR 할인율 적용 관행을 비판하고, 잉여현금흐름(FCF) 기반의 정밀 밸류에이션 제시.",
       representativeReport: {
-        title: "하이브리드(HEV) 믹스 개선에 따른 완성차 영업이익률 피크아웃 논쟁 종결",
+        title: "하이브리드(HEV) 고수익 믹스 개선 및 북미 IRA 보조금 인센티브 방어 추정",
         date: "2026-04-08",
-        keyThesis: "HEV의 옵션 채택률 상승과 북미 현지화 인센티브 절감 효과를 DART 손익 공시로 입증하여 피크아웃 공포를 불식."
+        keyThesis: "HEV 옵션 채택률 상승과 북미 현지화 인센티브 절감 효과를 DART 손익 공시로 입증."
       },
       h2OutlookAdvice: "미국 대선 이후 관세 정책 변화 가능성과 인도법인 상장(IPO) 이후 구주매출 대금의 자본 재배치 방안을 주시해야 함.",
       citationText: "시장 컨센서스를 흔들리지 않고 바로 세운 예리한 통찰력과 정교한 데이터 분석에 깊은 찬사를 보냅니다."
     }
   },
   {
-    id: "winner_ship_lee",
-    rank: 6,
+    id: "winner_ship_lee_jiho",
+    rank: 1,
     category: "조선/중공업/방산 섹터 최우수 애널리스트 (1위)",
-    name: "이한결",
-    brokerName: "다올투자증권",
+    name: "이지호",
+    brokerName: "메리츠증권",
     sector: "조선/중공업/방산",
-    score: 84.84,
+    score: 93.53,
+    isTarget24: true,
+    isAwardExcluded: false,
     keyReports: [
-      "LNG선 슬롯 프리미엄과 고선가 선박 건조 마진 실현 주기 (2026.01)",
-      "K-방산 유럽·중동 현지화 파트너십과 수주잔고 납기 스케줄 (2026.05)"
+      "LNG선 도크 슬롯 프리미엄 지속 및 K-방산 수출 잔고 매출 인식 스케줄링 (2026.01)",
+      "고선가 선박 건조 마진 실현 주기와 특수선 MRO 신사업 가치 (2026.05)"
     ],
     metrics: {
-      targetPriceAccuracy: 73.1,
-      dartAlignment: 84.9,
-      activityTimeliness: 84.6,
-      logicImpact: 84.6,
+      targetPriceAccuracy: 95.8,
+      dartAlignment: 95.1,
+      activityTimeliness: 92.8,
+      logicImpact: 93.0,
     },
-    summaryKeywords: ["슈퍼사이클 도크의 정밀 항해사", "K-방산 수출잔고 해부학"],
-    quantitativeQualitativeAnalysis: `조선소 도크(Dock)별 고선가 선박 건조 믹스를 DART 분기보고서 공사손실충당금 환입 내역과 매칭하여 실적 턴어라운드를 정확히 예측, 적중률 73.1%(섹터 평균 54.8%)와 84.84점의 뛰어난 평가를 받았습니다.`,
-    marketContributionInsight: `방산 수주잔고의 실제 납기(Delivery) 스케줄과 수출입은행 금융지원 조건을 면밀히 분석하여, 단순 MOU와 본계약의 차이를 명확히 구분하는 등 시장의 신뢰성 제고에 크게 기여했습니다.`,
+    summaryKeywords: ["도크 슬롯 슈퍼사이클", "K-방산 수출잔고 납기 스케줄러"],
+    quantitativeQualitativeAnalysis: `이지호 연구원은 조선소 도크(Dock)별 고선가 선박 건조 믹스를 DART 분기보고서 공사손실충당금 환입 내역과 매칭하여 목표가 적중률 95.8%, DART 실적 정합성 95.1%, 종합 평점 93.53점으로 조선/중공업/방산 섹터 1위를 차지했습니다.`,
+    marketContributionInsight: `방산 수주잔고의 실제 납기(Delivery) 스케줄과 수출입은행 금융지원 조건을 면밀히 분석하여, 단순 MOU와 본계약의 차이를 명확히 구분하는 등 시장의 신뢰성 제고에 기여했습니다.`,
     honorCitation: `오랜 침체를 딛고 일어선 조선·방산 슈퍼사이클의 긴 호흡을 도크의 현장 데이터와 공시로 입증한 탁월한 연구자에게 이 상을 수여합니다.`,
     fullReport: {
       executiveSummary: "조선소 건조 스케줄과 방산 납품 마일스톤을 공시로 정밀 추적한 중공업 섹터의 표준.",
-      targetPriceTracking: "클락슨 신조선가지수와 도크 슬롯 잔여기간을 결합한 3개년 선가 모델로 적중률 73.1%, 목표주가 평균 괴리율 -9.8% 달성.",
+      targetPriceTracking: "클락슨 신조선가지수와 도크 슬롯 잔여기간을 결합한 3개년 선가 모델로 적중률 95.8% 달성.",
       dartConsistency: "DART 공시 내 '수주상황' 항목의 납품 기한과 계약 금액 변경 공시를 철저히 추적하여 실적 오차 최소화.",
       timelinessDepth: "후판 가격 하향 안정화와 인력 수급 개선 시점을 야드 현장 팩트체크로 적시 분석.",
       marketHealthContribution: "과열된 루머성 방산 수출 기사에 대해 계약 조건의 마진율을 검증하며 냉정한 투자 기준 제시.",
       representativeReport: {
-        title: "LNG선 슬롯 프리미엄과 고선가 선박 건조 마진 실현 주기",
+        title: "LNG선 도크 슬롯 프리미엄 지속 및 K-방산 수출 잔고 매출 인식 스케줄링",
         date: "2026-01-22",
         keyThesis: "2023년 수주한 고선가 친환경 선박의 본격 매출화 구간 진입에 따른 영업이익률 두 자릿수 안착 경로 규명."
       },
-      h2OutlookAdvice: "미국 해군 MRO(유지·보수·정비) 사업 수주 가시성과 특수선 수주 마진율을 향후 모멘텀의 핵심으로 점검할 것.",
+      h2OutlookAdvice: "미국 해군 MRO 사업 수주 가시성과 특수선 수주 마진율을 향후 모멘텀의 핵심으로 점검할 것.",
       citationText: "거친 파도 속에서 도크의 진실을 캐내어 투자자에게 안정적인 나침반을 제공한 공로를 치하합니다."
     }
   },
   {
-    id: "winner_platform_lee",
-    rank: 7,
-    category: "플랫폼/게임/엔터 섹터 최우수 애널리스트 (1위)",
-    name: "이선화",
-    brokerName: "KB증권",
+    id: "winner_platform_ji_inhae",
+    rank: 1,
+    category: "플랫폼/게임/엔터 섹터 최우수 애널리스트 (1위 - 시상 승계)",
+    name: "지인해",
+    brokerName: "신한투자증권",
     sector: "플랫폼/게임/엔터",
-    score: 96.51,
+    score: 94.49,
+    isTarget24: true,
+    isAwardExcluded: false,
+    awardSuccessionNote: "※ 1위(이선화, KB증권 퇴사) 시상 제외에 따른 2위 공식 수상 승계",
     keyReports: [
-      "AI 검색 도입에 따른 플랫폼 체류시간과 커머스 수수료 개편 효과 (2026.03)",
-      "글로벌 음원 스트리밍 정산율 인상과 글로벌 팬덤 ARPU 분해 (2026.05)"
+      "글로벌 엔터 음원 IP 스트리밍 정산율 인상과 팬덤 ARPU 구조적 성장 (2026.04)",
+      "생성형 AI 검색 도입 및 게임 신작 라이브 서비스 잔존율 정밀 분석 (2026.06)"
     ],
     metrics: {
-      targetPriceAccuracy: 64.5,
+      targetPriceAccuracy: 68.5,
       dartAlignment: 96.1,
-      activityTimeliness: 96.4,
-      logicImpact: 96.3,
+      activityTimeliness: 94.2,
+      logicImpact: 94.0,
     },
-    summaryKeywords: ["AI 에이전트 전환기 통찰", "팬덤 이코노미 데이터 분석의 마스터"],
-    quantitativeQualitativeAnalysis: `플랫폼 포털의 AI 검색 융합에 따른 광고 전환율과 글로벌 엔터 팬덤 ARPU(가입자당 평균매출)를 완벽히 계량화하여 적중률 64.5%(섹터 평균 39.4% 대비 1위), 전체 2위에 해당하는 96.51점의 높은 종합 점수를 획득했습니다.`,
-    marketContributionInsight: `엔터테인먼트 산업의 단순 앨범 판매량 하락 공포를 글로벌 음원 스트리밍 매출 및 투어 MD 마진의 구조적 성장으로 반박하여 기관 투자자의 저가 매수 결단을 견인했습니다.`,
-    honorCitation: `무형자산과 트래픽이라는 까다로운 플랫폼 지표를 명확한 숫자로 실체화하고, 콘텐츠 산업의 글로벌 가치를 증명한 선도적 분석가에게 최우수상을 수여합니다.`,
+    summaryKeywords: ["글로벌 엔터테인먼트 밸류에이션 리더", "플랫폼/콘텐츠 실적 정합성의 표준"],
+    quantitativeQualitativeAnalysis: `지인해 연구원은 엔터테인먼트 및 플랫폼 산업의 글로벌 음원 IP 스트리밍 정산율과 팬덤 ARPU, 생성형 AI 검색 광고 전환율을 정밀하게 계량화하여 목표가 적중률 68.5%, DART 실적 정합성 96.1%, 종합 점수 94.49점을 획득했습니다. (※ 플랫폼/게임/엔터 1위 이선화 연구원의 KB증권 퇴사에 따른 시상 제외 규정으로 섹터 2위 지인해 연구원에게 공식 1위 최우수 챔피언 수상이 정식 승계되었습니다.)`,
+    marketContributionInsight: `단순 음반 판매량 둔화에 대한 시장 우려를 글로벌 음원 스트리밍 매출 및 투어 MD 마진의 구조적 성장 데이터로 정밀 반박하여 기관 투자자의 합리적 투자 판단을 성공적으로 이끌어냈습니다.`,
+    honorCitation: `무형자산과 트래픽, 글로벌 IP라는 까다로운 지표를 정교한 숫자로 실체화하고 대한민국 플랫폼 및 K-엔터테인먼트 산업의 진정한 밸류를 입증한 공로로 최우수 챔피언상을 수여합니다.`,
     fullReport: {
-      executiveSummary: "디지털 전환과 K-컬처 글로벌 확장의 핵심 지표를 가장 날카롭게 포착한 독보적 플랫폼 연구원.",
-      targetPriceTracking: "글로벌 빅테크 멀티플과 비교한 엄격한 SOTP(사업별 합산 밸류에이션)로 목표가 적중률 64.5%, 평균 괴리율 -12.1% 달성.",
-      dartConsistency: "DART 분기보고서 상 무형자산 상각비 및 외주용역비 증감 추이를 정확히 산출하여 96.1%의 실적 정합성 기록.",
-      timelinessDepth: "생성형 AI 검색 엔진 탑재에 따른 광고 단가(CPC/CPM) 회복 시점을 선제 보고서로 적시 제시.",
-      marketHealthContribution: "게임 신작 흥행 기대감에 기댄 막연한 매수를 경계하고 라이브 서비스 잔존율 지표를 중시하는 평가 기준 확립.",
+      executiveSummary: "글로벌 콘텐츠 IP 확장과 플랫폼 광고 혁신의 핵심 지표를 정교하게 추적한 독보적 엔터/플랫폼 분석가.",
+      targetPriceTracking: "글로벌 빅테크 및 엔터테인먼트 멀티플과 비교한 엄격한 SOTP 모델로 목표주가 적중률 68.5% 달성.",
+      dartConsistency: "DART 분기보고서 상 무형자산 상각비 및 음원/MD 매출 원가 추이를 정확히 산출하여 96.1%의 실적 정합성 기록.",
+      timelinessDepth: "생성형 AI 검색 엔진 탑재와 광고 수익화 시점을 선제 보고서로 적시 제시.",
+      marketHealthContribution: "단기 테마에 편승하지 않고 라이브 서비스 잔존율과 글로벌 팬덤 과금 지표를 중시하는 합리적 평가 기준 확립.",
       representativeReport: {
-        title: "AI 검색 도입에 따른 플랫폼 체류시간과 커머스 수수료 개편 효과",
-        date: "2026-03-14",
-        keyThesis: "네이버·카카오의 로컬 데이터베이스와 AI 요약 검색 간 시너지를 DART 광고 사업부문 매출 추정과 결합."
+        title: "글로벌 엔터 음원 IP 스트리밍 정산율 인상과 팬덤 ARPU 구조적 성장",
+        date: "2026-04-18",
+        keyThesis: "글로벌 스트리밍 플랫폼 정산율 개편과 위버스/팬덤 커머스 영업이익률을 DART 분기 손익계산서와 결합하여 입증."
       },
-      h2OutlookAdvice: "미국 법인 상장 및 현지 웹툰·음원 IP의 2차 판권 라이선싱 매출 확대를 주시해야 함.",
-      citationText: "플랫폼 혁신과 K-엔터테인먼트의 역동성을 정교한 데이터로 꿰뚫어본 눈부신 업적을 기립니다."
+      h2OutlookAdvice: "미국 법인 현지화 및 글로벌 음원 IP 2차 판권 라이선싱 매출 확대를 핵심 모니터링 변수로 설정해야 함.",
+      citationText: "정밀한 데이터 통찰력으로 K-컬처와 플랫폼 산업의 글로벌 도약을 조망한 눈부신 업적을 기립니다."
     }
   },
   {
-    id: "winner_finance_kim",
-    rank: 8,
+    id: "winner_finance_kim_in",
+    rank: 1,
     category: "금융/지주 섹터 최우수 애널리스트 (1위)",
     name: "김인",
     brokerName: "BNK투자증권",
     sector: "금융/지주",
     score: 96.29,
+    isTarget24: true,
+    isAwardExcluded: false,
     keyReports: [
-      "보통주자본비율(CET1) 관리 목표와 은행 지주 총주주환원율 40% 도달 경로 (2026.02)",
+      "보통주자본비율(CET1) 13% 초과 자본 환원 및 은행 지주 총주주환원율 40% 도달 선도 (2026.02)",
       "PF 부실채권 정리 완료와 대손충당금 환입에 따른 밸류업 스프레드 (2026.04)"
     ],
     metrics: {
       targetPriceAccuracy: 71.8,
-      dartAlignment: 96.5,
+      dartAlignment: 97.5,
       activityTimeliness: 95.8,
       logicImpact: 96.1,
     },
     summaryKeywords: ["밸류업 프로그램의 설계자", "CET1 비율과 주주환원의 나침반"],
-    quantitativeQualitativeAnalysis: `금융지주의 핵심 자본적정성 지표인 보통주자본(CET1) 비율과 대손비용률(CCR)을 DART 분기 경영공시와 오차 없이 결합 분석하여 목표주가 적중률 71.8%(섹터 평균 48.7%), 종합 96.29점(섹터 1위, 전체 3위)을 기록했습니다.`,
-    marketContributionInsight: `정부 밸류업 가이드라인 발표 이전부터 자사주 매입·소각을 통한 주당순자산(BPS) 증대 경로를 역설, 은행주의 만년 저평가(Korea Discount) 해소를 실증적으로 입증했습니다.`,
-    honorCitation: `대한민국 금융주의 자본 정책과 주주환원의 새 장을 연 밸류업 분석의 최고봉. 금융지주의 건전성과 주주가치를 완벽히 조화시킨 혜안에 경의를 표하며 최우수 애널리스트 상을 수여합니다.`,
+    quantitativeQualitativeAnalysis: `김인 연구원은 금융지주의 핵심 자본적정성 지표인 보통주자본(CET1) 비율과 대손비용률(CCR)을 DART 분기 경영공시와 오차 없이 결합 분석하여 목표주가 적중률 71.8%, DART 정합성 97.5%, 종합 96.29점(금융 섹터 1위, 전체 3위)을 기록했습니다.`,
+    marketContributionInsight: `정부 밸류업 가이드라인 발표 이전부터 자사주 매입·소각을 통한 주당순자산(BPS) 증대 경로를 역설하여 금융주의 만년 저평가(Korea Discount) 해소를 실증적으로 입증했습니다.`,
+    honorCitation: `대한민국 금융주의 자본 정책과 주주환원의 새 장을 연 밸류업 분석의 최고봉. 금융지주의 건전성과 주주가치를 완벽히 조화시킨 혜안에 최우수 애널리스트 상을 수여합니다.`,
     fullReport: {
       executiveSummary: "금융지주 자본비율 규제와 주주환원 모델링에서 타의 추종을 불허하는 금융 섹터의 살아있는 전설.",
-      targetPriceTracking: "배당수익률과 자사주 소각률을 결합한 총주주환원율 모델로 연간 목표주가 적중도 71.8%, 평균 괴리율 -10.3% 달성.",
-      dartConsistency: "DART 경영공시 내 위험가중자산(RWA) 증가율과 순이자마진(NIM) 추이를 96.5%의 정밀도로 예측.",
+      targetPriceTracking: "배당수익률과 자사주 소각률을 결합한 총주주환원율 모델로 연간 목표주가 적중도 71.8% 달성.",
+      dartConsistency: "DART 경영공시 내 위험가중자산(RWA) 증가율과 순이자마진(NIM) 추이를 97.5%의 정밀도로 예측.",
       timelinessDepth: "부동산 PF 관련 추가 충당금 적립 사이클의 정점을 선제 파악하여 은행주 실적 서프라이즈를 선제 제시.",
       marketHealthContribution: "단순 배당성향에 치중하던 시장 관행을 벗어나, 자본비율 버퍼에 기반한 자사주 소각의 강력한 주당가치 제고 효과 설파.",
       representativeReport: {
-        title: "보통주자본비율(CET1) 관리 목표와 은행 지주 총주주환원율 40% 도달 경로",
+        title: "보통주자본비율(CET1) 13% 초과 자본 환원 및 은행 지주 총주주환원율 40% 도달 선도",
         date: "2026-02-27",
         keyThesis: "CET1 비율 13% 초과 자본의 전액 주주환원 룰을 시뮬레이션하여 2026년 주주환원 총액 10조원 시대 도래를 증명."
       },
-      h2OutlookAdvice: "기준금리 인하 국면에서의 마진 방어 전략과 비이자이익(수수료 및 유가증권 운용손익) 체력을 핵심 변수로 확인해야 함.",
+      h2OutlookAdvice: "기준금리 인하 국면에서의 마진 방어 전략과 비이자이익 체력을 핵심 변수로 확인해야 함.",
       citationText: "한국 금융시장의 질적 도약을 이끈 밸류업 분석의 선구자로서 금융투자의 품격을 높인 공로를 기립니다."
     }
   },
   {
-    id: "winner_chemical_lee",
-    rank: 9,
+    id: "winner_chemical_park_sungbong",
+    rank: 1,
     category: "화학/철강/소재 섹터 최우수 애널리스트 (1위)",
-    name: "이용욱",
-    brokerName: "IBK투자증권",
+    name: "박성봉",
+    brokerName: "하나증권",
     sector: "화학/철강/소재",
-    score: 90.03,
-    isAwardExcluded: true,
-    awardExclusionNote: "※ 본 증권사(IBK투자증권)는 2026 어워즈 [평가 대상이나 시상 제외 5개사] 규정에 해당하여, 성과 지표(종합 90.03점/적중률 58.4%)는 공정하게 공개되나 공식 시상(트로피) 대상에서는 제외됩니다.",
+    score: 92.66,
+    isTarget24: true,
+    isAwardExcluded: false,
+    awardSuccessionNote: "※ 1위(IBK투자증권, 성명 비공개) 시상 제외에 따른 2위 공식 수상 승계",
     keyReports: [
-      "중국 증설 피크와 나프타 분해설비(NCC) 구조조정 마진 회복 시나리오 (2026.03)",
+      "글로벌 철강 롤마진 스프레드 및 한계 화학 설비 구조조정 정밀 추정 (2026.03)",
       "글로벌 인프라 투자와 탄소국경조정제도(CBAM) 철강 마진 스프레드 (2026.05)"
     ],
     metrics: {
-      targetPriceAccuracy: 58.4,
-      dartAlignment: 90.4,
-      activityTimeliness: 89.9,
-      logicImpact: 90.0,
+      targetPriceAccuracy: 40.4,
+      dartAlignment: 95.9,
+      activityTimeliness: 92.1,
+      logicImpact: 92.5,
     },
     summaryKeywords: ["사이클 최저점의 나침반", "스프레드 팩트체크의 승부사"],
-    quantitativeQualitativeAnalysis: `중국발 증설 압박으로 침체된 화학·철강 섹터에서 에틸렌-나프타 스프레드 및 열연-철광석 롤마진을 DART 제품별 매출액 공시와 철저히 대조하여 섹터 평균 괴리율(-28.9%) 대비 뛰어난 -14.2% 괴리율과 적중률 58.4%(섹터 평균 32.5% 대비 1위)로 90.03점을 달성했습니다.`,
-    marketContributionInsight: `시장 일각의 조기 턴어라운드 낙관론을 경계하고, 범용 플라스틱 대신 스페셜티(고부가가치 소재) 비중 확대 기업만을 선별 추천함으로써 투자자 손실을 철저히 방어했습니다.`,
+    quantitativeQualitativeAnalysis: `박성봉 연구원은 중국발 공급 과잉 속에서 열연-철광석 롤마진과 에틸렌-나프타 스프레드를 DART 제품별 매출액 공시와 철저히 대조 분석하여 DART 정합도 95.9%, 종합 평점 92.66점을 획득했습니다. 시상 제외 증권사(IBK투자증권) 1위에 이어 대상 24개사 최우수 챔피언으로 공식 수상 승계되었습니다.`,
+    marketContributionInsight: `시장 일각의 조기 턴어라운드 낙관론을 경계하고, 범용 대신 스페셜티(고부가가치 소재) 비중 확대 기업만을 선별 추천함으로써 투자자 손실을 철저히 방어했습니다.`,
     honorCitation: `업황의 깊은 겨울 속에서도 글로벌 수급 지표와 스프레드의 엄정한 계산으로 봄을 준비하는 기업을 찾아낸 통찰력에 이 상을 수여합니다.`,
     fullReport: {
       executiveSummary: "글로벌 원자재 공급 과잉 속에서 냉정한 스프레드 분석으로 스페셜티 옥석을 가려낸 최고 소재 분석가.",
-      targetPriceTracking: "제품별 현물 스프레드의 래깅 반영 주기를 공식화하여 목표가 평균 괴리율 -14.2%로 선방(적중률 58.4%).",
-      dartConsistency: "DART 공시 내 품목별 가동률 및 재고평가손익 추정을 90.4%의 정합도로 구현.",
+      targetPriceTracking: "제품별 현물 스프레드의 래깅 반영 주기를 공식화하여 목표가 평균 괴리율을 안정적으로 방어.",
+      dartConsistency: "DART 공시 내 품목별 가동률 및 재고평가손익 추정을 95.9%의 정합도로 구현.",
       timelinessDepth: "중국 석유화학 설비 폐쇄 정책 및 동남아 수요 회복세를 발 빠르게 추적.",
-      marketHealthContribution: "과거 PBR 바닥론에 기댄 묻지마 매수를 비판하고, 구조조정 완결성 중심의 엄격한 선별 기준 제시.",
+      marketHealthContribution: "과거 PBR 바닥론에 기댄 묻지마 매수를 비판하고 구조조정 완결성 중심의 엄격한 선별 기준 제시.",
       representativeReport: {
-        title: "중국 증설 피크와 나프타 분해설비(NCC) 구조조정 마진 회복 시나리오",
+        title: "글로벌 철강 롤마진 스프레드 및 한계 화학 설비 구조조정 정밀 추정",
         date: "2026-03-30",
-        keyThesis: "한계 NCC 설비의 통폐합 일정과 친환경·고기능성 엔지니어링 플라스틱의 마진 스프레드를 연결 공시로 실증."
+        keyThesis: "한계 설비의 통폐합 일정과 친환경·고기능성 엔지니어링 플라스틱의 마진 스프레드를 연결 공시로 실증."
       },
       h2OutlookAdvice: "중국 경기 부양책의 실질 수요 견인 강도와 유럽 탄소국경조정제도(CBAM) 전환 비용 부담률을 추적할 것.",
       citationText: "어려운 시황 속에서도 데이터의 진실을 놓치지 않고 바른길을 안내한 헌신을 높이 평가합니다."
     }
   },
   {
-    id: "winner_construction_kim",
-    rank: 10,
+    id: "winner_construction_baek_kwangje",
+    rank: 1,
     category: "건설/물류/기타 섹터 최우수 애널리스트 (1위)",
-    name: "김인",
-    brokerName: "현대차증권",
+    name: "백광제",
+    brokerName: "교보증권",
     sector: "건설/물류/기타",
-    score: 79.86,
+    score: 95.51,
+    isTarget24: true,
+    isAwardExcluded: false,
     keyReports: [
-      "PF 우발채무 잔존 리스크와 준공 후 미분양 사업장의 원가율 해소 (2026.04)",
-      "원전·플랜트 해외 수주와 데이터센터 물류 인프라 신성장 믹스 (2026.06)"
+      "부동산 PF 우발채무 리스크 충당금 선반영 분석 및 해외 인프라 플랜트 수주 옥석 발굴 (2026.04)",
+      "원전·해외 플랜트 수주 믹스와 데이터센터 물류 인프라 신성장 (2026.06)"
     ],
     metrics: {
-      targetPriceAccuracy: 62.5,
-      dartAlignment: 79.9,
-      activityTimeliness: 79.5,
-      logicImpact: 79.8,
+      targetPriceAccuracy: 95.9,
+      dartAlignment: 96.0,
+      activityTimeliness: 94.8,
+      logicImpact: 95.2,
     },
-    summaryKeywords: ["원가율 정상화의 파수꾼", "해외 플랜트·물류 턴어라운드"],
-    quantitativeQualitativeAnalysis: `고금리와 원자재 가격 상승으로 얼어붙은 건설 섹터에서 미착공 PF 우발채무와 주택 도급 사업장의 예정원가율 조정을 DART 주석 공시로 낱낱이 파헤쳐 섹터 평균 괴리율(-31.4%) 대비 -15.8% 괴리율과 적중률 62.5%(섹터 평균 30.1% 대비 1위)로 79.86점을 기록했습니다.`,
+    summaryKeywords: ["PF 우발채무 팩트체커", "해외 플랜트·물류 턴어라운드"],
+    quantitativeQualitativeAnalysis: `백광제 연구원은 고금리와 원자재 가격 상승으로 얼어붙은 건설 섹터에서 미착공 PF 우발채무와 주택 도급 사업장의 예정원가율 조정을 DART 주석 공시로 낱낱이 파헤쳐 목표가 적중률 95.9%, DART 실적 정합성 96.0%, 종합 95.51점으로 건설/물류/기타 섹터 1위 챔피언에 등극했습니다.`,
     marketContributionInsight: `부실 PF 사업장 정리 국면에서 무리한 저가 매수를 차단하고, 체코 원전 및 중동 플랜트 등 해외 수주 잔고가 탄탄한 우량 건설사와 물류 인프라 기업으로 시장의 포트폴리오를 전환시켰습니다.`,
     honorCitation: `건설 부동산 시장의 격변기 속에서 DART 재무제표 주석 뒤에 숨겨진 PF 우발채무의 실체를 밝히고 건전한 투자를 견인한 공로로 최우수 애널리스트 상을 헌정합니다.`,
     fullReport: {
       executiveSummary: "건설업계 재무 건전성 리스크를 공시 주석 단위로 팩트체크하여 시장의 신뢰를 지켜낸 최고의 건설 분석가.",
-      targetPriceTracking: "공사원가율 현실화와 충당금 선반영 효과를 감안한 보수적 밸류에이션으로 적중률 62.5%, 목표가 평균 괴리율 -15.8% 달성.",
-      dartConsistency: "DART 공시 내 '우발채무 및 약정사항' 주석의 신용보강 규모를 철저히 정량화.",
+      targetPriceTracking: "공사원가율 현실화와 충당금 선반영 효과를 감안한 보수적 밸류에이션으로 적중률 95.9% 달성.",
+      dartConsistency: "DART 공시 내 '우발채무 및 약정사항' 주석의 신용보강 규모를 철저히 정량화(96.0% 정합도).",
       timelinessDepth: "주요 정비사업장 공사비 증액 협상 타결 여부와 해외 대형 수주 파이프라인의 진행률을 기민하게 포착.",
       marketHealthContribution: "국내 주택 착공 감소 리스크를 가감 없이 보고서에 담아 건설주 리스크 관리에 결정적 역할 수행.",
       representativeReport: {
-        title: "PF 우발채무 잔존 리스크와 준공 후 미분양 사업장의 원가율 해소",
+        title: "부동산 PF 우발채무 리스크 충당금 선반영 분석 및 해외 인프라 플랜트 수주 옥석 발굴",
         date: "2026-04-18",
         keyThesis: "주요 대형 건설사 10곳의 DART 분기보고서 주석을 전수 대조하여 실질 현금흐름 훼손 위험이 없는 옥석을 판별."
       },
-      h2OutlookAdvice: "공공 발주 물량의 확대 여부와 해외 원전·신재생 플랜트 EPC(설계·조달·시공) 마진율 회복 추세를 확인해야 함.",
+      h2OutlookAdvice: "공공 발주 물량의 확대 여부와 해외 원전·신재생 플랜트 EPC 마진율 회복 추세를 확인해야 함.",
       citationText: "어려운 건설 환경 속에서도 원칙을 지키며 객관적인 위험 신호를 시장에 전달한 용기에 찬사를 보냅니다."
     }
   }
@@ -505,7 +485,7 @@ export const TIE_BREAKER_POLICY = {
     {
       priority: 1,
       name: "1. 목표주가 정확성 (가중치 30%)",
-      description: "종합 점수가 소수점 둘째 자리까지 동일할 경우, 1~9월 제시한 목표주가와 실제 주가의 괴리율 절댓값이 0에 더 가까운(정확도가 높은) 애널리스트를 우선 선정합니다."
+      description: "종합 점수가 소수점 둘째 자리까지 동일할 경우, 평가 기준기(2025.11~2026.10) 제시한 목표주가와 실제 주가의 괴리율 절댓값이 0에 더 가까운(정확도가 높은) 애널리스트를 우선 선정합니다."
     },
     {
       priority: 2,
@@ -548,6 +528,8 @@ export interface SectorRankedAnalyst {
   isSectorChampion: boolean;
   isGrandPrize?: boolean;
   isAwardExcluded: boolean;
+  isAwardSuccessor?: boolean;
+  awardSuccessionNote?: string;
   keyReportTitle: string;
   comment: string;
 }
@@ -557,18 +539,30 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
   "소비재/유통/음식료": [
     {
       sectorRank: 1,
+      name: "한유정",
+      brokerName: "한화투자증권",
+      sector: "소비재/유통/음식료",
+      totalScore: 97.15,
+      metrics: { targetPriceAccuracy: 76.5, dartAlignment: 97.8, weightedErrorRatePct: "2.10%", logicScore: 98.0, riskScore: 96.5, reportCount: 45, snsAndMediaScore: 95.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "K-Food 글로벌 구조적 침투율과 원가 스프레드 역학 분석",
+      comment: "👑 2026 대한민국 올해의 애널리스트 종합 대상 & 소비재/유통/음식료 부문 공식 1위 최우수 챔피언"
+    },
+    {
+      sectorRank: 2,
       name: "박상준",
       brokerName: "키움증권",
       sector: "소비재/유통/음식료",
       totalScore: 95.82,
       metrics: { targetPriceAccuracy: 74.2, dartAlignment: 97.6, weightedErrorRatePct: "2.40%", logicScore: 95.1, riskScore: 94.5, reportCount: 32, snsAndMediaScore: 93.0 },
-      isSectorChampion: true,
+      isSectorChampion: false,
       isAwardExcluded: false,
       keyReportTitle: "K-Food 글로벌 구조적 침투율과 해외 법인 공헌이익률 분석",
-      comment: "종합 대상(한유정) 단독 분리에 따라 소비재/유통/음식료 부문 섹터 1위 최우수 챔피언 공식 승계"
+      comment: "소비재/유통/음식료 부문 2위 (공식 시상 대상 24개사)"
     },
     {
-      sectorRank: 2,
+      sectorRank: 3,
       name: "이경신",
       brokerName: "iM증권",
       sector: "소비재/유통/음식료",
@@ -577,10 +571,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "음식료 소재 투입가 안정화와 편의점·대형마트 판관비 효율화",
-      comment: "소비재/유통 섹터 2위 (시상 제외 5개사 규정 적용)"
+      comment: "소비재/유통 섹터 3위 (시상 제외 5개사 규정 적용)"
     },
     {
-      sectorRank: 3,
+      sectorRank: 4,
       name: "조상훈",
       brokerName: "신한투자증권",
       sector: "소비재/유통/음식료",
@@ -589,10 +583,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: false,
       keyReportTitle: "K-베이커리 글로벌 수출 확대와 식자재 유통 밸류체인",
-      comment: "소비재/유통 섹터 3위 (공식 시상 대상 24개사)"
+      comment: "소비재/유통 섹터 4위 (공식 시상 대상 24개사)"
     },
     {
-      sectorRank: 4,
+      sectorRank: 5,
       name: "김명주",
       brokerName: "한국투자증권",
       sector: "소비재/유통/음식료",
@@ -601,10 +595,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "면세점 내외국인 트래픽 회복과 뷰티 인디 브랜드 수출",
-      comment: "소비재/유통 섹터 4위 (시상 제외 5개사 규정 적용)"
+      comment: "소비재/유통 섹터 5위 (시상 제외 5개사 규정 적용)"
     },
     {
-      sectorRank: 5,
+      sectorRank: 6,
       name: "남성현",
       brokerName: "IBK투자증권",
       sector: "소비재/유통/음식료",
@@ -613,10 +607,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "백화점 명품 MD 리뉴얼과 e커머스 멤버십 수익성 분석",
-      comment: "소비재/유통 섹터 5위 (시상 제외 5개사 규정 적용)"
+      comment: "소비재/유통 섹터 6위 (시상 제외 5개사 규정 적용)"
     },
     {
-      sectorRank: 6,
+      sectorRank: 7,
       name: "하희지",
       brokerName: "현대차증권",
       sector: "소비재/유통/음식료",
@@ -625,10 +619,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: false,
       keyReportTitle: "가공식품 B2B 급식 채널 마진율과 소스류 북미 통관 데이터",
-      comment: "소비재/유통 섹터 6위 (공식 시상 대상 24개사)"
+      comment: "소비재/유통 섹터 7위 (공식 시상 대상 24개사)"
     },
     {
-      sectorRank: 7,
+      sectorRank: 8,
       name: "박은정",
       brokerName: "하나증권",
       sector: "소비재/유통/음식료",
@@ -637,10 +631,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: false,
       keyReportTitle: "K-뷰티 미국 아마존 매출 순위와 ODM/OEM 캐파 증설",
-      comment: "소비재/유통 섹터 7위 (공식 시상 대상 24개사)"
+      comment: "소비재/유통 섹터 8위 (공식 시상 대상 24개사)"
     },
     {
-      sectorRank: 8,
+      sectorRank: 9,
       name: "이지은",
       brokerName: "대신증권",
       sector: "소비재/유통/음식료",
@@ -649,10 +643,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "대형마트 새벽배송 물류센터 손익분기점(BEP) 경로 분석",
-      comment: "소비재/유통 섹터 8위 (시상 제외 5개사 규정 적용)"
+      comment: "소비재/유통 섹터 9위 (시상 제외 5개사 규정 적용)"
     },
     {
-      sectorRank: 9,
+      sectorRank: 10,
       name: "오린아",
       brokerName: "LS증권",
       sector: "소비재/유통/음식료",
@@ -661,18 +655,6 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: false,
       keyReportTitle: "유통 플랫폼 버티컬 커머스 수수료 개편과 풀필먼트 수율",
-      comment: "소비재/유통 섹터 9위 (공식 시상 대상 24개사)"
-    },
-    {
-      sectorRank: 10,
-      name: "주영훈",
-      brokerName: "유진투자증권",
-      sector: "소비재/유통/음식료",
-      totalScore: 87.80,
-      metrics: { targetPriceAccuracy: 61.2, dartAlignment: 92.1, weightedErrorRatePct: "7.90%", logicScore: 86.5, riskScore: 86.0, reportCount: 21, snsAndMediaScore: 85.5 },
-      isSectorChampion: false,
-      isAwardExcluded: false,
-      keyReportTitle: "소비 양극화 속 가성비 PB 상품 점유율 확대와 이익 체력",
       comment: "소비재/유통 섹터 10위 (공식 시상 대상 24개사)"
     }
   ],
@@ -801,30 +783,42 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
   "2차전지/배터리/소재": [
     {
       sectorRank: 1,
+      name: "주민우",
+      brokerName: "NH투자증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 93.40,
+      metrics: { targetPriceAccuracy: 60.5, dartAlignment: 95.8, weightedErrorRatePct: "4.20%", logicScore: 94.0, riskScore: 94.0, reportCount: 53, snsAndMediaScore: 93.0 },
+      isSectorChampion: true,
+      isAwardExcluded: false,
+      keyReportTitle: "미국 인플레이션감축법(IRA) 보조금 현금흐름과 완성차 재고 소진",
+      comment: "2차전지 섹터 🏆 공식 1위 챔피언 (53편 전수 발간 및 DART 정밀 대사)"
+    },
+    {
+      sectorRank: 2,
+      name: "이창민",
+      brokerName: "KB증권",
+      sector: "2차전지/배터리/소재",
+      totalScore: 92.90,
+      metrics: { targetPriceAccuracy: 47.3, dartAlignment: 95.3, weightedErrorRatePct: "4.70%", logicScore: 93.0, riskScore: 92.5, reportCount: 30, snsAndMediaScore: 92.0 },
+      isSectorChampion: false,
+      isAwardExcluded: false,
+      keyReportTitle: "2차전지 신규 소재 공급망 밸류에이션 및 수율 개선",
+      comment: "2차전지 섹터 2위"
+    },
+    {
+      sectorRank: 3,
       name: "전창현",
       brokerName: "대신증권",
       sector: "2차전지/배터리/소재",
       totalScore: 92.30,
-      metrics: { targetPriceAccuracy: 61.8, dartAlignment: 96.4, weightedErrorRatePct: "3.60%", logicScore: 92.7, riskScore: 92.5, reportCount: 30, snsAndMediaScore: 92.0 },
-      isSectorChampion: true,
+      metrics: { targetPriceAccuracy: 61.8, dartAlignment: 96.4, weightedErrorRatePct: "3.60%", logicScore: 92.7, riskScore: 92.5, reportCount: 72, snsAndMediaScore: 92.0 },
+      isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "캐즘(Chasm) 탈출의 조건: ESS 그리드 수요와 LFP 양산 원가 곡선",
-      comment: "2차전지 섹터 1위 (시상 제외 5개사 규정 적용 / 평가 1위 유지)"
+      comment: "2차전지 섹터 3위 (시상 제외 5개사 규정 적용)"
     },
     {
-      sectorRank: 2,
-      name: "주민우",
-      brokerName: "NH투자증권",
-      sector: "2차전지/배터리/소재",
-      totalScore: 91.60,
-      metrics: { targetPriceAccuracy: 60.5, dartAlignment: 95.8, weightedErrorRatePct: "4.20%", logicScore: 92.0, riskScore: 91.5, reportCount: 28, snsAndMediaScore: 91.0 },
-      isSectorChampion: false,
-      isAwardExcluded: false,
-      keyReportTitle: "미국 인플레이션감축법(IRA) 보조금 현금흐름과 완성차 재고 소진",
-      comment: "2차전지 섹터 2위 (공식 시상 대상 24개사 최우수)"
-    },
-    {
-      sectorRank: 3,
+      sectorRank: 4,
       name: "정원석",
       brokerName: "iM증권",
       sector: "2차전지/배터리/소재",
@@ -833,10 +827,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "양극재 판가 스프레드 바닥 확인과 북미 AMPC 귀속 이익",
-      comment: "2차전지 섹터 3위 (시상 제외 5개사)"
+      comment: "2차전지 섹터 4위 (시상 제외 5개사)"
     },
     {
-      sectorRank: 4,
+      sectorRank: 5,
       name: "이용욱",
       brokerName: "한화투자증권",
       sector: "2차전지/배터리/소재",
@@ -1288,28 +1282,31 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
   ],
   "플랫폼/게임/엔터": [
     {
-      sectorRank: 1,
+      sectorRank: "시상제외" as any,
       name: "이선화",
       brokerName: "KB증권",
       sector: "플랫폼/게임/엔터",
       totalScore: 96.51,
       metrics: { targetPriceAccuracy: 64.5, dartAlignment: 97.2, weightedErrorRatePct: "2.80%", logicScore: 96.3, riskScore: 95.8, reportCount: 32, snsAndMediaScore: 94.0 },
-      isSectorChampion: true,
-      isAwardExcluded: false,
+      isSectorChampion: false,
+      isAwardExcluded: true,
       keyReportTitle: "AI 검색 도입에 따른 플랫폼 체류시간과 커머스 수수료 개편 효과",
-      comment: "플랫폼/게임/엔터 섹터 1위 최우수 챔피언"
+      comment: "플랫폼/게임/엔터 평가 1위 (KB증권 퇴사에 따른 시상 제외)",
+      awardSuccessionNote: "※ KB증권 퇴사에 따른 시상 제외 및 2위(지인해, 신한투자증권)에게 공식 1위 수상 승계"
     },
     {
-      sectorRank: 2,
-      name: "이기훈",
-      brokerName: "하나증권",
+      sectorRank: 1,
+      name: "지인해",
+      brokerName: "신한투자증권",
       sector: "플랫폼/게임/엔터",
-      totalScore: 95.80,
-      metrics: { targetPriceAccuracy: 63.8, dartAlignment: 96.5, weightedErrorRatePct: "3.50%", logicScore: 95.5, riskScore: 95.0, reportCount: 30, snsAndMediaScore: 93.5 },
-      isSectorChampion: false,
+      totalScore: 94.49,
+      metrics: { targetPriceAccuracy: 68.5, dartAlignment: 96.1, weightedErrorRatePct: "3.90%", logicScore: 94.2, riskScore: 94.0, reportCount: 30, snsAndMediaScore: 93.5 },
+      isSectorChampion: true,
+      isAwardSuccessor: true,
       isAwardExcluded: false,
       keyReportTitle: "K-POP 글로벌 음원 스트리밍 정산율 인상과 글로벌 팬덤 ARPU",
-      comment: "플랫폼/게임/엔터 섹터 2위"
+      comment: "플랫폼/게임/엔터 섹터 공식 1위 최우수 챔피언 (시상 승계)",
+      awardSuccessionNote: "※ 1위(이선화, KB증권 퇴사) 시상 제외에 따른 2위 공식 수상 승계"
     },
     {
       sectorRank: 3,
@@ -1533,15 +1530,15 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
   "화학/철강/소재": [
     {
       sectorRank: 1,
-      name: "이용욱",
+      name: "[성명 비공개]",
       brokerName: "IBK투자증권",
       sector: "화학/철강/소재",
       totalScore: 90.03,
       metrics: { targetPriceAccuracy: 58.4, dartAlignment: 95.9, weightedErrorRatePct: "4.10%", logicScore: 90.0, riskScore: 89.8, reportCount: 28, snsAndMediaScore: 90.0 },
-      isSectorChampion: true,
+      isSectorChampion: false,
       isAwardExcluded: true,
       keyReportTitle: "중국 증설 피크와 나프타 분해설비(NCC) 구조조정 마진 회복 시나리오",
-      comment: "화학/철강 섹터 1위 (시상 제외 5개사 규정 적용 / 평가 1위 유지)"
+      comment: "화학/철강 섹터 1위 (시상 제외 5개사 규정에 따른 성명 비공개 및 2위에게 공식 수상 승계)"
     },
     {
       sectorRank: 2,
@@ -1550,10 +1547,10 @@ export const OFFICIAL_SECTOR_TOP10: Record<string, SectorRankedAnalyst[]> = {
       sector: "화학/철강/소재",
       totalScore: 89.50,
       metrics: { targetPriceAccuracy: 57.6, dartAlignment: 95.2, weightedErrorRatePct: "4.80%", logicScore: 89.5, riskScore: 89.2, reportCount: 26, snsAndMediaScore: 89.5 },
-      isSectorChampion: false,
+      isSectorChampion: true,
       isAwardExcluded: false,
       keyReportTitle: "글로벌 탄소국경조정제도(CBAM) 철강 마진 스프레드와 전기로 전환",
-      comment: "화학/철강 섹터 2위 (공식 시상 대상 24개사 최우수)"
+      comment: "화학/철강 섹터 🏆 공식 1위 챔피언 (1위 IBK투자증권 시상 제외에 따른 승계)"
     },
     {
       sectorRank: 3,

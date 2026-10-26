@@ -1,5 +1,5 @@
 /**
- * 국내 증권사 평가 및 시상 운영 규정 (v1.8.1)
+ * 국내 증권사 평가 및 시상 운영 규정 (v1.8.2)
  *
  * 1. 공식 대상 증권사 (24개사):
  *    미래에셋증권, NH투자증권, 하나증권, LS증권, KB증권, BNK투자증권, DB증권, DS투자증권,
@@ -109,7 +109,7 @@ export function getBrokerAwardStatus(brokerName: string): BrokerAwardStatus {
       category: isTarget ? 'TARGET_AWARD_EXCLUDED' : 'EVALUATION_ONLY_EXCLUDED',
       label: '시상 제외 (평가 대상)',
       badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-      policyNote: 'v1.8.1 규정에 따라 성과 평가는 전수 집계되나 컴플라이언스 기준상 공식 시상(트로피) 대상에서 제외됩니다.'
+      policyNote: 'v1.8.2 규정에 따라 성과 평가는 전수 집계되나 컴플라이언스 기준상 공식 시상(트로피) 대상에서 제외됩니다.'
     };
   }
 
@@ -134,9 +134,9 @@ export function getBrokerAwardStatus(brokerName: string): BrokerAwardStatus {
   };
 }
 
-export const BROKER_POLICY_V181 = {
-  version: '1.8.1',
-  title: 'v1.8.1 증권사 평가 및 시상 운영 규정',
+export const BROKER_POLICY_V182 = {
+  version: '1.8.2',
+  title: 'v1.8.2 증권사 평가 및 시상 운영 규정',
   summary: '전체 32개 증권사 중 엄선된 24개 공식 대상 증권사 확정 및 5개사(IBK·삼성·한국투자·대신·iM) 평가 진행·시상 제외 규정 적용',
   effectiveDate: '2026.10',
   rules: [
@@ -154,3 +154,5 @@ export const BROKER_POLICY_V181 = {
     }
   ]
 };
+
+export const BROKER_POLICY_V181 = BROKER_POLICY_V182;

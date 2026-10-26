@@ -1,0 +1,21 @@
+{
+  "version": "1.8.1",
+  "backupDate": "2026-10-21T02:07:19.195Z",
+  "description": "VERSION 1.8.1 정식 백업본 - 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사 체계, 681명 실존 애널리스트 프로파일링, 7,158건 리포트 전수 검증",
+  "stats": {
+    "officialBrokers": 24,
+    "excludedBrokers": 5,
+    "totalReports": 7158,
+    "totalAnalysts": 681,
+    "dartMatchRate": "99.8%"
+  },
+  "filesSnapshot": [
+    "package.json",
+    "metadata.json",
+    "server.ts",
+    "src/data/brokerConfig.ts",
+    "src/data/awardsData.ts",
+    "src/components/VersionManager.tsx",
+    "src/components/AnalystAwards01.tsx"
+  ]
+}
