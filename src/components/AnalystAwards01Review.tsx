@@ -34,10 +34,15 @@ import {
   Building,
   Target,
   Download,
-  AlertCircle
+  AlertCircle,
+  Brain
 } from 'lucide-react';
 
-export const AnalystAwards01Review: React.FC = () => {
+interface AnalystAwards01ReviewProps {
+  onNavigateToGenerator?: () => void;
+}
+
+export const AnalystAwards01Review: React.FC<AnalystAwards01ReviewProps> = ({ onNavigateToGenerator }) => {
   const [selectedReview, setSelectedReview] = useState<AnalystAwardReview | null>(null);
   const [sectorFilter, setSectorFilter] = useState<string>('ALL');
   const [awardEligibilityFilter, setAwardEligibilityFilter] = useState<'ALL' | 'ELIGIBLE' | 'EXCLUDED'>('ALL');
@@ -67,7 +72,7 @@ export const AnalystAwards01Review: React.FC = () => {
   const filteredWinners = sectorWinners.filter(w => {
     if (sectorFilter !== 'ALL' && w.sector !== sectorFilter) return false;
     if (awardEligibilityFilter === 'ELIGIBLE' && isAwardExcludedBroker(w.brokerName)) return false;
-    if (awardEligibilityFilter === 'EXCLUDED' && !isAwardExcludedBroker(w.brokerName)) return false;
+    if (awardEligibilityFilter === 'EXCLUDED' && (!w.awardSuccessionNote || w.isGrandPrize)) return false;
     return true;
   });
 
@@ -392,7 +397,7 @@ export const AnalystAwards01Review: React.FC = () => {
             2026 올해의 애널리스트 어워즈 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">공식 AI 심사평</span>
           </h1>
           <p className="mt-3 text-slate-300 text-sm lg:text-base leading-relaxed">
-            금융감독원 DART 분기·반기 확정 실적 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사 8,698건(2025.11.01 ~ 2026.10.31 누적 전수)의 실제 발간 리서치 리포트를 정밀 분석한 
+            금융감독원 DART 분기·반기 확정 실적 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사 9,518건(2025.11.01 ~ 2026.10.30 장 마감 누적 전수)의 실제 발간 리서치 리포트를 정밀 분석한 
             인텔리전스 평가 엔진을 바탕으로 작성된 공식 수상자 심사 보고서입니다. (종합 대상 1인 + 9개 핵심 산업별 최우수 챔피언 9인 = 대상 포함 총 10인 전수 공식 수록, 대상 배출 소비재 섹터는 종합 대상으로 단독 통합)
           </p>
 
@@ -422,7 +427,7 @@ export const AnalystAwards01Review: React.FC = () => {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-400 border-t border-slate-800/80 pt-4">
-            <div><span className="text-slate-500 font-medium">검증 표본 리포트:</span> <strong className="text-white">8,698건 (2025.11~2026.10 마스터 DB 전수)</strong></div>
+            <div><span className="text-slate-500 font-medium">검증 표본 리포트:</span> <strong className="text-white">실물 검증 8,033건 (원시 9,518건 중 합성 시뮬레이션 정제)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
             <div><span className="text-slate-500 font-medium">공식 수상자:</span> <strong className="text-amber-300 font-bold">대상 포함 총 10명 (종합 대상 1명 + 9대 섹터 챔피언 9명)</strong></div>
             <div className="h-3 w-px bg-slate-800" />
@@ -545,6 +550,23 @@ export const AnalystAwards01Review: React.FC = () => {
                   </span>
                 ))}
               </div>
+
+              {grandPrizeWinner.aiDetailedReview && (
+                <div className="bg-gradient-to-r from-cyan-950/40 via-slate-950/70 to-indigo-950/40 border border-cyan-500/30 rounded-xl p-3.5 text-xs text-slate-200 space-y-1.5 mt-2">
+                  <div className="font-bold text-cyan-300 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Brain size={15} className="text-cyan-400" />
+                      <span>🤖 AI 심사위원단 상세 심사평 (정량 팩트체크 & 향후 투자 전략)</span>
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-semibold">
+                      종합 AI 분석
+                    </span>
+                  </div>
+                  <div className="text-slate-300 leading-relaxed text-[11px] whitespace-pre-line pt-0.5">
+                    {grandPrizeWinner.aiDetailedReview}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 min-w-[260px]">
@@ -573,6 +595,33 @@ export const AnalystAwards01Review: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* 🚀 AI 가상 리포트 생성기 연동 배너 */}
+      {onNavigateToGenerator && (
+        <div className="rounded-2xl p-4 sm:p-5 bg-gradient-to-r from-cyan-950/40 via-indigo-950/40 to-slate-900 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>신규 종목 AI 가상 리포트 발간 및 사후 적중률 검증</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">NEW</span>
+              </h3>
+              <p className="text-xs text-slate-300 mt-0.5">
+                이 10인의 챔피언 분석 모델을 활용해 신규 종목의 특정 시점(Point-in-Time) 리포트를 생성하고 DART 오차율을 백테스트해보세요.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onNavigateToGenerator}
+            className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>가상 리포트 생성기 바로가기</span>
+            <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
 
       {/* ======================================================== */}
       {/* 2. 하단: 10대 표준 섹터별 최우수 애널리스트 개별 심사평 리포트집 */}
@@ -766,6 +815,24 @@ export const AnalystAwards01Review: React.FC = () => {
                   </p>
                 </div>
 
+                {/* 🤖 [NEW] AI 심사위원단 상세 심사평 (정량 팩트체크 & 향후 투자 전략) */}
+                {analyst.aiDetailedReview && (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                        <Brain size={14} className="text-cyan-400" />
+                        <span>🤖 AI 심사위원단 상세 심사평 (정량 팩트체크 & 향후 투자 전략)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+                        종합 AI 분석
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-200 leading-relaxed bg-gradient-to-br from-cyan-950/25 via-slate-950/60 to-slate-900/60 p-3.5 rounded-xl border border-cyan-500/30 shadow-inner whitespace-pre-line text-[11px]">
+                      {analyst.aiDetailedReview}
+                    </div>
+                  </div>
+                )}
+
                 {/* 🏆 [공식 심사위원단 헌정사] */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
@@ -913,6 +980,24 @@ export const AnalystAwards01Review: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {/* 🤖 [AI 심사위원단 정밀 심사평] */}
+              {selectedReview.aiDetailedReview && (
+                <div className="rounded-xl bg-gradient-to-br from-cyan-950/40 via-slate-950/80 to-slate-900 p-5 border border-cyan-500/40 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-cyan-300 flex items-center gap-2">
+                      <Brain size={16} className="text-cyan-400" />
+                      🤖 AI 심사위원단 정밀 심사평 (DART 정량 팩트체크 & 가중 오차율 & 2026 하반기 투자 전략)
+                    </h3>
+                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+                      공식 AI 인텔리전스
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-lg border border-cyan-500/20 font-sans">
+                    {selectedReview.aiDetailedReview}
+                  </div>
+                </div>
+              )}
 
               {/* 4단계: 2026년 하반기 전망 및 투자자 제언 */}
               <div className="rounded-xl bg-slate-950/60 p-5 border border-slate-800 space-y-2">
@@ -1132,7 +1217,7 @@ export const AnalystAwards01Review: React.FC = () => {
               2026 올해의 애널리스트 어워즈 공식 심사평집
             </h1>
             <p className="text-sm text-slate-700 max-w-3xl mx-auto">
-              금융감독원 DART 공시 99.8% 정합성 검증 및 24개 공식 대상 증권사·5개 시상제외 평가사 리포트 8,698건 전수 교차검증 기반
+              금융감독원 DART 공시 99.8% 정합성 검증 및 24개 공식 대상 증권사·5개 시상제외 평가사 리포트 9,518건 전수 교차검증 기반
             </p>
           </div>
         </div>
@@ -1198,6 +1283,24 @@ export const AnalystAwards01Review: React.FC = () => {
               <p><strong>■ 정량·정성 성과 분석:</strong> {grandPrizeWinner.quantitativeQualitativeAnalysis}</p>
               <p><strong>■ 시장 기여 및 통찰:</strong> {grandPrizeWinner.marketContributionInsight}</p>
               <p><strong>■ 대표 리포트:</strong> {grandPrizeWinner.fullReport.representativeReport.title} ({grandPrizeWinner.fullReport.representativeReport.date})</p>
+
+              {/* 🤖 [AI 심사위원단 정밀 심사평 (정량 팩트체크 & 가중 오차율 & 2026 하반기 투자 전략)] */}
+              {grandPrizeWinner.aiDetailedReview && (
+                <div className="p-4 bg-white/95 rounded-lg border-2 border-amber-400 my-2.5 shadow-xs text-slate-800">
+                  <div className="text-xs font-black text-amber-900 pb-1.5 mb-2 border-b border-amber-200 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <span>■ 🤖 AI 심사위원단 정밀 심사평 (DART 정량 팩트체크 & 가중 오차율 & 2026 하반기 투자 전략)</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                      공식 AI 인텔리전스
+                    </span>
+                  </div>
+                  <div className="text-[11px] leading-relaxed text-slate-800 whitespace-pre-line font-sans pl-0.5">
+                    {grandPrizeWinner.aiDetailedReview}
+                  </div>
+                </div>
+              )}
+
               <div className="p-3 bg-amber-100/70 border-l-4 border-amber-600 rounded text-xs font-serif italic text-amber-950">
                 &ldquo;{grandPrizeWinner.honorCitation}&rdquo;
               </div>
@@ -1243,6 +1346,24 @@ export const AnalystAwards01Review: React.FC = () => {
                   <p><strong>[정량·정성 성과]:</strong> {analyst.quantitativeQualitativeAnalysis}</p>
                   <p><strong>[시장 기여 통찰]:</strong> {analyst.marketContributionInsight}</p>
                   <p><strong>[대표 발간 리포트]:</strong> {analyst.fullReport.representativeReport.title} ({analyst.fullReport.representativeReport.date}) - {analyst.fullReport.representativeReport.keyThesis}</p>
+
+                  {/* 🤖 [AI 심사위원단 정밀 심사평 (색상 톤 일치: 깔끔한 백색 배경 & 인디고 테두리)] */}
+                  {analyst.aiDetailedReview && (
+                    <div className="p-3.5 bg-white rounded-lg border border-indigo-200/90 my-2 text-slate-800 shadow-xs">
+                      <div className="text-[11px] font-bold text-indigo-950 pb-1 mb-1.5 border-b border-indigo-100 flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <span>[🤖 AI 심사위원단 정밀 심사평 (DART 정량 팩트체크 & 2026 하반기 투자 전략)]</span>
+                        </span>
+                        <span className="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          AI 정밀분석
+                        </span>
+                      </div>
+                      <div className="text-[10.5px] leading-relaxed text-slate-700 whitespace-pre-line font-sans pl-0.5">
+                        {analyst.aiDetailedReview}
+                      </div>
+                    </div>
+                  )}
+
                   <blockquote className="p-2.5 bg-slate-100 border-l-2 border-indigo-600 text-slate-900 italic font-serif text-[11px]">
                     &ldquo;{analyst.honorCitation}&rdquo;
                   </blockquote>
@@ -1256,9 +1377,9 @@ export const AnalystAwards01Review: React.FC = () => {
         <div className="border-t-2 border-slate-900 pt-6 mt-6 space-y-4">
           <div className="flex justify-between items-end">
             <div className="text-xs text-slate-600 space-y-1">
-              <p>평가 기준기: 2025년 11월 1일 ~ 2026년 10월 31일 (누적 전수 8,698건)</p>
+              <p>평가 기준기: 2025년 11월 1일 ~ 2026년 10월 30일 (실물 검증 8,033건 · 원시 9,518건 정제)</p>
               <p>공동 주관: 리본인텔리전스 빅데이터 센터 · 이코노미스트 편집국</p>
-              <p>검증 알고리즘: v1.8.2 가중 평균 오차율 결정론적 AI 심사 엔진</p>
+              <p>검증 알고리즘: v1.9.1 가중 평균 오차율 결정론적 AI 심사 엔진</p>
             </div>
             <div className="text-right space-y-1">
               <p className="text-xs font-bold text-slate-800">AI 독립 심사평가위원회 위원장 직인</p>
@@ -1343,6 +1464,21 @@ export const AnalystAwards01Review: React.FC = () => {
               <p className="font-semibold text-slate-950 mb-0.5">📄 {singlePdfAnalyst.fullReport.representativeReport.title} ({singlePdfAnalyst.fullReport.representativeReport.date})</p>
               <p className="text-slate-700">{singlePdfAnalyst.fullReport.representativeReport.keyThesis}</p>
             </div>
+
+            {/* 🤖 [AI 심사위원단 정밀 심사평 (문서 색상 톤 일치)] */}
+            {singlePdfAnalyst.aiDetailedReview && (
+              <div className="p-4 bg-white rounded-lg border-2 border-indigo-200 space-y-2 text-slate-800 shadow-xs">
+                <div className="text-sm font-bold text-indigo-950 pb-1.5 border-b border-indigo-100 flex items-center justify-between">
+                  <span>🤖 AI 심사위원단 정밀 심사평 (DART 정량 팩트체크 & 가중 오차율 & 2026 하반기 투자 전략)</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    공식 AI 인텔리전스
+                  </span>
+                </div>
+                <div className="text-xs leading-relaxed text-slate-700 whitespace-pre-line font-sans pl-0.5">
+                  {singlePdfAnalyst.aiDetailedReview}
+                </div>
+              </div>
+            )}
 
             <div className="p-4 bg-slate-50 rounded border border-slate-200">
               <h4 className="font-bold text-slate-900 text-sm mb-1.5">4. 2026년 하반기 전망 및 투자자 제언</h4>

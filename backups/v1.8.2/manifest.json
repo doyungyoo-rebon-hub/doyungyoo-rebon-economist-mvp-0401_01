@@ -1,0 +1,12 @@
+{
+  "version": "1.8.2",
+  "timestamp": "2026-10-26T06:20:51.389Z",
+  "description": "VERSION 1.8.2 Full Immutable Snapshot: KB증권 퇴사(이선화) 시상제외 및 플랫폼 2위(지인해, 신한투자증권) 공식 1위 챔피언 승계, 5개사(한국·삼성·iM·대신·IBK) 1위 비공개 시상 제외 및 2위 승계, 10대 섹터 100인 풀 스코어카드 및 오차율 조망 매트릭스 완비",
+  "stats": {
+    "totalReports": 8698,
+    "totalAnalysts": 261,
+    "officialBrokers": 24,
+    "excludedBrokers": 5,
+    "grandPrize": "한유정 (한화투자증권)"
+  }
+}

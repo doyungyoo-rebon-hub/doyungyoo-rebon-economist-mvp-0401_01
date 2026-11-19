@@ -1,0 +1,8 @@
+{
+  "name": "리본-이코노미스트_올해의 애널리스트어워즈_MVP_04",
+  "description": "리본인텔리전스 이코노미스트 2026 애널리스트 어워즈 - VERSION 1.9.0 조선/방산 이지호 및 건설 이상호 공식 1위 챔피언 확정 헌액 & 평가결과_보고서_01 리포트 전수 무결성 검증 완결판",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

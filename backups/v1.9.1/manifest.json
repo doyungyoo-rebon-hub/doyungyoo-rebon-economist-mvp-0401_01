@@ -1,0 +1,28 @@
+{
+  "version": "VERSION 1.9.1",
+  "releaseDate": "2026-11-12",
+  "type": "CLEAN_MASTER_RELEASE",
+  "description": "원시 수집 9,518건 중 합성 시뮬레이션(1,402건) 및 퇴사 제외(83건) 정제 완료 → 실물 검증 8,033건 확정 · 곽민정 시뮬레이션 제외 · 조선/방산 1위 이지호(메리츠증권 퇴사) 시상 제외 및 2위 이한결(키움증권, 93.45점, 실물 83편) 공식 1위 챔피언 승계 확정",
+  "simulationPurged": true,
+  "shipbuildingSector": {
+    "resignedRank1Excluded": "이지호 (메리츠증권 퇴사, 93.68점, 24편 실물 - 정량 원장 보존 및 공식 시상 제외)",
+    "officialChampionSucceeded": "이한결 (키움증권, 93.45점, 83편 실물 - ※ 1위 이지호 메리츠증권 퇴사 시상 제외에 따른 2위 공식 수상 승계)",
+    "thirdPlace": "허준서 (유진투자증권, 92.93점, 64편 실물)",
+    "excludedSimulationOnly": [
+      "곽민정 (평가 기간 내 실물 리포트 0건 · 합성 시뮬레이션 130건 전량 삭제)"
+    ]
+  },
+  "constructionSector": {
+    "champion": "이상호 (교보증권, 93.52점, 16편 실물)"
+  },
+  "databaseStatus": {
+    "rawTargetReportsCount": 9518,
+    "retiredExcludedCount": 83,
+    "kwakSimulationRemovedCount": 130,
+    "syntheticPlaceholderRemovedCount": 1272,
+    "verifiedRealReportsCount": 8033,
+    "synthetic2026DataRemoved": true,
+    "internalOriginalPdfUrlPurified": true
+  },
+  "timestamp": "2026-11-13T00:35:30.173Z"
+}

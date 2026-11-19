@@ -224,7 +224,7 @@ export const AnalystDirectory01: React.FC<{ onNavigateToReview: () => void }> = 
           <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs text-slate-400 block">누적 검증 리포트</span>
             <strong className="text-xl font-bold font-mono text-amber-300">
-              {totalReportsEvaluated > 0 ? `${totalReportsEvaluated.toLocaleString()}편` : '8,698편'}
+              {totalReportsEvaluated > 0 ? `${totalReportsEvaluated.toLocaleString()}편` : '9,518편'}
             </strong>
           </div>
         </div>

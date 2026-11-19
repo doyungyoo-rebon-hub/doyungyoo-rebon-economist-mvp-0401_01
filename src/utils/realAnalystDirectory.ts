@@ -43,9 +43,17 @@ export const OFFICIAL_ANALYST_MASTER_ROSTER: Record<string, MasterAnalystInfo> =
     "broker": "KB증권",
     "sector": "자동차/모빌리티"
   },
-  "이한결": {
-    "broker": "다올투자증권",
+  "이지호": {
+    "broker": "메리츠증권",
     "sector": "조선/중공업/방산"
+  },
+  "이한결": {
+    "broker": "키움증권",
+    "sector": "조선/중공업/방산",
+    "pastBrokers": [
+      "다올투자증권"
+    ],
+    "isTransferred": true
   },
   "이선화": {
     "broker": "KB증권",
@@ -276,14 +284,6 @@ export const OFFICIAL_ANALYST_MASTER_ROSTER: Record<string, MasterAnalystInfo> =
     "broker": "교보증권",
     "sector": "조선/중공업/방산"
   },
-  "이지호": {
-    "broker": "메리츠증권",
-    "sector": "조선/중공업/방산"
-  },
-  "곽민정": {
-    "broker": "현대차증권",
-    "sector": "조선/중공업/방산"
-  },
   "이기훈": {
     "broker": "하나증권",
     "sector": "플랫폼/게임/엔터"
@@ -424,7 +424,7 @@ export const OFFICIAL_ANALYST_MASTER_ROSTER: Record<string, MasterAnalystInfo> =
     "broker": "KB증권",
     "sector": "건설/물류/기타"
   },
-  "백광제": {
+  "이상호": {
     "broker": "교보증권",
     "sector": "건설/물류/기타"
   },
@@ -478,6 +478,26 @@ export const OFFICIAL_ANALYST_MASTER_ROSTER: Record<string, MasterAnalystInfo> =
   "백재승": {
     "broker": "삼성증권",
     "sector": "화학/철강/소재"
+  },
+  "오광영": {
+    "broker": "신영증권",
+    "sector": "금융/지주"
+  },
+  "김귀연": {
+    "broker": "대신증권",
+    "sector": "자동차/모빌리티",
+    "pastBrokers": [
+      "흥국증권"
+    ],
+    "isTransferred": true
+  },
+  "허준서": {
+    "broker": "유진투자증권",
+    "sector": "조선/중공업/방산"
+  },
+  "이태환": {
+    "broker": "대신증권",
+    "sector": "조선/중공업/방산"
   }
 };
 
@@ -487,7 +507,8 @@ export const VERIFIED_ANALYSTS: Record<string, VerifiedAnalyst> = {
   "전창현___대신증권": { name: "전창현", broker: "대신증권", sector: "2차전지/배터리/소재", verified: true },
   "이안나___교보증권": { name: "이안나", broker: "교보증권", sector: "바이오/제약/헬스케어", verified: true },
   "강성진___KB증권": { name: "강성진", broker: "KB증권", sector: "자동차/모빌리티", verified: true },
-  "이한결___다올투자증권": { name: "이한결", broker: "다올투자증권", sector: "조선/중공업/방산", verified: true },
+  "이한결___키움증권": { name: "이한결", broker: "키움증권", sector: "조선/중공업/방산", verified: true, pastBrokers: ["다올투자증권"], isTransferred: true },
+  "이한결___다올투자증권": { name: "이한결", broker: "키움증권", sector: "조선/중공업/방산", verified: true, pastBrokers: ["다올투자증권"], isTransferred: true },
   "이선화___KB증권": { name: "이선화", broker: "KB증권", sector: "플랫폼/게임/엔터", verified: true, pastBrokers: ["유진투자증권"] },
   "김인___BNK투자증권": { name: "김인", broker: "BNK투자증권", sector: "금융/지주", verified: true, pastBrokers: ["유진투자증권"] },
   "채민숙___한국투자증권": { name: "채민숙", broker: "한국투자증권", sector: "반도체/IT/전자", verified: true, pastBrokers: ["유진투자증권", "DB금융투자"] },
@@ -500,8 +521,9 @@ export const VERIFIED_ANALYSTS: Record<string, VerifiedAnalyst> = {
   "류제현___미래에셋증권": { name: "류제현", broker: "미래에셋증권", sector: "건설/물류/기타", verified: true },
   "양지환___대신증권": { name: "양지환", broker: "대신증권", sector: "건설/물류/기타", verified: true },
   "이용욱___IBK투자증권": { name: "이용욱", broker: "IBK투자증권", sector: "화학/철강/소재", verified: true },
-  "이지호___메리츠증권": { name: "이지호", broker: "메리츠증권", sector: "조선/중공업/방산", verified: true },
+  "이상호___교보증권": { name: "이상호", broker: "교보증권", sector: "건설/물류/기타", verified: true },
   "주민우___NH투자증권": { name: "주민우", broker: "NH투자증권", sector: "2차전지/배터리/소재", verified: true },
+  "이지호___메리츠증권": { name: "이지호", broker: "메리츠증권", sector: "조선/중공업/방산", verified: true },
   "박종대___메리츠증권": { name: "박종대", broker: "메리츠증권", sector: "소비재/유통/음식료", verified: true }
 };
 

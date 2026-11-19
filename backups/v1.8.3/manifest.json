@@ -1,0 +1,13 @@
+{
+  "version": "1.8.3",
+  "timestamp": "2026-10-31T06:27:17.489Z",
+  "description": "VERSION 1.8.3 Production Gold Snapshot: 전 메뉴 대상(한유정) 헌액, 플랫폼 1위(지인해, 신한투자증권) 승계 & 이선화(KB증권 퇴사) 시상 제외 완비, 5개사(한국·삼성·iM·대신·IBK) 1위 비공개 시상 제외 및 2위 승계 엄수, 8698건 원문 DB 및 100인 풀 스코어카드, 온프레미스/AI Studio 즉시 복원 완비본",
+  "stats": {
+    "totalReports": 8698,
+    "totalAnalysts": 261,
+    "officialBrokers": 24,
+    "excludedBrokers": 5,
+    "grandPrize": "한유정 (한화투자증권)",
+    "platformChampion": "지인해 (신한투자증권, 승계)"
+  }
+}

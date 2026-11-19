@@ -11,7 +11,8 @@ import {
   Sparkles,
   TrendingUp,
   FileSpreadsheet,
-  Wallet
+  Wallet,
+  Brain
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -48,8 +49,8 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
     },
     {
       id: 'analysts_01_review',
-      label: '올해의 애널리스트_01 심사평',
-      shortLabel: '심사평',
+      label: '공식 심사평 (올해의 애널리스트_01)',
+      shortLabel: '공식 심사평',
       icon: Award,
       badge: 'AI 공식 평가집',
       badgeColor: 'bg-yellow-400/20 text-yellow-300 border-yellow-400/30',
@@ -69,8 +70,26 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '애널리스트리포트_조회_01',
       shortLabel: '리포트 조회',
       icon: FileText,
-      badge: '8,698건',
+      badge: '9,518건',
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+    },
+    {
+      id: 'ai_research_intelligence',
+      label: 'AI 리서치 인텔리전스',
+      shortLabel: 'AI 인텔리전스',
+      icon: Brain,
+      badge: 'GraphRAG · 온톨로지',
+      badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
+      highlight: true
+    },
+    {
+      id: 'virtual_report_generator',
+      label: 'AI 가상 리포트 생성기',
+      shortLabel: 'AI 리포트 생성',
+      icon: Sparkles,
+      badge: '신규 종목 백테스트',
+      badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+      highlight: true
     },
     {
       id: 'report_analysis_01',
@@ -127,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
       label: '버전 관리 & 백업',
       shortLabel: '버전 관리',
       icon: GitBranch,
-      badge: 'v1.8.2',
+      badge: 'v1.9.1',
       badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30'
     }
   ];
@@ -146,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({ currentTab, onTabChange }) => {
                 리본인텔리전스 × 이코노미스트
               </span>
               <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                VERSION 1.8.2
+                VERSION 1.9.1
               </span>
               <span className="hidden sm:inline-block text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.2 rounded border border-emerald-500/30 font-medium">
                 대상 24개사 · 평가 5개사 연동

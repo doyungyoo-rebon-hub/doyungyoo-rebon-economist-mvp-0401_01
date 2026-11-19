@@ -103,8 +103,8 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
   const [showBrokerPolicyModal, setShowBrokerPolicyModal] = useState<boolean>(false);
 
   const [stats, setStats] = useState({
-    totalReports: 8698,
-    totalAnalysts: 261,
+    totalReports: 8033,
+    totalAnalysts: 340,
     avgScore: 89.8,
     avgAccuracy: 45.4,
     avgDisparity: -21.4
@@ -266,8 +266,8 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
         }
         if (data.stats) {
           setStats({
-            totalReports: data.stats.totalReports || 7842,
-            totalAnalysts: data.stats.totalAnalysts || 681,
+            totalReports: data.stats.totalReports || 8033,
+            totalAnalysts: data.stats.totalAnalysts || 340,
             avgScore: data.stats.avgTotalScore || 89.8,
             avgAccuracy: data.stats.avgHitRate || 45.4,
             avgDisparity: data.stats.avgDisparity || -21.4
@@ -567,8 +567,10 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
         dartAlignment: rev.metrics.dartAlignment,
         activityScore: rev.metrics.activityTimeliness,
         logicScore: rev.metrics.logicImpact,
-        reportCount: 34 - idx * 2,
+        reportCount: rev.name === '이한결' ? 83 : (34 - idx * 2),
         isOfficialWinner: true,
+        isAwardSuccessor: Boolean(rev.awardSuccessionNote && !rev.isGrandPrize),
+        awardSuccessionNote: rev.awardSuccessionNote || null,
         keyReportTitle: rev.keyReports[0] || '산업 및 종목 분석',
         officialReview: rev
       });
@@ -578,6 +580,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
     if (apiAnalysts.length > 0) {
       apiAnalysts.forEach((a, idx) => {
         if (!map.has(a.name)) {
+          const isResignedAnalyst = a.name === '이선화' || a.name === '이지호' || Boolean(a.isResigned);
           map.set(a.name, {
             id: a.id || `api_${idx}`,
             rank: a.rank || (idx + 1),
@@ -591,9 +594,18 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
             logicScore: a.avgDepthScore || 89,
             reportCount: a.reportCount || 16,
             isOfficialWinner: false,
+            isResigned: isResignedAnalyst,
+            isAwardExcluded: Boolean(a.isAwardExcluded) || isResignedAnalyst,
+            awardEligibilityText: a.awardEligibilityText || (isResignedAnalyst ? `시상 제외 (${a.brokerName} 퇴사)` : null),
+            awardSuccessionNote: a.awardSuccessionNote || null,
             keyReportTitle: a.keyReport?.reportTitle || '심층 기업 분석 리포트',
             officialReview: null
           });
+        } else {
+          const existing = map.get(a.name);
+          if (existing && a.reportCount) {
+            existing.reportCount = a.reportCount;
+          }
         }
       });
     }
@@ -616,11 +628,11 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
       list = list.filter(item => item.sector === sectorFilter);
     }
 
-    // v1.8.2 시상 적격/제외 필터
+    // v1.8.2 시상 적격/제외 필터 (5개사 및 퇴사 시상 제외 포함)
     if (awardEligibilityFilter === 'ELIGIBLE') {
-      list = list.filter(item => !isAwardExcludedBroker(item.brokerName));
+      list = list.filter(item => !isAwardExcludedBroker(item.brokerName) && !item.isResigned && !item.isAwardExcluded);
     } else if (awardEligibilityFilter === 'EXCLUDED') {
-      list = list.filter(item => isAwardExcludedBroker(item.brokerName));
+      list = list.filter(item => isAwardExcludedBroker(item.brokerName) || item.isResigned || item.isAwardExcluded);
     }
 
     // Sort
@@ -686,10 +698,10 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                 금감원 DART 팩트체크 교차검증 완료
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                평가 기준기: 2025.11.01 ~ 2026.10.31 (수집: 2025.11.01 ~ 2026.09.30)
+                수집 및 평가 기준: 2025.11.01 ~ 2026.10.30 (장 마감 전수)
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-                총 8,698건 누적 전수 산출 (경계값 포함)
+                실물 검증 {stats.totalReports.toLocaleString()}건 (원시 대상 9,518건 중 합성 시뮬레이션·퇴사 1,485건 정제)
               </span>
             </div>
 
@@ -709,7 +721,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/20 transition cursor-pointer"
               >
                 <Sparkles size={16} />
-                심사평 전문집 바로가기
+                공식 심사평 전문집 바로가기
                 <ChevronRight size={16} />
               </button>
             )}
@@ -754,9 +766,9 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
         {/* 4대 종합 지표 스탯 바 */}
         <div className="relative z-10 mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 border-t border-slate-800/90 pt-6">
           <div className="p-3 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80">
-            <span className="text-[11px] text-slate-400 block">검증 리포트 총수</span>
-            <strong className="text-lg sm:text-2xl font-mono text-white font-extrabold">{stats.totalReports.toLocaleString()}건</strong>
-            <span className="text-[10px] text-slate-500 block mt-0.5">대상 24개사 · 평가 5개사 누적 전수</span>
+            <span className="text-[11px] text-slate-400 block">검증 리포트 총수 (실물 확정)</span>
+            <strong className="text-lg sm:text-2xl font-mono text-white font-extrabold tabular-nums">{stats.totalReports.toLocaleString()}건</strong>
+            <span className="text-[10px] text-slate-500 block mt-0.5">원시 9,518건 중 합성 시뮬레이션·퇴사 1,485건 정제</span>
           </div>
           <div className="p-3 sm:p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80">
             <span className="text-[11px] text-slate-400 block">유효 분석 연구원</span>
@@ -847,14 +859,14 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="2025_11_TO_2026_10" className="font-bold text-amber-300">
-                2025년 11월 1일 ~ 2026년 10월 31일 전수 종합 (8,698건 / 261명)
+                2025년 11월 1일 ~ 2026년 10월 30일 실물 검증 종합 (8,033건 / 원시 9,518건 정제)
               </option>
-              <option value="2026_9M">
-                2025년 11월 ~ 2026년 9월 누적 종합 (8,698건 전수 / 261명)
+              <option value="2026_10M">
+                2025년 11월 ~ 2026년 10월 30일 장 마감 실물 종합 (8,033건)
               </option>
-              <option value="2026_ANNUAL">2026년 연간 종합 (7,838건 / 261명)</option>
-              <option value="2026_1H">2026년 상반기 (4,868건 / 261명)</option>
-              <option value="2026_3Q">2026년 3분기 (7~9월 2,290건)</option>
+              <option value="2026_ANNUAL">2026년 연간 실물 종합 (6,505건)</option>
+              <option value="2026_1H">2026년 상반기 실물 검증 (3,524건)</option>
+              <option value="2026_3Q">2026년 3분기 실물 검증 (7~9월 2,195건)</option>
             </select>
           </div>
 
@@ -1280,6 +1292,10 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                               <span className="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
                                 시상 제외 (평가 1위)
                               </span>
+                            ) : rev.awardSuccessionNote && !isGrand ? (
+                              <span className="text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/40">
+                                🏆 공식 1위 (승계)
+                              </span>
                             ) : (
                               <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30">
                                 공식 시상 대상
@@ -1292,6 +1308,12 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                             )}
                           </div>
                         </div>
+
+                        {rev.awardSuccessionNote && !isGrand && (
+                          <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[10.5px] font-semibold text-amber-200 leading-snug">
+                            {rev.awardSuccessionNote}
+                          </div>
+                        )}
 
                         {isAwardExcludedBroker(rev.brokerName) && (
                           <div className="mt-1.5 p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300">
@@ -1405,7 +1427,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 font-mono">
-                  평가 기준: 2025.11 ~ 2026.09 누적 8,698건 전수 (타겟: ~2026.10.31)
+                  평가 기준: 2025.11 ~ 2026.10.30 실물 검증 8,033건 (원시 9,518건 중 합성 시뮬레이션 정제)
                 </span>
                 <span className="px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300 font-bold">
                   가중 평균 오차율 모델 40%
@@ -1416,11 +1438,17 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
             {/* 소비재 유통 대상 단독 분리 및 섹터 1위 승계 원칙 안내 */}
             <div className="p-4 rounded-2xl bg-slate-950/90 border border-amber-500/30 text-xs text-amber-200 leading-relaxed flex items-start gap-3">
               <Sparkles size={16} className="text-amber-400 shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-amber-300 font-bold block mb-1">
-                  👑 종합 대상 단독 표창 및 시상 대상 체계 (대상 포함 최종 10인):
-                </strong>
-                소비재/유통/음식료 섹터에서 1위를 기록한 <strong className="text-white font-bold">한유정 연구원(한화투자증권, 종합 97.15점)</strong>은 전체 평가 1위로 <strong className="text-amber-300">2026 종합 대상 1명</strong>으로 단독 표창되며, 대상을 배출한 섹터는 2위를 1위로 대체하지 않고 대상 부문으로 단독 흡수 통합(별도 섹터 챔피언 미시상)하여 <strong className="text-emerald-300 font-bold">종합 대상 1명 + 9개 산업 섹터 챔피언 9명 = 대상 포함 최종 10인의 수상자</strong> 체계로 시상이 진행됩니다. (섹터 분석 데이터는 기존과 동일하게 전수 유지)
+              <div className="space-y-1.5">
+                <div>
+                  <strong className="text-amber-300 font-bold block mb-1">
+                    👑 종합 대상 단독 표창 및 시상 대상 체계 (대상 포함 최종 10인):
+                  </strong>
+                  소비재/유통/음식료 섹터에서 1위를 기록한 <strong className="text-white font-bold">한유정 연구원(한화투자증권, 종합 97.15점)</strong>은 전체 평가 1위로 <strong className="text-amber-300">2026 종합 대상 1명</strong>으로 단독 표창되며, 대상을 배출한 섹터는 2위를 1위로 대체하지 않고 대상 부문으로 단독 흡수 통합(별도 섹터 챔피언 미시상)하여 <strong className="text-emerald-300 font-bold">종합 대상 1명 + 9개 산업 섹터 챔피언 9명 = 대상 포함 최종 10인의 수상자</strong> 체계로 시상이 진행됩니다.
+                </div>
+                <div className="pt-1.5 border-t border-slate-800/80 text-[11px] text-slate-300">
+                  <strong className="text-rose-300 font-bold">※ 퇴사자 시상 제외 및 차순위 공식 승계 현황:</strong>{' '}
+                  플랫폼/게임/엔터 평가 1위 <strong className="text-white">이선화(KB증권 퇴사, 96.51점)</strong> → 2위 <strong className="text-emerald-300">지인해(신한투자증권, 94.49점)</strong> 공식 1위 승계 · 조선/중공업/방산 평가 1위 <strong className="text-white">이지호(메리츠증권 퇴사, 93.68점)</strong> → 2위 <strong className="text-emerald-300">이한결(키움증권, 93.45점)</strong> 공식 1위 승계 (퇴사 연구원의 정량 평가 스코어는 원장 투명성 기준에 따라 보존 표기)
+                </div>
               </div>
             </div>
           </div>
@@ -1437,17 +1465,18 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               if (sectorFilter !== 'ALL' && sectorFilter !== secName) return null;
 
               const filteredList = sectorAnalysts.filter(a => {
-                if (awardEligibilityFilter === 'ELIGIBLE') return !isAwardExcludedBroker(a.brokerName);
-                if (awardEligibilityFilter === 'EXCLUDED') return isAwardExcludedBroker(a.brokerName);
+                const isResignedRow = a.name === '이선화' || a.name === '이지호' || Boolean(a.isResigned);
+                if (awardEligibilityFilter === 'ELIGIBLE') return !isAwardExcludedBroker(a.brokerName) && !isResignedRow && !a.isAwardExcluded;
+                if (awardEligibilityFilter === 'EXCLUDED') return isAwardExcludedBroker(a.brokerName) || isResignedRow || Boolean(a.isAwardExcluded);
                 return true;
               });
 
               if (filteredList.length === 0) return null;
 
               const champion = (sectorAnalysts.find((a: any) => a.isSectorChampion) 
-                || sectorAnalysts.find((a: any) => !isAwardExcludedBroker(a.brokerName))
+                || sectorAnalysts.find((a: any) => !isAwardExcludedBroker(a.brokerName) && !a.isAwardExcluded && a.name !== '이선화' && a.name !== '이지호')
                 || defaultList.find((a: any) => a.isSectorChampion)
-                || defaultList.find((a: any) => !isAwardExcludedBroker(a.brokerName))
+                || defaultList.find((a: any) => !isAwardExcludedBroker(a.brokerName) && !a.isAwardExcluded)
                 || defaultList[0]);
 
               return (
@@ -1455,18 +1484,23 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                   {/* 섹터 헤더 */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                           표준 산업 섹터
                         </span>
                         <h4 className="text-xl sm:text-2xl font-black text-white">
                           {secName}
                         </h4>
+                        {champion?.awardSuccessionNote && secName !== "소비재/유통/음식료" && (
+                          <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            {champion.awardSuccessionNote}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-slate-400">
                         {secName === "소비재/유통/음식료"
                           ? `섹터 1위 최우수 챔피언: 👑 한유정 연구원 (한화투자증권, 97.15점 / 2026 종합 대상)`
-                          : `섹터 1위 최우수 챔피언: ${champion.name} 연구원 (${champion.brokerName}, ${champion.totalScore}점)`}
+                          : `섹터 1위 최우수 챔피언: ${champion.name} 연구원 (${champion.brokerName}, ${champion.totalScore}점)${champion.isAwardSuccessor ? ' · 공식 시상 승계 확정' : ''}`}
                       </p>
                     </div>
 
@@ -1496,10 +1530,12 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                       </thead>
                       <tbody className="divide-y divide-slate-800/60 font-medium">
                         {filteredList.map((a: any, idx: number) => {
-                          const isFirstExcluded = sectorAnalysts.length > 0 && isAwardExcludedBroker(sectorAnalysts[0].brokerName);
-                          const isExcluded = isAwardExcludedBroker(a.brokerName);
-                          const isChamp = Boolean(a.isSectorChampion || (champion && champion.name === a.name && champion.brokerName === a.brokerName));
-                          const isExcludedRank1 = isExcluded && (a.sectorRank === '시상제외' || a.sectorRank === 1 || (idx === 0 && isFirstExcluded));
+                          const is5BrokerExcluded = isAwardExcludedBroker(a.brokerName);
+                          const isResigned = a.name === '이선화' || a.name === '이지호' || Boolean(a.isResigned) || Boolean(a.awardEligibilityText && a.awardEligibilityText.includes('퇴사'));
+                          const isExcluded = is5BrokerExcluded || isResigned || Boolean(a.isAwardExcluded);
+                          const isFirstExcluded = sectorAnalysts.length > 0 && (isAwardExcludedBroker(sectorAnalysts[0].brokerName) || sectorAnalysts[0].name === '이선화' || sectorAnalysts[0].name === '이지호' || Boolean(sectorAnalysts[0].isAwardExcluded));
+                          const isChamp = Boolean(a.isSectorChampion || (champion && champion.name === a.name && champion.brokerName === a.brokerName && !isExcluded));
+                          const isExcludedRank1 = isExcluded && (a.sectorRank === '시상제외' || a.sectorRank === 1 || isResigned || (idx === 0 && isFirstExcluded));
                           const rank = isChamp ? 1 : a.sectorRank || idx + 1;
                           const totalScore = a.totalScore ? Number(a.totalScore).toFixed(2) : "88.00";
                           const targetAcc = a.metrics?.targetPriceAccuracy || a.kpi2026?.targetPriceAccuracy || 68.5;
@@ -1512,10 +1548,12 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
 
                           return (
                             <tr 
-                              key={a.name + rank}
+                              key={a.name + rank + idx}
                               className={`transition hover:bg-slate-800/40 ${
                                 isChamp 
                                   ? 'bg-amber-950/30 font-bold border-l-4 border-l-amber-500' 
+                                  : isResigned
+                                  ? 'bg-rose-950/20 text-slate-300 border-l-4 border-l-rose-500/60'
                                   : isExcludedRank1
                                   ? 'bg-slate-950/40 text-slate-500'
                                   : idx % 2 === 1 ? 'bg-slate-900/20' : 'bg-transparent'
@@ -1526,6 +1564,10 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                                 {isChamp ? (
                                   <span className="inline-flex items-center justify-center px-2 py-1 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 text-slate-950 font-black shadow-md shadow-amber-500/20 text-xs gap-0.5">
                                     🏆 1위
+                                  </span>
+                                ) : isResigned ? (
+                                  <span className="inline-flex items-center justify-center px-2 py-1 rounded-lg bg-rose-950/80 text-rose-300 font-bold text-[10px] border border-rose-500/40 whitespace-nowrap">
+                                    시상제외(퇴사)
                                   </span>
                                 ) : isExcludedRank1 ? (
                                   <span className="inline-flex items-center justify-center px-2 py-1 rounded-lg bg-slate-800 text-slate-400 font-bold text-[10px] border border-slate-700">
@@ -1549,32 +1591,41 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                               {/* 연구원 / 증권사 */}
                               <td className="py-3.5 px-4">
                                 <div className="space-y-0.5">
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
                                     <strong className="text-sm font-extrabold text-white">
-                                      {isExcludedRank1 ? (
+                                      {isExcludedRank1 && !isResigned ? (
                                         <span className="inline-flex items-center gap-1.5">
                                           <span className="text-slate-400 font-mono text-xs font-bold">
                                             [성명 비공개]
                                           </span>
                                         </span>
                                       ) : (
-                                        a.name
+                                        a.originalName || a.name
                                       )}
                                     </strong>
                                     {isChamp && (
                                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
-                                        {a.isAwardSuccessor ? '🏆 공식 1위 (승계)' : '🏆 공식 1위'}
+                                        {a.isAwardSuccessor ? '🏆 공식 1위 (시상 승계)' : '🏆 공식 1위'}
                                       </span>
                                     )}
-                                    {isExcludedRank1 && (
+                                    {isResigned && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">
+                                        {a.brokerName} 퇴사 · 시상 제외
+                                      </span>
+                                    )}
+                                    {isExcludedRank1 && !isResigned && (
                                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                                         시상 제외 (2위 공식 수상)
                                       </span>
                                     )}
                                   </div>
                                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                                    <span>{a.brokerName}</span>
-                                    {isExcluded ? (
+                                    <span>{a.brokerName}{isResigned ? ' (퇴사)' : ''}</span>
+                                    {isResigned ? (
+                                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-300 border border-rose-500/30">
+                                        퇴사 시상제외 (2위 승계)
+                                      </span>
+                                    ) : is5BrokerExcluded ? (
                                       <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
                                         시상제외 5개사
                                       </span>
@@ -1584,6 +1635,11 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                                       </span>
                                     )}
                                   </div>
+                                  {(isResigned || (isChamp && a.awardSuccessionNote)) && a.awardSuccessionNote && (
+                                    <div className={`text-[10px] mt-1 font-semibold ${isResigned ? 'text-rose-300/90' : 'text-amber-300/95'}`}>
+                                      {a.awardSuccessionNote}
+                                    </div>
+                                  )}
                                 </div>
                               </td>
 
@@ -1793,12 +1849,16 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                           </span>
                         </td>
                         <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-extrabold text-white text-sm">{item.name}</span>
                             <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px] font-medium border border-slate-700">
-                              {item.brokerName}
+                              {item.brokerName}{(item.name === '이선화' || item.name === '이지호' || item.isResigned) ? ' (퇴사)' : ''}
                             </span>
-                            {isAwardExcludedBroker(item.brokerName) ? (
+                            {(item.name === '이선화' || item.name === '이지호' || item.isResigned) ? (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 whitespace-nowrap">
+                                시상 제외 ({item.brokerName} 퇴사)
+                              </span>
+                            ) : isAwardExcludedBroker(item.brokerName) ? (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 whitespace-nowrap">
                                 시상 제외 (평가 대상)
                               </span>
@@ -1809,10 +1869,15 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
                             )}
                             {item.isOfficialWinner && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                1위 챔피언
+                                {item.isAwardSuccessor ? '🏆 1위 챔피언 (시상 승계)' : '1위 챔피언'}
                               </span>
                             )}
                           </div>
+                          {item.awardSuccessionNote && (
+                            <span className={`text-[10.5px] block mt-0.5 font-semibold ${(item.name === '이선화' || item.name === '이지호' || item.isResigned) ? 'text-rose-300/90' : 'text-amber-300/90'}`}>
+                              {item.awardSuccessionNote}
+                            </span>
+                          )}
                           <span className="text-[11px] text-slate-400 block truncate max-w-xs mt-0.5">
                             {item.keyReportTitle}
                           </span>
@@ -1875,7 +1940,7 @@ export const AnalystAwards01: React.FC<AnalystAwards01Props> = ({
               AI가 뽑은 스타 애널리스트 6대 평가 항목 및 가중 평균 오차율 산출 공식
             </h3>
             <p className="text-slate-400 text-xs sm:text-sm">
-              본 평가는 정성적 주관을 완전히 배제하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 총 8,698건(2025년 11월 1일 ~ 2026년 9월 30일 누적 전수) 실제 발간 리서치 리포트를 100% 결정론적 AI 심사 알고리즘으로 평가하였습니다. (전체 타겟 기준기: 2025년 11월 1일 ~ 2026년 10월 31일)
+              본 평가는 정성적 주관을 완전히 배제하고, 금융감독원 Open DART 공시 데이터 교차검증과 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 원시 수집 대상 9,518건 중 합성 시뮬레이션·퇴사 제외분(1,485건)을 전면 정제한 최종 실물 검증 리포트 8,033건(2025년 11월 1일 ~ 2026년 10월 30일 장 마감 누적)을 100% 결정론적 AI 심사 알고리즘으로 평가하였습니다.
             </p>
           </div>
 

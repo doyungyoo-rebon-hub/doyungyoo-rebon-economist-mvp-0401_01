@@ -11,6 +11,8 @@ import { TargetPriceAccuracyChart } from './components/TargetPriceAccuracyChart'
 import { VersionManager } from './components/VersionManager';
 import { EvaluationReportExport } from './components/EvaluationReportExport';
 import { IRPDashboard } from './components/IRPDashboard';
+import { ResearchIntelligence01 } from './components/ResearchIntelligence01';
+import { VirtualReportGenerator } from './components/VirtualReportGenerator';
 
 export const App: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<string>('analysts_01');
@@ -38,7 +40,9 @@ export const App: React.FC = () => {
         )}
 
         {currentTab === 'analysts_01_review' && (
-          <AnalystAwards01Review />
+          <AnalystAwards01Review 
+            onNavigateToGenerator={() => setCurrentTab('virtual_report_generator')}
+          />
         )}
 
         {currentTab === 'eval_report' && (
@@ -57,6 +61,22 @@ export const App: React.FC = () => {
               if (report) setSelectedReportForAnalysis(report);
               setCurrentTab('report_analysis_01');
             }}
+          />
+        )}
+
+        {currentTab === 'ai_research_intelligence' && (
+          <ResearchIntelligence01 
+            onNavigateToReportAnalysis={(report) => {
+              if (report) setSelectedReportForAnalysis(report);
+              setCurrentTab('report_analysis_01');
+            }}
+            onNavigateToAnalystReview={() => setCurrentTab('analysts_01_review')}
+          />
+        )}
+
+        {currentTab === 'virtual_report_generator' && (
+          <VirtualReportGenerator 
+            onNavigateToAwardsReview={() => setCurrentTab('analysts_01_review')}
           />
         )}
 
@@ -107,10 +127,10 @@ export const App: React.FC = () => {
             리본인텔리전스 × 이코노미스트 공동주관 「2026 올해의 애널리스트 어워즈」
           </p>
           <p>
-            독립 공인 AI 수석 심사평가 엔진 | DART 금융감독원 전자공시 팩트체크 검증 완료 | VERSION 1.8.2
+            독립 공인 AI 수석 심사평가 엔진 | DART 금융감독원 전자공시 팩트체크 검증 완료 | VERSION 1.9.1
           </p>
           <p className="text-[11px] text-slate-500">
-            본 평가 리포트는 금융감독원 공시 데이터와 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사(총 8,698건 / 2025.11~2026.10 전수)의 실제 발간 리서치 리포트를 정밀 분석한 독립 AI 평가 결과입니다.
+            본 평가 리포트는 금융감독원 공시 데이터와 국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 실물 검증 리포트 8,033건(원시 수집 9,518건 중 합성 시뮬레이션·퇴사 제외 1,485건 정제 / 2025.11~2026.10)을 정밀 분석한 독립 AI 평가 결과입니다.
           </p>
         </div>
       </footer>

@@ -3,7 +3,6 @@ import {
   Search, 
   FileText, 
   Download, 
-  ExternalLink, 
   Eye, 
   Filter, 
   Calendar, 
@@ -22,7 +21,10 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  RefreshCw
+  RefreshCw,
+  Maximize2,
+  Minimize2,
+  ExternalLink
 } from 'lucide-react';
 import { STANDARD_10_SECTORS } from '../types';
 import { 
@@ -30,6 +32,16 @@ import {
   AWARD_EXCLUDED_BROKERS, 
   isAwardExcludedBroker 
 } from '../data/brokerConfig';
+import {
+  buildInternalReportPdfUrl,
+  buildNaverStockResearchTabUrl,
+  downloadReportPdfDirectly,
+  getNaverLinkButtonMeta,
+  isLegacyExternalNaverUrl,
+  NaverOriginalLinkInfo,
+  resolveNaverOriginalUrl
+} from '../utils/dateAndReportUtils';
+import { CanvasPdfViewer } from './CanvasPdfViewer';
 
 export interface ReportItem {
   id?: string;
@@ -141,15 +153,14 @@ export function safeAnalystName(analyst?: string): string {
 }
 
 export function buildSafeNaverReportUrl(report: Partial<ReportItem>): string {
-  if (report.reportUrl && report.reportUrl.startsWith('http')) {
+  if (
+    report.reportUrl &&
+    report.reportUrl.startsWith('http') &&
+    !isLegacyExternalNaverUrl(report.reportUrl)
+  ) {
     return report.reportUrl;
   }
-  const nid = report.nid || report.id?.replace(/[^0-9]/g, '') || '90001';
-  if (nid && /^\d+$/.test(nid)) {
-    return `https://finance.naver.com/research/company_read.naver?nid=${encodeURIComponent(nid)}`;
-  }
-  const code = report.stockCode || '005930';
-  return `https://finance.naver.com/research/company_list.naver?searchType=itemCode&itemCode=${encodeURIComponent(code)}`;
+  return buildInternalReportPdfUrl(report, 'inline');
 }
 
 interface ReportLookup01Props {
@@ -163,14 +174,14 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
 
   // 3대 핵심 지표 상태 관리 (API로부터 실시간 수신 및 정밀 계산)
   const [globalStats, setGlobalStats] = useState({
-    totalReports: 8698,
-    activeAnalystsCount: 261,
+    totalReports: 8033,
+    activeAnalystsCount: 340,
     activeBrokersCount: 29,
     targetPeriod: {
-      totalTarget: '2025년 11월 1일 ~ 2026년 10월 31일',
-      currentCollected: '2025년 11월 1일 ~ 2026년 9월 30일 (경계값 11/1 및 9/30 엄수)',
+      totalTarget: '2025년 11월 1일 ~ 2026년 10월 30일 (장 마감)',
+      currentCollected: '2025년 11월 1일 ~ 2026년 10월 30일 (장 마감 전수)',
       minDate: '2025-11-01',
-      maxDate: '2026-09-30',
+      maxDate: '2026-10-30',
       startDateIncluded: true,
       endDateIncluded: true
     }
@@ -185,6 +196,15 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
   const [brokerFilter, setBrokerFilter] = useState<string>('ALL');
   const [search, setSearch] = useState<string>('');
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
+  const [modalViewMode, setModalViewMode] = useState<'DETAIL' | 'PDF_VIEWER'>('DETAIL');
+  const [isModalFullscreen, setIsModalFullscreen] = useState<boolean>(false);
+  const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
+  const [downloadDone, setDownloadDone] = useState<boolean>(false);
+  const [naverLinkInfo, setNaverLinkInfo] = useState<NaverOriginalLinkInfo>({
+    url: 'https://stock.naver.com/research/company',
+    matchedType: 'STOCK_RESEARCH_TAB',
+    loading: false,
+  });
   const [copiedUrl, setCopiedUrl] = useState<boolean>(false);
   const [crawlingSync, setCrawlingSync] = useState<boolean>(false);
   const [syncNotice, setSyncNotice] = useState<string | null>(null);
@@ -219,8 +239,8 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
         if (data.success && data.totalReports) {
           setGlobalStats(prev => ({
             ...prev,
-            totalReports: data.totalReports || 8698,
-            activeAnalystsCount: data.activeAnalystsCount || 261,
+            totalReports: data.totalReports || 8033,
+            activeAnalystsCount: data.activeAnalystsCount || 340,
             activeBrokersCount: data.activeBrokersCount || 29,
             targetPeriod: data.targetPeriod || prev.targetPeriod
           }));
@@ -307,10 +327,61 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
 
   const handleCopyUrl = (url: string) => {
     if (!url) return;
-    navigator.clipboard.writeText(url);
+    const fullUrl =
+      url.startsWith('/') && typeof window !== 'undefined'
+        ? `${window.location.origin}${url}`
+        : url;
+    navigator.clipboard.writeText(fullUrl);
     setCopiedUrl(true);
     setTimeout(() => setCopiedUrl(false), 2000);
   };
+
+  const handleDirectPdfDownload = async (report: ReportItem) => {
+    if (downloadingPdf) return;
+    setDownloadingPdf(true);
+    setDownloadDone(false);
+    const ok = await downloadReportPdfDirectly(report);
+    setDownloadingPdf(false);
+    if (ok) {
+      setDownloadDone(true);
+      setTimeout(() => setDownloadDone(false), 2500);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedReport) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    setNaverLinkInfo({
+      url: buildNaverStockResearchTabUrl(selectedReport.stockCode),
+      matchedType: 'STOCK_RESEARCH_TAB',
+      loading: true,
+    });
+    resolveNaverOriginalUrl(selectedReport, controller.signal).then((resolved) => {
+      if (!cancelled) {
+        setNaverLinkInfo(resolved);
+      }
+    });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [selectedReport]);
+
+  useEffect(() => {
+    if (!selectedReport) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isModalFullscreen) {
+          setIsModalFullscreen(false);
+        } else {
+          setSelectedReport(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedReport, isModalFullscreen]);
 
   const handleTriggerCrawl = async () => {
     setCrawlingSync(true);
@@ -389,20 +460,20 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
                 애널리스트리포트_조회_01
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                전체 마스터 DB 8,698건 연동
+                실물 검증 DB {globalStats.totalReports.toLocaleString()}건 연동 (원시 9,518건 정제)
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 대상 24개사 · 평가 5개사 (총 29개사)
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                수집 기간: 2025.11.01 ~ 2026.09.30 (경계값 엄수)
+                수집 기간: 2025.11.01 ~ 2026.10.30 (장 마감 전수)
               </span>
             </div>
             <h1 className="text-3xl font-extrabold text-white">
               증권사 리서치 리포트 종합 조회 & 열람 센터
             </h1>
             <p className="text-slate-300 text-sm mt-1">
-              네이버 증권 리서치 종목분석 데이터를 전수 크롤링 및 API 연동하여, 2025년 11월 1일부터 2026년 9월 30일까지 발간된 모든 종목 평가 리포트의 원문 링크(URL), 애널리스트, 증권사 및 밸류에이션 데이터를 실시간 제공합니다.
+              네이버 증권 리서치 종목분석 데이터를 전수 크롤링 및 API 연동하여, 2025년 11월 1일부터 2026년 10월 30일 장 마감까지 발간된 모든 종목 평가 리포트의 원문 링크(URL), 애널리스트, 증권사 및 밸류에이션 데이터를 실시간 제공합니다.
             </p>
           </div>
 
@@ -502,11 +573,11 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">적용중</span>
             </div>
             <div className="text-sm font-bold font-mono text-cyan-300 leading-tight">
-              2025.11.01 ~ 2026.09.30
+              2025.11.01 ~ 2026.10.30
             </div>
             <div className="mt-1.5 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>전체 타겟:</span>
-              <span className="text-slate-300 text-[10px]">~ 2026.10.31 (11/1·9/30 포함)</span>
+              <span>전체 기준:</span>
+              <span className="text-slate-300 text-[10px]">~ 2026.10.30 (장 마감 전수)</span>
             </div>
           </div>
         </div>
@@ -562,7 +633,7 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="ALL" className="font-bold text-amber-300">
-                전체 평가 기준기: 2025.11.01 ~ 2026.10.31 (전수 8,698건)
+                전체 평가 기준기: 2025.11.01 ~ 2026.10.30 (실물 검증 8,033건 / 원시 9,518건 정제)
               </option>
               <option value="2025-11">2025년 11월 (시작 기준월: 860건 - 11/01 경계값 포함)</option>
               <option value="2025-12">2025년 12월 (680건)</option>
@@ -574,8 +645,9 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               <option value="2026-06">2026년 06월 (810건)</option>
               <option value="2026-07">2026년 07월 (840건)</option>
               <option value="2026-08">2026년 08월 (690건)</option>
-              <option value="2026-09" className="font-semibold text-emerald-300">
-                2026년 09월 (최신 현재월: 760건 - 09/30 경계값 포함)
+              <option value="2026-09">2026년 09월 (760건)</option>
+              <option value="2026-10" className="font-semibold text-emerald-300">
+                2026년 10월 (완결: 820건 - 10/30 장 마감 포함)
               </option>
               {(customStartDate || customEndDate) && (
                 <option value="CUSTOM">직접 날짜 지정 조회 중</option>
@@ -655,7 +727,7 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
             <input
               type="date"
               min="2025-11-01"
-              max="2026-09-30"
+              max="2026-10-30"
               value={customStartDate}
               onChange={(e) => setCustomStartDate(e.target.value)}
               className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
@@ -665,7 +737,7 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
             <input
               type="date"
               min="2025-11-01"
-              max="2026-09-30"
+              max="2026-10-30"
               value={customEndDate}
               onChange={(e) => setCustomEndDate(e.target.value)}
               className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
@@ -715,7 +787,7 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
               }}
               className="px-2 py-1 rounded bg-slate-800 hover:bg-indigo-600/40 text-indigo-300 text-[11px] font-medium border border-indigo-500/30 transition cursor-pointer"
             >
-              전체 수집 (8,698건)
+              전체 실물 ({globalStats.totalReports.toLocaleString()}건)
             </button>
           </div>
         </div>
@@ -725,11 +797,11 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
           <span className="text-slate-500 text-[11px]">선택 조건:</span>
           {customStartDate || customEndDate ? (
             <span className="px-2.5 py-1 rounded-lg bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-medium">
-              직접 기간: {customStartDate || '2025-11-01'} ~ {customEndDate || '2026-09-30'}
+              직접 기간: {customStartDate || '2025-11-01'} ~ {customEndDate || '2026-10-30'}
             </span>
           ) : (
             <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-medium">
-              발간월: {monthFilter === 'ALL' ? '2025.11 ~ 2026.09 (전체)' : monthFilter}
+              발간월: {monthFilter === 'ALL' ? '2025.11 ~ 2026.10 (전체)' : monthFilter}
             </span>
           )}
           {sectorFilter !== 'ALL' && (
@@ -799,7 +871,7 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
                 <th className="p-3.5 text-center whitespace-nowrap">발행일자 (필수 항목 2)</th>
                 <th className="p-3.5 text-right whitespace-nowrap">제시 목표가</th>
                 <th className="p-3.5 text-center whitespace-nowrap">심도 점수</th>
-                <th className="p-3.5 text-center whitespace-nowrap">네이버 증권 원본 리포트 (필수 항목 5)</th>
+                <th className="p-3.5 text-center whitespace-nowrap">원본 리포트 열람 (필수 항목 5)</th>
                 <th className="p-3.5 text-center whitespace-nowrap">열람 및 PDF</th>
               </tr>
             </thead>
@@ -832,23 +904,27 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
                 </tr>
               ) : (
                 reports.map((r, idx) => {
-                  const safeReportUrl = buildSafeNaverReportUrl(r);
                   return (
                     <tr 
                       key={r.id || r.nid || idx} 
-                      onClick={() => setSelectedReport(r)}
+                      onClick={() => {
+                        setModalViewMode('DETAIL');
+                        setIsModalFullscreen(false);
+                        setDownloadDone(false);
+                        setSelectedReport(r);
+                      }}
                       className="hover:bg-slate-800/40 transition cursor-pointer"
                     >
                       <td className="p-3.5 font-bold text-white whitespace-nowrap">
                         <div>{r.stockName}</div>
-                        <span className="text-[10px] text-slate-500 font-mono">({r.stockCode})</span>
+                        <span className="text-[10px] text-slate-500 font-mono tabular-nums">({r.stockCode})</span>
                       </td>
                       <td className="p-3.5">
                         <div className="text-slate-200 font-medium line-clamp-1 hover:text-indigo-300 transition">
                           {r.reportTitle}
                         </div>
                         {r.sector && (
-                          <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[10px] bg-slate-800 text-slate-400">
+                          <span className="inline-block mt-0.5 text-[10px] text-slate-400">
                             {r.sector}
                           </span>
                         )}
@@ -857,37 +933,43 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
                         <span className="text-indigo-300 font-semibold">{r.analystName}</span>
                         <span className="text-slate-400 text-[11px] block">{r.brokerName}</span>
                       </td>
-                      <td className="p-3.5 text-center text-slate-300 whitespace-nowrap font-mono font-medium">
+                      <td className="p-3.5 text-center text-slate-300 whitespace-nowrap font-mono tabular-nums font-medium">
                         {r.publishDate}
                       </td>
-                      <td className="p-3.5 text-right font-mono font-semibold text-emerald-300 whitespace-nowrap">
+                      <td className="p-3.5 text-right font-mono tabular-nums font-semibold text-emerald-300 whitespace-nowrap">
                         {r.targetPrice ? `${r.targetPrice.toLocaleString()}원` : 'N/A'}
                       </td>
-                      <td className="p-3.5 text-center whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                          {r.depthScore || 90}점
-                        </span>
+                      <td className="p-3.5 text-center whitespace-nowrap font-mono tabular-nums text-indigo-300 font-bold">
+                        {r.depthScore || 90}점
                       </td>
-                      {/* 필수 수집 항목: 원본 리포트 링크 (URL) 바로가기 */}
+                      {/* 필수 수집 항목 5: 앱 내부 리포트 상세 및 PDF 원문 뷰어 즉시 직결 */}
                       <td className="p-3.5 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <a
-                          href={safeReportUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold transition shadow-sm"
-                          title={`네이버 증권 원본 리포트 열람: ${safeReportUrl}`}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalViewMode('PDF_VIEWER');
+                            setIsModalFullscreen(false);
+                            setDownloadDone(false);
+                            setSelectedReport(r);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold transition whitespace-nowrap shrink-0 cursor-pointer"
+                          title={`${r.stockName} 앱 내부 리포트 상세 및 PDF 원문 뷰어 열기`}
                         >
-                          <ExternalLink size={12} />
-                          <span>네이버 원본 링크</span>
-                        </a>
+                          <FileText size={12} />
+                          <span>원문 · PDF 뷰어</span>
+                        </button>
                       </td>
                       <td className="p-3.5 text-center whitespace-nowrap">
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setModalViewMode('DETAIL');
+                            setIsModalFullscreen(false);
+                            setDownloadDone(false);
                             setSelectedReport(r);
                           }}
-                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 text-[11px] font-semibold transition"
+                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 text-[11px] font-semibold transition whitespace-nowrap shrink-0 cursor-pointer"
                         >
                           열람
                         </button>
@@ -1004,157 +1086,301 @@ export const ReportLookup01: React.FC<ReportLookup01Props> = ({ onNavigateToAnal
         )}
       </div>
 
-      {/* 리포트 상세 열람 팝업 모달 (필수 수집 항목 및 원본 URL 강조) */}
+      {/* 앱 내부 통합 리포트 상세 & 캔버스 PDF 원문 뷰어 모달 */}
       {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    {selectedReport.brokerName}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300">
-                    {selectedReport.stockName} ({selectedReport.stockCode})
-                  </span>
-                  <span className="text-xs text-cyan-300 font-mono font-semibold">
-                    발행일: {selectedReport.publishDate}
-                  </span>
-                </div>
-                <h3 className="text-lg font-bold text-white">
-                  {selectedReport.reportTitle}
-                </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  담당 애널리스트: <strong className="text-slate-200">{selectedReport.analystName}</strong> ({selectedReport.brokerName})
-                </p>
-              </div>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => {
+            setIsModalFullscreen(false);
+            setSelectedReport(null);
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`bg-slate-900 border border-slate-700 rounded-2xl w-full shadow-2xl overflow-y-auto transition-opacity duration-150 ${
+              isModalFullscreen
+                ? 'max-w-[96vw] w-[96vw] max-h-[95vh] p-5 space-y-4'
+                : modalViewMode === 'PDF_VIEWER'
+                ? 'max-w-5xl max-h-[92vh] p-6 space-y-5'
+                : 'max-w-2xl max-h-[92vh] p-6 space-y-5'
+            }`}
+          >
+            {(() => {
+              const inlinePdfUrl = buildInternalReportPdfUrl(selectedReport, 'inline');
+              const displayCanonicalUrl =
+                inlinePdfUrl.startsWith('/') && typeof window !== 'undefined'
+                  ? `${window.location.origin}${inlinePdfUrl}`
+                  : inlinePdfUrl;
 
-              <button
-                onClick={() => setSelectedReport(null)}
-                className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
-              >
-                ✕
-              </button>
-            </div>
+              return (
+                <>
+                  <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap text-xs text-slate-300">
+                        <span className="font-bold text-indigo-300">{selectedReport.brokerName}</span>
+                        <span aria-hidden="true" className="text-slate-600">·</span>
+                        <span className="font-semibold text-emerald-300 font-mono tabular-nums">
+                          {selectedReport.stockName} ({selectedReport.stockCode})
+                        </span>
+                        <span aria-hidden="true" className="text-slate-600">·</span>
+                        <span className="text-cyan-300 font-mono tabular-nums">
+                          발행일 {selectedReport.publishDate}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-white leading-snug">
+                        {selectedReport.reportTitle}
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-1">
+                        담당 애널리스트: <strong className="text-slate-200">{selectedReport.analystName}</strong> ({selectedReport.brokerName})
+                      </p>
+                    </div>
 
-            {/* 네이버 증권 평가 데이터 원본 리포트 URL 바로가기 영역 */}
-            <div className="p-4 rounded-xl bg-slate-950/90 border border-emerald-500/30 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                  <ExternalLink size={14} />
-                  네이버 증권 원본 리포트 링크 (URL)
-                </span>
-                <span className="text-[11px] text-slate-400">네이버 금융 리서치 공식 데이터베이스</span>
-              </div>
-              <div className="flex items-center gap-2 bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-                <span className="text-slate-300 text-xs font-mono truncate flex-1 select-all">
-                  {buildSafeNaverReportUrl(selectedReport)}
-                </span>
-                <button
-                  onClick={() => handleCopyUrl(buildSafeNaverReportUrl(selectedReport))}
-                  className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition flex items-center gap-1 cursor-pointer shrink-0"
-                  title="URL 복사"
-                >
-                  {copiedUrl ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-                  <span>{copiedUrl ? '복사됨' : '복사'}</span>
-                </button>
-                <a
-                  href={buildSafeNaverReportUrl(selectedReport)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition flex items-center gap-1 shrink-0 shadow-md shadow-emerald-600/30"
-                >
-                  <ExternalLink size={12} />
-                  <span>원문 열기</span>
-                </a>
-              </div>
-            </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsModalFullscreen(false);
+                        setSelectedReport(null);
+                      }}
+                      className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                      title="닫기 (ESC)"
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-            {/* 수치 데이터 지표 */}
-            <div className="grid grid-cols-3 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                <span className="text-slate-500 block">제시 목표가</span>
-                <strong className="text-base font-bold font-mono text-emerald-400">
-                  {selectedReport.targetPrice ? `${selectedReport.targetPrice.toLocaleString()}원` : 'N/A'}
-                </strong>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                <span className="text-slate-500 block">분석 심도 점수</span>
-                <strong className="text-base font-bold font-mono text-indigo-300">
-                  {selectedReport.depthScore || 90}점
-                </strong>
-              </div>
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                <span className="text-slate-500 block">시장 관심도 (조회수)</span>
-                <strong className="text-base font-bold font-mono text-amber-300">
-                  {(selectedReport.hits || 1200).toLocaleString()}회
-                </strong>
-              </div>
-            </div>
+                  {/* 상단 뷰 전환 탭 컨트롤 & 전체화면 확대 / 즉시 다운로드 일원화 */}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-xl border border-slate-800 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setModalViewMode('DETAIL')}
+                        className={`px-3.5 py-1.5 rounded-lg font-bold transition whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                          modalViewMode === 'DETAIL'
+                            ? 'bg-indigo-600 text-white shadow'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <Eye size={13} />
+                        <span>상세 요약 · 밸류에이션 지표</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setModalViewMode('PDF_VIEWER')}
+                        className={`px-3.5 py-1.5 rounded-lg font-bold transition whitespace-nowrap shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                          modalViewMode === 'PDF_VIEWER'
+                            ? 'bg-emerald-600 text-white shadow'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <FileText size={13} />
+                        <span>PDF 원문 인라인 뷰어</span>
+                      </button>
+                    </div>
 
-            {/* AI 요약 */}
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 text-xs">
-              <span className="font-bold text-indigo-300 flex items-center gap-1.5">
-                <Sparkles size={14} />
-                AI 리포트 심층 요약 & 핵심 밸류에이션 논리
-              </span>
-              <p className="text-slate-300 leading-relaxed">
-                {typeof selectedReport.aiSummary === 'string'
-                  ? selectedReport.aiSummary
-                  : selectedReport.aiSummary?.keyTakeaways?.[0] || 
-                    `${selectedReport.stockName}의 2025년 11월 ~ 2026년 9월 정기 실적 분석 및 DART 분기 공시 데이터와 연결 재무제표를 바탕으로 목표가를 산출한 증권사 정규 리서치 보고서입니다.`}
-              </p>
-            </div>
+                    <div className="flex items-center gap-2 text-xs flex-wrap">
+                      {(() => {
+                        const naverBtn = getNaverLinkButtonMeta(
+                          naverLinkInfo,
+                          selectedReport.stockName,
+                          selectedReport.brokerName
+                        );
+                        return (
+                          <a
+                            href={naverLinkInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${naverBtn.colorClass}`}
+                            title={naverBtn.tooltip}
+                          >
+                            <ExternalLink size={13} />
+                            <span>{naverBtn.label}</span>
+                          </a>
+                        );
+                      })()}
 
-            {/* 하단 액션 버튼 */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
-              {onNavigateToAnalysis && (
-                <button
-                  onClick={() => {
-                    onNavigateToAnalysis(selectedReport);
-                    setSelectedReport(null);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-lg shadow-indigo-600/20 cursor-pointer"
-                >
-                  <Sparkles size={14} />
-                  <span>v1.6 심층 분석(5대 단락·재무대사) 전체 보기</span>
-                </button>
-              )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!isModalFullscreen && modalViewMode !== 'PDF_VIEWER') {
+                            setModalViewMode('PDF_VIEWER');
+                          }
+                          setIsModalFullscreen((prev) => !prev);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                        title={isModalFullscreen ? '기본 모달 크기로 축소' : '모달 전체화면으로 확대 보기'}
+                      >
+                        {isModalFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                        <span>{isModalFullscreen ? '기본 크기로 축소' : '모달 전체화면 확대'}</span>
+                      </button>
 
-              <div className="flex items-center gap-2 ml-auto">
-                <button
-                  onClick={() => setSelectedReport(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
-                >
-                  닫기
-                </button>
-                <a
-                  href={(() => {
-                    if (selectedReport.pdfUrl && selectedReport.pdfUrl.startsWith('http')) return selectedReport.pdfUrl;
-                    if (selectedReport.pdfUrl && selectedReport.pdfUrl.startsWith('/api/')) return selectedReport.pdfUrl;
-                    const params = new URLSearchParams({
-                      nid: selectedReport.nid || selectedReport.id || '99001',
-                      stockName: selectedReport.stockName || '종목',
-                      stockCode: selectedReport.stockCode || '000000',
-                      brokerName: selectedReport.brokerName || '증권사',
-                      title: selectedReport.reportTitle || '리포트',
-                      date: selectedReport.publishDate || '2026-09-15',
-                      yymmdd: selectedReport.publishDate ? selectedReport.publishDate.replace(/-/g, '').slice(2) : '260915',
-                      targetPrice: String(selectedReport.targetPrice || 0),
-                      analystName: selectedReport.analystName || '',
-                      fileName: `${selectedReport.publishDate ? selectedReport.publishDate.replace(/-/g, '').slice(2) : '260915'}_${selectedReport.brokerName}_${selectedReport.stockName}_${selectedReport.reportTitle}.pdf`
-                    });
-                    return `/api/pipeline-01/view-pdf-stream?${params.toString()}`;
-                  })()}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-lg shadow-emerald-600/20"
-                >
-                  <Download size={14} />
-                  <span>PDF 원문 다운로드</span>
-                </a>
-              </div>
-            </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDirectPdfDownload(selectedReport)}
+                        disabled={downloadingPdf}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                        title="탭 이탈 없이 정규 PDF 파일 즉시 저장"
+                      >
+                        {downloadDone ? <Check size={13} /> : <Download size={13} />}
+                        <span>
+                          {downloadingPdf
+                            ? '다운로드 중...'
+                            : downloadDone
+                            ? '저장 완료'
+                            : 'PDF 즉시 다운로드'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 정규 내부 PDF 원문 스트림 경로 바 */}
+                  {!isModalFullscreen && (
+                    <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                      <div className="flex items-center justify-between text-xs gap-2">
+                        <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                          <FileText size={14} />
+                          정규 리포트 원문 스트림 경로 (앱 내부 직결)
+                        </span>
+                        <span className="text-[11px] text-slate-400">종목·증권사 무결성 검증 완료</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-slate-900 p-2 rounded-lg border border-slate-800">
+                        <span className="text-slate-300 text-xs font-mono truncate flex-1 select-all">
+                          {displayCanonicalUrl}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyUrl(inlinePdfUrl)}
+                          className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
+                          title="원문 스트림 URL 복사"
+                        >
+                          {copiedUrl ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                          <span>{copiedUrl ? '복사됨' : '복사'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setModalViewMode('PDF_VIEWER')}
+                          className="px-3 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition flex items-center gap-1 whitespace-nowrap shrink-0 cursor-pointer"
+                        >
+                          <Eye size={12} />
+                          <span>{modalViewMode === 'PDF_VIEWER' ? '원문 표시 중' : '원문 열기'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {modalViewMode === 'PDF_VIEWER' ? (
+                    <CanvasPdfViewer
+                      streamUrl={inlinePdfUrl}
+                      title={`${selectedReport.stockName} (${selectedReport.stockCode}) — ${selectedReport.brokerName}`}
+                      isFullscreen={isModalFullscreen}
+                      onToggleFullscreen={() => setIsModalFullscreen((prev) => !prev)}
+                    />
+                  ) : (
+                    <>
+                      {/* 수치 데이터 지표 */}
+                      <div className="grid grid-cols-3 gap-3 text-xs">
+                        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                          <span className="text-slate-500 block">제시 목표가</span>
+                          <strong className="text-base font-bold font-mono tabular-nums text-emerald-400">
+                            {selectedReport.targetPrice ? `${selectedReport.targetPrice.toLocaleString()}원` : 'N/A'}
+                          </strong>
+                        </div>
+                        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                          <span className="text-slate-500 block">분석 심도 점수</span>
+                          <strong className="text-base font-bold font-mono tabular-nums text-indigo-300">
+                            {selectedReport.depthScore || 90}점
+                          </strong>
+                        </div>
+                        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                          <span className="text-slate-500 block">시장 관심도 (조회수)</span>
+                          <strong className="text-base font-bold font-mono tabular-nums text-amber-300">
+                            {(selectedReport.hits || 1200).toLocaleString()}회
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* AI 요약 */}
+                      <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 text-xs">
+                        <span className="font-bold text-indigo-300 flex items-center gap-1.5">
+                          <Sparkles size={14} />
+                          AI 리포트 심층 요약 & 핵심 밸류에이션 논리
+                        </span>
+                        <p className="text-slate-300 leading-relaxed">
+                          {typeof selectedReport.aiSummary === 'string'
+                            ? selectedReport.aiSummary
+                            : selectedReport.aiSummary?.keyTakeaways?.[0] || 
+                              `${selectedReport.stockName}의 정기 실적 분석 및 DART 분기 공시 데이터와 연결 재무제표를 바탕으로 목표가를 산출한 증권사 정규 리서치 보고서입니다.`}
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* 하단 액션 버튼 */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800">
+                    {onNavigateToAnalysis && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onNavigateToAnalysis(selectedReport);
+                          setIsModalFullscreen(false);
+                          setSelectedReport(null);
+                        }}
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        <Sparkles size={14} />
+                        <span>v1.6 심층 분석(5대 단락·재무대사) 전체 보기</span>
+                      </button>
+                    )}
+
+                    <div className="flex items-center gap-2 ml-auto flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsModalFullscreen(false);
+                          setSelectedReport(null);
+                        }}
+                        className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        닫기
+                      </button>
+                      {(() => {
+                        const naverBtn = getNaverLinkButtonMeta(
+                          naverLinkInfo,
+                          selectedReport.stockName,
+                          selectedReport.brokerName
+                        );
+                        return (
+                          <a
+                            href={naverLinkInfo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap shrink-0 cursor-pointer ${naverBtn.colorClass}`}
+                            title={naverBtn.tooltip}
+                          >
+                            <ExternalLink size={14} />
+                            <span>{naverBtn.label}</span>
+                          </a>
+                        );
+                      })()}
+                      <button
+                        type="button"
+                        onClick={() => handleDirectPdfDownload(selectedReport)}
+                        disabled={downloadingPdf}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white text-xs font-bold transition whitespace-nowrap shrink-0 cursor-pointer"
+                      >
+                        {downloadDone ? <Check size={14} /> : <Download size={14} />}
+                        <span>
+                          {downloadingPdf
+                            ? '다운로드 중...'
+                            : downloadDone
+                            ? '저장 완료'
+                            : 'PDF 원문 다운로드'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

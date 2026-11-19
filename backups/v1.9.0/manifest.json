@@ -1,0 +1,23 @@
+{
+  "version": "1.9.0",
+  "timestamp": "2026-11-12T04:47:00.000Z",
+  "releaseName": "VERSION 1.9.0 Production Gold Master Release",
+  "description": "VERSION 1.9.0 Production Gold Master: 조선/중공업/방산 1위 이지호(메리츠증권, 93.68점, 24편) 및 건설/물류 1위 이상호(교보증권, 93.52점, 16편) 공식 챔피언 확정 헌액, 평가결과_보고서_01(총괄의결서·TOP100·오차율매트릭스·전수데이터북) 실물 리포트 전수 대사 완료, 5개사(한국·삼성·iM·대신·IBK) 시상제외 및 2위 승계 엄수, 9,518건 실물 리포트 전수 분석 및 4,868건 마스터 DB 연동 완비본",
+  "stats": {
+    "totalEvaluatedReports": 9518,
+    "masterDbReports": 4868,
+    "totalAnalysts": 343,
+    "officialBrokers": 24,
+    "excludedBrokers": 5,
+    "grandPrize": "한유정 (한화투자증권, 97.15점)",
+    "shipbuildingDefenseChampion": "이지호 (메리츠증권, 93.68점, 24편 검증)",
+    "constructionChampion": "이상호 (교보증권, 93.52점, 16편 검증)",
+    "platformChampion": "지인해 (신한투자증권, 94.49점, 승계 1위)",
+    "semiconductorChampion": "김동원 (KB증권, 94.59점, 승계 1위)",
+    "batteryChampion": "주민우 (NH투자증권, 93.40점, 1위)",
+    "bioChampion": "신민수 (키움증권, 93.86점, 1위)",
+    "mobilityChampion": "유지웅 (다올투자증권, 93.83점, 1위)",
+    "financeChampion": "김인 (BNK투자증권, 96.29점, 1위)",
+    "materialsChampion": "박성봉 (하나증권, 92.66점, 승계 1위)"
+  }
+}

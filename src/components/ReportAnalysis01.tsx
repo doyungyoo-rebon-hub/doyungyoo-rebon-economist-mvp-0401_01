@@ -17,7 +17,6 @@ import {
   Building2,
   FileText,
   Download,
-  ExternalLink,
   CheckCircle2,
   AlertTriangle,
   RotateCcw,
@@ -29,7 +28,11 @@ import {
   Scale,
   Activity,
   DollarSign,
-  PieChart
+  PieChart,
+  Maximize2,
+  Minimize2,
+  Check,
+  ExternalLink
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -49,6 +52,15 @@ import {
   PricePoint, 
   ActiveReportData 
 } from './TargetPriceAccuracyChart';
+import {
+  buildInternalReportPdfUrl,
+  buildNaverStockResearchTabUrl,
+  downloadReportPdfDirectly,
+  getNaverLinkButtonMeta,
+  NaverOriginalLinkInfo,
+  resolveNaverOriginalUrl
+} from '../utils/dateAndReportUtils';
+import { CanvasPdfViewer } from './CanvasPdfViewer';
 
 export interface ReportDetailItem {
   id?: string;
@@ -92,6 +104,15 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
 
   // 5대 심층 서브 탭: 종합요약, 주가궤적차트, 5대본문단락, DART재무제표, 밸류에이션&피어
   const [activeTab, setActiveTab] = useState<'SUMMARY' | 'CHART' | 'PARAGRAPHS' | 'FINANCIALS' | 'VALUATION'>('SUMMARY');
+  const [showPdfViewerModal, setShowPdfViewerModal] = useState<boolean>(false);
+  const [isPdfModalFullscreen, setIsPdfModalFullscreen] = useState<boolean>(false);
+  const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
+  const [downloadDone, setDownloadDone] = useState<boolean>(false);
+  const [naverLinkInfo, setNaverLinkInfo] = useState<NaverOriginalLinkInfo>({
+    url: 'https://stock.naver.com/research/company',
+    matchedType: 'STOCK_RESEARCH_TAB',
+    loading: false,
+  });
 
   // 필터 상태
   const [monthFilter, setMonthFilter] = useState<string>('2026-09');
@@ -122,6 +143,27 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
       setSelectedReport(initialSelectedReport);
     }
   }, [initialSelectedReport]);
+
+  // 선택된 리포트 변경 시 실시간 네이버 원문 단건 매칭 및 종목별 리서치 탭 폴백 해석
+  useEffect(() => {
+    if (!selectedReport) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    setNaverLinkInfo({
+      url: buildNaverStockResearchTabUrl(selectedReport.stockCode),
+      matchedType: 'STOCK_RESEARCH_TAB',
+      loading: true,
+    });
+    resolveNaverOriginalUrl(selectedReport, controller.signal).then((resolved) => {
+      if (!cancelled) {
+        setNaverLinkInfo(resolved);
+      }
+    });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [selectedReport]);
 
   const fetchAnalysisReports = async () => {
     setLoading(true);
@@ -201,29 +243,38 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
     return [yMin, yMax];
   }, [trajectoryPoints, reportAccuracyData]);
 
-  // PDF 다운로드 스트리밍 URL 생성기 (원문 파일 다운로드 보장)
-  const getDownloadPdfUrl = (r: ReportDetailItem): string => {
-    if (r.pdfUrl && r.pdfUrl.startsWith('http')) return r.pdfUrl;
-    if (r.pdfUrl && r.pdfUrl.startsWith('/api/')) return r.pdfUrl;
-    const target = r.targetPrice || 250000;
-    const current = r.currentPrice || Math.round(target * 0.78);
-    const params = new URLSearchParams({
-      nid: r.nid || r.id || '99001',
-      stockName: r.stockName || '종목',
-      stockCode: r.stockCode || '000000',
-      brokerName: r.brokerName || '증권사',
-      title: r.reportTitle || '리서치_보고서',
-      date: r.publishDate || '2026-09-15',
-      yymmdd: r.publishDate ? r.publishDate.replace(/-/g, '').slice(2) : '260915',
-      targetPrice: String(target),
-      currentPrice: String(current),
-      investmentOpinion: r.investmentOpinion || r.rating || 'BUY',
-      analystName: r.analystName || '연구원',
-      sector: r.sector || '종합',
-      fileName: `${r.publishDate ? r.publishDate.replace(/-/g, '').slice(2) : '260915'}_${r.brokerName}_${r.stockName}_${r.reportTitle}.pdf`
-    });
-    return `/api/pipeline-01/view-pdf-stream?${params.toString()}`;
+  // 앱 내부 인라인 PDF 원문 뷰어 URL 생성기
+  const getInlinePdfUrl = (r: ReportDetailItem): string => {
+    return buildInternalReportPdfUrl(r, 'inline');
   };
+
+  // 새 탭 이탈 및 샌드박스 차단 없는 즉시 PDF 파일 다운로드
+  const handleDirectDownload = async (r: ReportDetailItem) => {
+    if (downloadingPdf) return;
+    setDownloadingPdf(true);
+    setDownloadDone(false);
+    const ok = await downloadReportPdfDirectly(r);
+    setDownloadingPdf(false);
+    if (ok) {
+      setDownloadDone(true);
+      setTimeout(() => setDownloadDone(false), 2500);
+    }
+  };
+
+  useEffect(() => {
+    if (!showPdfViewerModal) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isPdfModalFullscreen) {
+          setIsPdfModalFullscreen(false);
+        } else {
+          setShowPdfViewerModal(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showPdfViewerModal, isPdfModalFullscreen]);
 
   // 브라우저 네이티브 PDF 인쇄/저장 (Print to PDF)
   const handlePrintToPdf = () => {
@@ -548,38 +599,67 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
                     </span>
                   </div>
 
-                  {/* PDF 다운로드 및 인쇄 액션 버튼 */}
-                  <div className="flex items-center gap-2 print:hidden">
-                    <a
-                      href={getDownloadPdfUrl(selectedReport)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/20 cursor-pointer"
-                      title="증권사 정규 PDF 원문 다운로드"
+                  {/* 원문 PDF 뷰어, 다운로드 및 인쇄 액션 버튼 */}
+                  <div className="flex items-center gap-2 print:hidden flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsPdfModalFullscreen(false);
+                        setShowPdfViewerModal(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition whitespace-nowrap shrink-0 cursor-pointer"
+                      title="앱 내부 캔버스 PDF 원문 뷰어 열기"
                     >
-                      <Download size={13} />
-                      <span>PDF 원문 다운로드</span>
-                    </a>
+                      <BookOpen size={13} />
+                      <span>원문 PDF 뷰어</span>
+                    </button>
 
                     <button
+                      type="button"
+                      onClick={() => handleDirectDownload(selectedReport)}
+                      disabled={downloadingPdf}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold text-xs transition whitespace-nowrap shrink-0 cursor-pointer"
+                      title="증권사 정규 PDF 원문 즉시 다운로드"
+                    >
+                      {downloadDone ? <Check size={13} /> : <Download size={13} />}
+                      <span>
+                        {downloadingPdf
+                          ? '다운로드 중...'
+                          : downloadDone
+                          ? '저장 완료'
+                          : 'PDF 원문 다운로드'}
+                      </span>
+                    </button>
+
+                    {(() => {
+                      const naverBtn = getNaverLinkButtonMeta(
+                        naverLinkInfo,
+                        selectedReport.stockName,
+                        selectedReport.brokerName
+                      );
+                      return (
+                        <a
+                          href={naverLinkInfo.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs transition whitespace-nowrap shrink-0 cursor-pointer ${naverBtn.colorClass}`}
+                          title={naverBtn.tooltip}
+                        >
+                          <ExternalLink size={13} />
+                          <span>{naverBtn.label}</span>
+                        </a>
+                      );
+                    })()}
+
+                    <button
+                      type="button"
                       onClick={handlePrintToPdf}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition whitespace-nowrap shrink-0 cursor-pointer"
                       title="심층 분석서 인쇄 및 PDF 저장"
                     >
                       <Printer size={13} />
                       <span>인쇄</span>
                     </button>
-
-                    {selectedReport.reportUrl && (
-                      <a
-                        href={selectedReport.reportUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
-                      >
-                        <ExternalLink size={12} />
-                      </a>
-                    )}
                   </div>
                 </div>
 
@@ -1131,20 +1211,59 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
                   해당 리포트는 금융감독원 공시 및 7대 KPI 평가 엔진을 통해 무결성 검증을 마쳤습니다.
                 </span>
 
-                <div className="flex items-center gap-2">
-                  <a
-                    href={getDownloadPdfUrl(selectedReport)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-600/20 cursor-pointer"
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsPdfModalFullscreen(false);
+                      setShowPdfViewerModal(true);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition whitespace-nowrap shrink-0 cursor-pointer"
                   >
-                    <Download size={13} />
-                    <span>PDF 원문 다운로드</span>
-                  </a>
+                    <BookOpen size={13} />
+                    <span>원문 PDF 뷰어</span>
+                  </button>
 
                   <button
+                    type="button"
+                    onClick={() => handleDirectDownload(selectedReport)}
+                    disabled={downloadingPdf}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white font-bold text-xs transition whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    {downloadDone ? <Check size={13} /> : <Download size={13} />}
+                    <span>
+                      {downloadingPdf
+                        ? '다운로드 중...'
+                        : downloadDone
+                        ? '저장 완료'
+                        : 'PDF 원문 다운로드'}
+                    </span>
+                  </button>
+
+                  {(() => {
+                    const naverBtn = getNaverLinkButtonMeta(
+                      naverLinkInfo,
+                      selectedReport.stockName,
+                      selectedReport.brokerName
+                    );
+                    return (
+                      <a
+                        href={naverLinkInfo.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs transition whitespace-nowrap shrink-0 cursor-pointer ${naverBtn.colorClass}`}
+                        title={naverBtn.tooltip}
+                      >
+                        <ExternalLink size={13} />
+                        <span>{naverBtn.label}</span>
+                      </a>
+                    );
+                  })()}
+
+                  <button
+                    type="button"
                     onClick={handlePrintToPdf}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     <Printer size={13} />
                     <span>A4 심층 분석서 인쇄 / 저장</span>
@@ -1156,11 +1275,114 @@ export const ReportAnalysis01: React.FC<ReportAnalysis01Props> = ({
             <div className="py-32 text-center text-slate-400 space-y-2">
               <FileText size={32} className="mx-auto text-slate-600 mb-2" />
               <p className="text-sm font-semibold text-slate-300">좌측 목록에서 분석할 리포트를 선택해 주세요.</p>
-              <p className="text-xs text-slate-500">선택 즉시 AI 4대 투자 포인트, 5대 본문 단락, 재무 대사표 및 PDF 다운로드가 활성화됩니다.</p>
+              <p className="text-xs text-slate-500">선택 즉시 AI 4대 투자 포인트, 5대 본문 단락, 재무 대사표 및 PDF 원문 뷰어가 활성화됩니다.</p>
             </div>
           )}
         </div>
       </div>
+
+      {/* 심층 분석 전용 앱 내부 캔버스 PDF 원문 뷰어 모달 */}
+      {showPdfViewerModal && selectedReport && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-150 print:hidden"
+          onClick={() => {
+            setIsPdfModalFullscreen(false);
+            setShowPdfViewerModal(false);
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`bg-slate-900 border border-slate-700 rounded-2xl w-full shadow-2xl overflow-y-auto transition-opacity duration-150 ${
+              isPdfModalFullscreen
+                ? 'max-w-[96vw] w-[96vw] max-h-[95vh] p-5 space-y-4'
+                : 'max-w-5xl max-h-[92vh] p-6 space-y-4'
+            }`}
+          >
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-4">
+              <div>
+                <div className="flex items-center gap-2 text-xs text-slate-300 mb-1">
+                  <span className="font-bold text-indigo-300">{selectedReport.brokerName}</span>
+                  <span aria-hidden="true" className="text-slate-600">·</span>
+                  <span className="font-semibold text-emerald-300 font-mono tabular-nums">
+                    {selectedReport.stockName} ({selectedReport.stockCode})
+                  </span>
+                  <span aria-hidden="true" className="text-slate-600">·</span>
+                  <span className="font-mono tabular-nums text-cyan-300">
+                    발간일 {selectedReport.publishDate}
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
+                  {selectedReport.reportTitle}
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {(() => {
+                  const naverBtn = getNaverLinkButtonMeta(
+                    naverLinkInfo,
+                    selectedReport.stockName,
+                    selectedReport.brokerName
+                  );
+                  return (
+                    <a
+                      href={naverLinkInfo.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${naverBtn.colorClass}`}
+                      title={naverBtn.tooltip}
+                    >
+                      <ExternalLink size={12} />
+                      <span>{naverBtn.label}</span>
+                    </a>
+                  );
+                })()}
+                <button
+                  type="button"
+                  onClick={() => setIsPdfModalFullscreen((prev) => !prev)}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                  title={isPdfModalFullscreen ? '기본 모달 크기로 축소' : '모달 전체화면으로 확대 보기'}
+                >
+                  {isPdfModalFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+                  <span>{isPdfModalFullscreen ? '기본 크기로 축소' : '모달 전체화면 확대'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDirectDownload(selectedReport)}
+                  disabled={downloadingPdf}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 text-white text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  {downloadDone ? <Check size={12} /> : <Download size={12} />}
+                  <span>
+                    {downloadingPdf
+                      ? '다운로드 중...'
+                      : downloadDone
+                      ? '저장 완료'
+                      : 'PDF 즉시 다운로드'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPdfModalFullscreen(false);
+                    setShowPdfViewerModal(false);
+                  }}
+                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                  title="닫기 (ESC)"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <CanvasPdfViewer
+              streamUrl={getInlinePdfUrl(selectedReport)}
+              title={`${selectedReport.stockName} (${selectedReport.stockCode}) — ${selectedReport.brokerName}`}
+              isFullscreen={isPdfModalFullscreen}
+              onToggleFullscreen={() => setIsPdfModalFullscreen((prev) => !prev)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

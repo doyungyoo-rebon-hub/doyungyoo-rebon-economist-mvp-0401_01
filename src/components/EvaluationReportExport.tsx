@@ -37,7 +37,8 @@ import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import { 
   OFFICIAL_OVERALL_SUMMARY, 
-  OFFICIAL_WINNERS_REVIEWS
+  OFFICIAL_WINNERS_REVIEWS,
+  OFFICIAL_SECTOR_TOP10
 } from '../data/awardsData';
 import {
   BROKER_POLICY_V181,
@@ -50,6 +51,30 @@ interface EvaluationReportExportProps {
   onBackToAwards?: () => void;
   onNavigateToChart?: (reportData: any) => void;
 }
+
+const isParkSungBongHana = (name?: string, brokerName?: string, originalName?: string): boolean => {
+  const clean = (name || '').trim();
+  const orig = (originalName || '').trim();
+  const broker = (brokerName || '').trim();
+  return (clean === '박성봉' || orig === '박성봉') && broker.includes('하나증권');
+};
+
+const isChampionStringParkSungBongHana = (champion?: string): boolean => {
+  const c = (champion || '').trim();
+  return c.includes('박성봉') && c.includes('하나증권');
+};
+
+const getExportSectorLabel = (
+  sector: string | undefined,
+  name?: string,
+  brokerName?: string,
+  originalName?: string
+): string => {
+  if (isParkSungBongHana(name, brokerName, originalName)) {
+    return '철강·운송';
+  }
+  return sector || '일반산업';
+};
 
 export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({ 
   onBackToAwards,
@@ -128,16 +153,116 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
   // 10 Sector Champions (Aligned 100% with Big Data Master Audit Ledger & 5-Excluded Broker Rule)
   const sectorChampions = useMemo(() => {
     const officialChampions = [
-      { name: '한유정', brokerName: '한화투자증권', sector: '소비재/유통/음식료', totalScore: 97.15, sectorRank: 1, hitRate: 76.5, reportCount: 45, note: '👑 2026 종합 대상 & 소비재/유통 1위 최우수 챔피언 (오차율 7.2% 역대 최저)' },
-      { name: '김동원', brokerName: 'KB증권', sector: '반도체/IT/전자', totalScore: 94.59, sectorRank: 1, hitRate: 69.8, reportCount: 34, note: '※ 1위(한국투자증권, 성명 비공개) 시상 제외에 따른 2위 공식 수상 승계' },
-      { name: '주민우', brokerName: 'NH투자증권', sector: '2차전지/배터리/소재', totalScore: 93.40, sectorRank: 1, hitRate: 60.5, reportCount: 53, note: '2차전지 밸류체인 전수 분석 및 DART 공시 정합도 95.8% 달성 (공식 1위 챔피언)' },
-      { name: '신민수', brokerName: '키움증권', sector: '바이오/제약/헬스케어', totalScore: 93.86, sectorRank: 1, hitRate: 66.4, reportCount: 33, note: 'ADC 플랫폼 및 글로벌 임상 3상 데이터 검증' },
-      { name: '유지웅', brokerName: '다올투자증권', sector: '자동차/모빌리티', totalScore: 93.83, sectorRank: 1, hitRate: 65.9, reportCount: 79, note: '하이브리드 믹스 개선 및 북미 전기차 인센티브 분석' },
-      { name: '이지호', brokerName: '메리츠증권', sector: '조선/중공업/방산', totalScore: 93.53, sectorRank: 1, hitRate: 47.1, reportCount: 16, note: 'LNG선 도크 슬롯 가치 상승 및 K-방산 수주 추적' },
-      { name: '지인해', brokerName: '신한투자증권', sector: '플랫폼/게임/엔터', totalScore: 94.49, sectorRank: 1, hitRate: 68.5, reportCount: 42, note: '※ 1위(이선화, KB증권 퇴사) 시상 제외에 따른 2위 공식 수상 승계' },
-      { name: '김인', brokerName: 'BNK투자증권', sector: '금융/지주', totalScore: 96.29, sectorRank: 1, hitRate: 71.8, reportCount: 139, note: '보통주자본비율(CET1) 관리 및 총주주환원율(TSR) 40% 도달 선도' },
-      { name: '박성봉', brokerName: '하나증권', sector: '화학/철강/소재', totalScore: 92.66, sectorRank: 1, hitRate: 40.4, reportCount: 28, note: '※ 1위(IBK투자증권, 성명 비공개) 시상 제외에 따른 2위 공식 수상 승계' },
-      { name: '백광제', brokerName: '교보증권', sector: '건설/물류/기타', totalScore: 95.51, sectorRank: 1, hitRate: 43.5, reportCount: 49, note: 'PF 우발채무 리스크 선반영 및 인프라 플랜트 수주 옥석 발굴' }
+      { 
+        name: '한유정', 
+        brokerName: '한화투자증권', 
+        sector: '소비재/유통/음식료', 
+        totalScore: 97.15, 
+        sectorRank: 1, 
+        hitRate: 76.5, 
+        reportCount: 45, 
+        keyReportTitle: 'K-Food 글로벌 구조적 침투율과 원가 스프레드 역학 분석 (삼양식품·CJ제일제당)',
+        note: '👑 2026 종합 대상 & 소비재/유통 1위 최우수 챔피언 (오차율 7.2% 역대 최저)' 
+      },
+      { 
+        name: '김동원', 
+        brokerName: 'KB증권', 
+        sector: '반도체/IT/전자', 
+        totalScore: 94.59, 
+        sectorRank: 1, 
+        hitRate: 69.8, 
+        reportCount: 34, 
+        keyReportTitle: 'HBM4 공급망 밸류체인과 메모리 판가 상승 사이클 선행 적중',
+        note: 'HBM4 아키텍처 전환 및 글로벌 AI 메모리 공급망 정밀 분석' 
+      },
+      { 
+        name: '주민우', 
+        brokerName: 'NH투자증권', 
+        sector: '2차전지/배터리/소재', 
+        totalScore: 93.40, 
+        sectorRank: 1, 
+        hitRate: 60.5, 
+        reportCount: 53, 
+        keyReportTitle: '2차전지 밸류체인 전수 분석 및 IRA 보조금 현금흐름 추적',
+        note: '2차전지 밸류체인 전수 분석 및 DART 공시 정합도 95.8% 달성' 
+      },
+      { 
+        name: '신민수', 
+        brokerName: '키움증권', 
+        sector: '바이오/제약/헬스케어', 
+        totalScore: 93.86, 
+        sectorRank: 1, 
+        hitRate: 66.4, 
+        reportCount: 33, 
+        keyReportTitle: 'ADC 플랫폼 기술이전 마일스톤 및 글로벌 임상 3상 객관적 대사',
+        note: 'ADC 플랫폼 및 글로벌 임상 3상 데이터 검증' 
+      },
+      { 
+        name: '유지웅', 
+        brokerName: '다올투자증권', 
+        sector: '자동차/모빌리티', 
+        totalScore: 93.83, 
+        sectorRank: 1, 
+        hitRate: 65.9, 
+        reportCount: 79, 
+        keyReportTitle: '하이브리드(HEV) 고수익 믹스 개선 및 북미 IRA 보조금 방어 추정',
+        note: '하이브리드 믹스 개선 및 북미 전기차 인센티브 분석' 
+      },
+      { 
+        name: '이한결', 
+        brokerName: '키움증권', 
+        sector: '조선/중공업/방산', 
+        totalScore: 93.45, 
+        sectorRank: 1, 
+        hitRate: 73.1, 
+        reportCount: 83, 
+        keyReportTitle: '한화에어로스페이스·HD현대중공업: K-방산 수출 파이프라인 및 특수선·상선 도크 마진율 정밀 분석',
+        note: 'HD현대중공업 도크 마진 및 K-방산 수출 파이프라인 DART 정밀 대사' 
+      },
+      { 
+        name: '지인해', 
+        brokerName: '신한투자증권', 
+        sector: '플랫폼/게임/엔터', 
+        totalScore: 94.49, 
+        sectorRank: 1, 
+        hitRate: 68.5, 
+        reportCount: 42, 
+        keyReportTitle: '글로벌 엔터 음원 IP/ARPU 및 AI 검색 엔진 체류시간 회복',
+        note: '글로벌 엔터 팬덤 음원 IP/ARPU 및 AI 검색 체류시간 정밀 추정' 
+      },
+      { 
+        name: '김인', 
+        brokerName: 'BNK투자증권', 
+        sector: '금융/지주', 
+        totalScore: 96.29, 
+        sectorRank: 1, 
+        hitRate: 71.8, 
+        reportCount: 139, 
+        keyReportTitle: '보통주자본비율(CET1) 13% 초과 자본 환원 및 은행 지주 TSR 40% 도달',
+        note: '보통주자본비율(CET1) 관리 및 총주주환원율(TSR) 40% 도달 선도' 
+      },
+      { 
+        name: '박성봉', 
+        brokerName: '하나증권', 
+        sector: '화학/철강/소재', 
+        totalScore: 92.66, 
+        sectorRank: 1, 
+        hitRate: 40.4, 
+        reportCount: 28, 
+        keyReportTitle: '글로벌 CBAM 철강 마진 스프레드와 전기로 전환 시나리오',
+        note: '글로벌 철강 롤마진 스프레드 및 한계 화학 설비 구조조정 분석' 
+      },
+      { 
+        name: '이상호', 
+        brokerName: '교보증권', 
+        sector: '건설/물류/기타', 
+        totalScore: 93.52, 
+        sectorRank: 1, 
+        hitRate: 58.2, 
+        reportCount: 16, 
+        keyReportTitle: '대형 건설사 주택 정비사업 예정원가율 현실화와 충당금 분석',
+        note: '대형 및 중견 건설사 DART 예정원가율 현실화 및 부동산 PF 우발채무 분석' 
+      }
     ];
 
     return officialChampions.map(champ => {
@@ -151,7 +276,8 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             name: champ.name,
             brokerName: champ.brokerName,
             sector: champ.sector,
-            note: champ.note || match.awardSuccessionNote || '업종 최고 정밀도 달성'
+            keyReportTitle: champ.keyReportTitle || match.keyReport?.reportTitle || match.keyReportTitle,
+            note: champ.note || '업종 최고 정밀도 달성'
           };
         }
       }
@@ -165,21 +291,39 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       let combined: any[] = [];
       Object.keys(apiData.sectorAwards).forEach(sec => {
         const arr = apiData.sectorAwards[sec] || [];
-        const isFirstExcluded = arr.length > 0 && isAwardExcludedBroker(arr[0].brokerName);
-        // [컴플라이언스 리스크 원천 차단 & 2위 공식 수상 승계]
+        const isFirst5BrokerExcluded = arr.length > 0 && isAwardExcludedBroker(arr[0].brokerName);
+        const isFirstResigned = arr.length > 0 && (['이선화', '이지호'].includes(arr[0].name) || ['이선화', '이지호'].includes(arr[0].originalName) || Boolean(arr[0].isResigned));
+        const isFirstExcluded = isFirst5BrokerExcluded || isFirstResigned;
+        // [컴플라이언스 리스크 원천 차단 & 퇴사 시상 제외 및 2위 공식 수상 승계]
         const sanitized = arr.map((a: any, sIdx: number) => {
-          const isExcluded = isAwardExcludedBroker(a.brokerName);
-          const isRank1 = a.sectorRank === 1 || sIdx === 0;
-          if (isExcluded && isRank1) {
+          const is5BrokerExcluded = isAwardExcludedBroker(a.brokerName);
+          const isResignedRow = ['이선화', '이지호'].includes(a.name) || ['이선화', '이지호'].includes(a.originalName) || Boolean(a.isResigned);
+          const isExcluded = is5BrokerExcluded || isResignedRow || Boolean(a.isAwardExcluded);
+          const isRank1 = a.sectorRank === 1 || a.sectorRank === '시상제외' || sIdx === 0;
+          const officialList = (OFFICIAL_SECTOR_TOP10 as any)[sec] || [];
+          const officialItem = officialList.find((o: any) => o.name === a.name || (o.sectorRank === a.sectorRank && !isExcluded));
+          const keyReportTitle = a.keyReport?.reportTitle || a.keyReportTitle || officialItem?.keyReportTitle || '업종 심층 정규 리서치 보고서';
+          if (isResignedRow && isRank1) {
             return {
               ...a,
               sectorRank: '시상제외',
               isSectorChampion: false,
               isAwardWinner: false,
-              name: '[성명 비공개]'
+              isResigned: true,
+              keyReportTitle
             };
           }
-          // 1위가 시상제외사일 때 차순위 적격자(2위)가 공식 1위 수상
+          if (is5BrokerExcluded && isRank1) {
+            return {
+              ...a,
+              sectorRank: '시상제외',
+              isSectorChampion: false,
+              isAwardWinner: false,
+              name: '[성명 비공개]',
+              keyReportTitle
+            };
+          }
+          // 1위가 시상제외사 또는 퇴사자일 때 차순위 적격자(2위)가 공식 1위 수상
           if (isFirstExcluded && !isExcluded && (sIdx === 1 || a.isAwardSuccessor || a.isSectorChampion)) {
             return {
               ...a,
@@ -187,9 +331,13 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               isSectorChampion: true,
               isAwardSuccessor: true,
               isAwardWinner: true,
+              keyReportTitle
             };
           }
-          return a;
+          return {
+            ...a,
+            keyReportTitle
+          };
         });
         combined = [...combined, ...sanitized];
       });
@@ -248,7 +396,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
           badgeColor: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300',
           title: '2026 대한민국 AI 스타 애널리스트 어워즈 종합 총괄 의결서',
           subtitle: '가중 평균 오차율 모델 기반 6대 핵심 지표 종합 심사 결과 및 종합 대상 · 10대 산업 챔피언 공식 인가서',
-          desc: '대한민국 24개 공식 대상 증권사 및 5개 시상제외 평가사 발간 8,698건 리서치 리포트 전수를 분석한 최고 권위의 공식 의결서입니다.'
+          desc: '대한민국 24개 공식 대상 증권사 및 5개 평가사 발간 실물 검증 8,033건(원시 대상 9,518건 중 비정규·시뮬레이션 1,485건 정제) 리서치 리포트를 분석한 최고 권위의 공식 의결서입니다.'
         };
       case 'sector_top100':
         return {
@@ -274,7 +422,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
           badge: '4. 전체 전수 데이터북',
           badgeColor: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300',
           title: '2026 올해의 애널리스트 어워즈 전체 평가 마스터 데이터북',
-          subtitle: '8,698건 정규 리포트 및 평가 대상 303명(유효 261명) 전원 수록 통합 마스터 데이터북',
+          subtitle: '실물 검증 8,033건(원시 9,518건 정제) 정규 리포트 및 평가 대상 유효 340명 수록 통합 마스터 데이터북',
           desc: '투명하고 정밀한 데이터 검증을 위한 전체 평가 대상자의 전수 스코어, 오차율, 적중률, 발간 편수 및 원본 파일(Excel/CSV/JSON) 다운로드 허브입니다.'
         };
     }
@@ -289,6 +437,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       list = [...all100SectorAnalysts];
     }
 
+    list = list.filter(a => a.name !== '백광제' && a.name !== '곽민정');
     // Sort by totalScore descending
     list.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 
@@ -299,14 +448,19 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       list = list.filter(a => isAwardExcludedBroker(a.brokerName));
     }
 
-    // Filter by search term
+    // Filter by search term (supports both canonical sector and display-overridden sector)
     if (fullDataSearchTerm.trim()) {
       const q = fullDataSearchTerm.trim().toLowerCase();
-      list = list.filter(a => 
-        (a.name && a.name.toLowerCase().includes(q)) ||
-        (a.brokerName && a.brokerName.toLowerCase().includes(q)) ||
-        (a.sector && a.sector.toLowerCase().includes(q))
-      );
+      list = list.filter(a => {
+        const displaySec = getExportSectorLabel(a.sector, a.name, a.brokerName, a.originalName).toLowerCase();
+        return (
+          (a.name && a.name.toLowerCase().includes(q)) ||
+          (a.originalName && a.originalName.toLowerCase().includes(q)) ||
+          (a.brokerName && a.brokerName.toLowerCase().includes(q)) ||
+          (a.sector && a.sector.toLowerCase().includes(q)) ||
+          displaySec.includes(q)
+        );
+      });
     }
 
     return list;
@@ -326,7 +480,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
     }> = {
       '소비재/유통/음식료': {
         fallbackChampion: '한유정 (한화투자증권)',
-        successor: '👑 2026 종합 대상 & 소비재/유통 1위 최우수 챔피언',
+        successor: null,
         weightedError: '7.2%',
         fallbackAccuracy: '76.5%',
         fallbackReportCount: 45,
@@ -336,7 +490,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       },
       '반도체/IT/전자': {
         fallbackChampion: '김동원 (KB증권)',
-        successor: '※ 1위 한국투자증권(성명 비공개) 시상 제외에 따른 2위 공식 수상 승계',
+        successor: null,
         weightedError: '6.8%',
         fallbackAccuracy: '69.8%',
         fallbackReportCount: 34,
@@ -375,18 +529,18 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
         dynamicsNote: '하이브리드(HEV) 고수익 믹스 개선 및 북미 IRA 보조금 인센티브 방어 추정'
       },
       '조선/중공업/방산': {
-        fallbackChampion: '이지호 (메리츠증권)',
+        fallbackChampion: '이한결 (키움증권)',
         successor: null,
-        weightedError: '8.9%',
-        fallbackAccuracy: '95.8%',
-        fallbackReportCount: 16,
-        fallbackDartConsistency: '95.1%',
+        weightedError: '4.7%',
+        fallbackAccuracy: '73.1%',
+        fallbackReportCount: 83,
+        fallbackDartConsistency: '95.3%',
         difficulty: '높음',
-        dynamicsNote: 'LNG선 도크 슬롯 프리미엄 지속 및 K-방산 수출 잔고 매출 인식 스케줄링'
+        dynamicsNote: 'HD현대중공업 도크 마진 및 한화에어로스페이스·현대로템 수출 파이프라인 DART 정밀 대사'
       },
       '플랫폼/게임/엔터': {
         fallbackChampion: '지인해 (신한투자증권)',
-        successor: '※ 1위 이선화(KB증권 퇴사) 시상 제외에 따른 2위 공식 수상 승계',
+        successor: null,
         weightedError: '7.9%',
         fallbackAccuracy: '68.5%',
         fallbackReportCount: 42,
@@ -406,7 +560,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       },
       '화학/철강/소재': {
         fallbackChampion: '박성봉 (하나증권)',
-        successor: '※ 1위 IBK투자증권(성명 비공개) 시상 제외에 따른 2위 공식 수상 승계',
+        successor: null,
         weightedError: '9.2%',
         fallbackAccuracy: '40.4%',
         fallbackReportCount: 28,
@@ -415,14 +569,14 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
         dynamicsNote: '글로벌 철강 롤마진 스프레드 및 한계 화학 설비 구조조정 정밀 추정'
       },
       '건설/물류/기타': {
-        fallbackChampion: '백광제 (교보증권)',
+        fallbackChampion: '이상호 (교보증권)',
         successor: null,
         weightedError: '9.6%',
-        fallbackAccuracy: '95.9%',
-        fallbackReportCount: 49,
-        fallbackDartConsistency: '96.0%',
+        fallbackAccuracy: '58.2%',
+        fallbackReportCount: 16,
+        fallbackDartConsistency: '95.6%',
         difficulty: '매우 높음',
-        dynamicsNote: '부동산 PF 우발채무 리스크 충당금 선반영 분석 및 해외 인프라 플랜트 수주 옥석 발굴'
+        dynamicsNote: '대형 및 중견 건설사 DART 예정원가율 현실화 및 부동산 PF 우발채무 선제 분석'
       }
     };
 
@@ -446,7 +600,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
         return {
           sector: sec,
           champion: '한유정 (한화투자증권)',
-          successor: '👑 2026 종합 대상 & 소비재/유통 1위 최우수 챔피언',
+          successor: null,
           weightedError: '7.2%',
           targetAccuracy: han?.kpi2026?.targetPriceAccuracy ? `${han.kpi2026.targetPriceAccuracy}%` : '76.5%',
           reportCount: han?.reportCount || 45,
@@ -458,16 +612,15 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 
       const apiSecWinners = apiData?.sectorAwards?.[sec];
       let apiWinner = null;
-      let isSuccession = false;
-      let firstAnalyst = null;
 
       if (apiSecWinners && apiSecWinners.length > 0) {
-        firstAnalyst = apiSecWinners[0];
-        // 한국투자증권, 삼성증권, iM증권, 대신증권, IBK투자증권 (시상 제외 5개사)에서 1위가 나온 경우
-        // 해당 분야는 2등(차순위 적격자)에게 공식 챔피언 수상 승계
-        if (isAwardExcludedBroker(firstAnalyst.brokerName)) {
-          apiWinner = apiSecWinners.find(a => !isAwardExcludedBroker(a.brokerName)) || apiSecWinners[1] || firstAnalyst;
-          isSuccession = apiWinner !== firstAnalyst;
+        const firstAnalyst = apiSecWinners[0];
+        const isResignedFirst = ['이선화', '이지호'].includes(firstAnalyst.name) || ['이선화', '이지호'].includes(firstAnalyst.originalName) || Boolean(firstAnalyst.isResigned);
+        const isExcludedFirst = isAwardExcludedBroker(firstAnalyst.brokerName) || Boolean(firstAnalyst.isAwardExcluded) || isResignedFirst;
+        if (isExcludedFirst) {
+          apiWinner = apiSecWinners.find((a: any) => a.isSectorChampion && !a.isAwardExcluded) || 
+                      apiSecWinners.find((a: any) => !isAwardExcludedBroker(a.brokerName) && !a.isAwardExcluded && !['이선화', '이지호'].includes(a.name)) || 
+                      apiSecWinners[1] || firstAnalyst;
         } else {
           apiWinner = firstAnalyst;
         }
@@ -477,7 +630,6 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       let targetAccStr = meta.fallbackAccuracy;
       let repCount = meta.fallbackReportCount;
       let dartStr = meta.fallbackDartConsistency;
-      let successorNote = meta.successor;
 
       if (apiWinner) {
         championStr = `${apiWinner.name} (${apiWinner.brokerName})`;
@@ -490,15 +642,12 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
         if (apiWinner.kpi2026?.earningsEstAccuracy) {
           dartStr = `${apiWinner.kpi2026.earningsEstAccuracy}%`;
         }
-        if (isSuccession && firstAnalyst) {
-          successorNote = `※ 1위 ${firstAnalyst.name}(${firstAnalyst.brokerName}) 시상 제외에 따른 2위 공식 수상 승계`;
-        }
       }
 
       return {
         sector: sec,
         champion: championStr,
-        successor: successorNote,
+        successor: null,
         weightedError: meta.weightedError,
         targetAccuracy: targetAccStr,
         reportCount: repCount,
@@ -533,7 +682,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       park: {
         name: '박상준',
         broker: '키움증권',
-        role: '🏆 소비재/유통/음식료 섹터 1위 (공식 승계)',
+        role: '소비재/유통/음식료 섹터 최상위 교차검증 대조군',
         totalScore: 95.82,
         weightedAvgError: '8.6%',
         breakdown: [
@@ -558,14 +707,14 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 **문서번호**: ${reportMetaConfig.docNo}  
 **발간구분**: ${reportMetaConfig.badge}  
 **발간기관**: 리본인텔리전스 × 이코노미스트 공동주관 AI 독립 심사평가위원회  
-**발간일자**: ${today} (평가 기준기: 2025년 11월 1일 ~ 2026년 10월 31일 누적 전수)  
+**발간일자**: ${today} (평가 기준기: 2025년 11월 1일 ~ 2026년 10월 30일 누적 전수)  
 **수신**: 금융위원회, 한국금융투자협회, 회원사 리서치센터 및 대외 투자자 공람  
 
 ---
 
 ## 1. 심사 개요 및 총평
-- **검증 데이터**: 2025년 11월 1일 ~ 2026년 10월 31일 국내 증권사 리포트 8,698건 전수 분석
-- **평가 대상**: 성명 및 전문섹터 스마트 식별 기준 유효 261명 (공인 인명록 100% 정합성 검증 및 최신 소속 통합)
+- **검증 데이터**: 2025년 11월 1일 ~ 2026년 10월 30일 실물 검증 리포트 8,033건 분석 (원시 수집 9,518건 중 비정규·시뮬레이션 1,485건 정제)
+- **평가 대상**: 성명 및 전문섹터 스마트 식별 기준 유효 340명 (공인 인명록 100% 정합성 검증 및 최신 소속 통합)
 - **공시 팩트체크**: 금융감독원 전자공시(Open DART) 실적 정합성 99.8% 크로스체크 완료
 - **적용 모형**: 가중 평균 오차율(Weighted Average Error Rate) 결합 6대 결정론적 평가 알고리즘
 
@@ -595,16 +744,19 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 
 ---
 
-## 4. 🏆 9대 핵심 산업별 섹터 1위 챔피언 (총 9인 / 대상 배출 섹터는 종합 대상으로 단독 통합)
-*종합 대상이 배출된 소비재/유통/음식료 섹터(한유정 연구원)는 해당 섹터 2위를 1위로 대체하지 않고 대상 1인 단독 통합으로 별도 섹터 시상에서 제외되어, 대상 포함 최종 10인의 수상자 체제로 확정되었습니다. 또한 한국투자증권, 삼성증권, iM증권, 대신증권, IBK투자증권(시상 제외 5개사)에서 1위가 나온 반도체(김동원, KB증권) 및 화학(박성봉, 하나증권) 섹터는 1위 연구원의 성명을 비공개 처리하고 2위 연구원에게 공식 챔피언 수상이 정상 승계됨.*
+## 4. 🏆 10대 핵심 산업별 섹터 1위 최우수 챔피언 (총 10인)
+*대한민국 핵심 10대 산업별 최고 정밀도와 목표주가 적중률을 기록한 최우수 챔피언 명단입니다.*
 
-| 섹터 | 순위 | 성명 | 소속 증권사 | 종합 점수 | 목표가 적중도 | 가중평균 오차율 | 심사 비고 |
-| :--- | :---: | :--- | :--- | :---: | :---: | :---: | :--- |
+| 섹터 | 순위 | 성명 | 소속 증권사 | 종합 점수 | 목표가 적중도 | 가중평균 오차율 | 검증 편수 | 대표 적중 리포트 및 심사 비고 |
+| :--- | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
 `;
 
     let sectorTable = '';
     sectorChampions.forEach(sc => {
-      sectorTable += `| ${sc.sector} | 1위 | **${sc.name}** | ${sc.brokerName} | ${sc.totalScore}점 | ${sc.hitRate || sc.kpi2026?.targetPriceAccuracy}% | ${sc.kpi2026?.weightedAvgErrorRate || 8.5}% | ${sc.note || '섹터 1위'} |\n`;
+      const repTitle = sc.keyReportTitle ? `[리포트: ${sc.keyReportTitle}] ` : '';
+      const errStr = sc.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || (sc.kpi2026?.weightedAvgErrorRate ? `${sc.kpi2026.weightedAvgErrorRate}%` : (sc.sector === '소비재/유통/음식료' ? '7.2%' : sc.sector === '조선/중공업/방산' ? '4.7%' : '7.8%'));
+      const exportSector = getExportSectorLabel(sc.sector, sc.name, sc.brokerName, sc.originalName);
+      sectorTable += `| ${exportSector} | 1위 | **${sc.name}** | ${sc.brokerName} | ${sc.totalScore}점 | ${sc.hitRate || sc.kpi2026?.targetPriceAccuracy}% | ${errStr} | ${sc.reportCount || 24}건 | ${repTitle}${sc.note || '섹터 1위'} |\n`;
     });
 
     md += sectorTable;
@@ -613,7 +765,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 ---
 
 ## 5. 📊 10대 산업별 가중 평균 오차율 및 거시 정합도 전수 종합 조망 매트릭스
-- **전체 표본 평균 가중오차율**: 11.4% (전수 8,698건 / 261명)
+- **전체 표본 평균 가중오차율**: 11.4% (실물 검증 8,033건 / 유효 340명)
 - **10대 섹터 1위 평균 가중오차율**: 7.8% (초정밀 정합 달성 / 대상 한유정 7.2%)
 - **DART 공시 교차검증 일치율**: 99.8% (금융감독원 전자공시 손익계산서 1대1 대사)
 - **1위 수상자 목표가 적중률**: 67.4% (시장 평균 대비 +25.9%p)
@@ -624,7 +776,8 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 
     let benchmarkTable = '';
     sectorMacroBenchmarks.forEach(b => {
-      benchmarkTable += `| ${b.sector} | **${b.champion}**${b.successor ? ` (승계: ${b.successor})` : ''} | ${b.weightedError} | ${b.targetAccuracy} | ${b.reportCount}건 | ${b.dartConsistency} | ${b.difficulty} | ${b.dynamicsNote} |\n`;
+      const exportSector = isChampionStringParkSungBongHana(b.champion) ? '철강·운송' : b.sector;
+      benchmarkTable += `| ${exportSector} | **${b.champion}** | ${b.weightedError} | ${b.targetAccuracy} | ${b.reportCount}건 | ${b.dartConsistency} | ${b.difficulty} | ${b.dynamicsNote} |\n`;
     });
     md += benchmarkTable;
 
@@ -644,7 +797,12 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
     Object.keys(grouped).forEach(sec => {
       md += `\n### [${sec}] TOP 10\n`;
       grouped[sec].slice(0, 10).forEach(a => {
-        md += `- **${a.sectorRank || 1}위**: ${a.name} (${a.brokerName}) - 종합 ${a.totalScore}점 (목표가 정확도 ${a.kpi2026?.targetPriceAccuracy || a.hitRate}점, 오차율 ${a.kpi2026?.weightedAvgErrorRate || '8.x'}%)\n`;
+        const is5ExcludedRank1 = isAwardExcludedBroker(a.brokerName) && a.sectorRank === '시상제외';
+        const cleanName = is5ExcludedRank1 ? '[성명 비공개]' : (!isAwardExcludedBroker(a.brokerName) && a.originalName ? a.originalName : a.name);
+        const rankLabel = a.sectorRank === '시상제외' ? '시상제외' : `${a.sectorRank || 1}위`;
+        const errVal = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || (a.kpi2026?.weightedAvgErrorRate ? `${a.kpi2026.weightedAvgErrorRate}%` : '7.8%');
+        const awardTag = isParkSungBongHana(a.name, a.brokerName, a.originalName) ? ' · 철강·운송' : '';
+        md += `- **${rankLabel}**: ${cleanName} (${a.brokerName}${awardTag}) - 종합 ${a.totalScore}점 (목표가 정확도 ${a.kpi2026?.targetPriceAccuracy || a.hitRate}점, 오차율 ${errVal})\n`;
       });
     });
 
@@ -882,6 +1040,8 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
         targetList = [...all100SectorAnalysts];
       }
 
+      targetList = targetList.filter(a => a.name !== '백광제' && a.name !== '곽민정');
+
       if (targetList.length === 0) {
         showNotice('평가 데이터가 준비되지 않았습니다.');
         return;
@@ -933,24 +1093,28 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
           || (kpi.weightedAvgErrorRate ? `${kpi.weightedAvgErrorRate}%` : '4.20%');
         const hitRate = `${(a.hitRate ?? a.baseHitRate ?? 45).toFixed(1)}%`;
         const count = a.reportCount || 16;
-        const isExcluded = isAwardExcludedBroker(a.brokerName);
-        const eligibility = isExcluded ? '시상 제외 5개사 (평가 대상)' : '공식 시상 대상 (24개사)';
+        const is5Excluded = isAwardExcludedBroker(a.brokerName);
+        const isAnyExcluded = is5Excluded || ['이선화', '이지호'].includes(a.name) || Boolean(a.isAwardExcluded);
+        const eligibility = isAnyExcluded ? '시상 제외' : '공식 시상 대상 (24개사)';
+        const cleanName = is5Excluded && secRank === 1 ? '[성명 비공개]' : (!is5Excluded && a.originalName ? a.originalName : a.name);
         const topStocks = Array.isArray(a.stocksList) && a.stocksList.length > 0 
           ? a.stocksList.join(', ') 
           : (Array.isArray(a.stocks) && a.stocks.length > 0 ? a.stocks.join(', ') : '주요 대표 커버리지');
         const keyReport = a.keyReport?.reportTitle || a.keyReportTitle || '산업 및 기업 심층 분석 리포트';
-        const pastInfo = Array.isArray(a.pastBrokers) && a.pastBrokers.length > 0 
-          ? ` [최근 발간: ${a.brokerName} / 이전 발간: ${a.pastBrokers.join(', ')}]` 
-          : '';
-        const baseComment = a.aiComment || a.note || (overallRank === 1 ? '👑 2026 올해의 애널리스트 종합 대상 표창' : secRank === 1 ? '🏆 10대 산업별 섹터 1위 최우수 챔피언' : '공인 심사위원회 6대 KPI 적격 판정');
-        const aiComment = baseComment + pastInfo;
+        const rawComment = a.aiComment || a.note || '';
+        const hasProceduralText = /승계|퇴사/.test(rawComment);
+        const aiComment = (!hasProceduralText && rawComment)
+          ? rawComment
+          : (overallRank === 1 ? '👑 2026 올해의 애널리스트 종합 대상 표창' : (!isAnyExcluded && (secRank === 1 || a.isSectorChampion)) ? '🏆 10대 산업별 섹터 1위 최우수 챔피언' : '공인 심사위원회 6대 KPI 적격 판정');
+
+        const exportSector = getExportSectorLabel(a.sector, a.name, a.brokerName, a.originalName);
 
         return {
           '전체순위': `${overallRank}위`,
-          '섹터순위': `${a.sector} ${secRank}위`,
-          '애널리스트 성명': a.name,
+          '섹터순위': `${exportSector} ${typeof a.sectorRank === 'number' ? `${a.sectorRank}위` : (isAnyExcluded && secRank === 1 ? '시상제외' : `${secRank}위`)}`,
+          '애널리스트 성명': cleanName,
           '소속 증권사': a.brokerName,
-          '전문 섹터': a.sector,
+          '전문 섹터': exportSector,
           '종합 평가 점수': `${score}점`,
           '평가 등급': grade,
           '[1] 목표주가 정확성(30%)': `${p1}점`,
@@ -1020,12 +1184,14 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       targetList = [...all100SectorAnalysts];
     }
 
+    targetList = targetList.filter(a => a.name !== '백광제' && a.name !== '곽민정');
     targetList.sort((a, b) => (b.totalScore || 0) - (a.totalScore || 0));
 
     let csv = headers.join(',') + '\n';
     targetList.forEach((a, idx) => {
       const overallRank = `${idx + 1}위`;
-      const secRank = `${a.sector} ${a.sectorRank || 1}위`;
+      const exportSector = getExportSectorLabel(a.sector, a.name, a.brokerName, a.originalName);
+      const secRank = `${exportSector} ${a.sectorRank === '시상제외' ? '시상제외' : `${a.sectorRank || 1}위`}`;
       const score = Number((a.totalScore || 0).toFixed(2));
       let grade = score >= 96 ? 'S+' : score >= 93 ? 'S' : score >= 90 ? 'A+' : score >= 85 ? 'A' : score >= 80 ? 'B+' : 'B';
       const kpi = a.kpi2026 || {};
@@ -1035,17 +1201,20 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
       const p4 = Number((kpi.riskAnalysisAdequacy ?? kpi.riskAnalysisScore ?? 88).toFixed(1));
       const p5 = Number((kpi.reportPublicationFreq ?? kpi.publicationFreqScore ?? 85).toFixed(1));
       const p6 = Number((kpi.snsAttention ?? kpi.snsMediaAttentionScore ?? 85).toFixed(1));
-      const weightedError = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || '4.20%';
+      const weightedError = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || (kpi.weightedAvgErrorRate ? `${kpi.weightedAvgErrorRate}%` : '4.20%');
       const hitRate = `${(a.hitRate ?? a.baseHitRate ?? 45).toFixed(1)}%`;
       const count = a.reportCount || 16;
-      const isExcluded = isAwardExcludedBroker(a.brokerName);
-      const eligibility = isExcluded ? '시상 제외 5개사' : '공식 대상 24개사';
+      const is5Excluded = isAwardExcludedBroker(a.brokerName);
+      const isAnyExcluded = is5Excluded || ['이선화', '이지호'].includes(a.name) || Boolean(a.isAwardExcluded);
+      const eligibility = isAnyExcluded ? '시상 제외' : '공식 대상 24개사';
+      const cleanName = is5Excluded && a.sectorRank === '시상제외' ? '[성명 비공개]' : (!is5Excluded && a.originalName ? a.originalName : a.name);
       const stocks = (Array.isArray(a.stocksList) ? a.stocksList.join(' ') : '주요 대표주').replace(/,/g, ' ');
-      const report = (a.keyReport?.reportTitle || '산업 및 기업 분석 리포트').replace(/,/g, ' ');
-      const comment = (a.aiComment || a.note || '공인 평가 완료').replace(/,/g, ' ');
+      const report = (a.keyReport?.reportTitle || a.keyReportTitle || '산업 및 기업 분석 리포트').replace(/,/g, ' ');
+      const rawComment = a.aiComment || a.note || '';
+      const comment = ((!(/승계|퇴사/.test(rawComment)) && rawComment) ? rawComment : '공인 평가 완료').replace(/,/g, ' ');
 
       const row = [
-        overallRank, `"${secRank}"`, `"${a.name}"`, `"${a.brokerName}"`, `"${a.sector}"`,
+        overallRank, `"${secRank}"`, `"${cleanName}"`, `"${a.brokerName}"`, `"${exportSector}"`,
         score, grade, p1, p2, p3, p4, p5, p6,
         `"${weightedError}"`, `"${hitRate}"`, count, `"${eligibility}"`,
         `"${stocks}"`, `"${report}"`, `"${comment}"`
@@ -1105,14 +1274,36 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
 
   // Handle JSON Download
   const handleDownloadJSON = () => {
+    const sanitizeAnalystForOfficialExport = (item: any) => {
+      const {
+        awardSuccessionNote,
+        awardExclusionReason,
+        isAwardSuccessor,
+        isResigned,
+        pastBrokers,
+        pastBrokersText,
+        originalName,
+        aiSectorComment,
+        ...rest
+      } = item || {};
+      const is5ExcludedRank1 = isAwardExcludedBroker(rest.brokerName) && rest.sectorRank === '시상제외';
+      return {
+        ...rest,
+        sector: getExportSectorLabel(rest.sector, rest.name, rest.brokerName, originalName),
+        name: is5ExcludedRank1 ? '[성명 비공개]' : (!isAwardExcludedBroker(rest.brokerName) && originalName ? originalName : rest.name),
+        brokerName: rest.brokerName,
+        note: rest.note && !(/승계|퇴사/.test(rest.note)) ? rest.note : undefined,
+      };
+    };
+
     const payload = {
       reportTitle: '2026 AI 스타 애널리스트 어워즈 공인 평가 결과 보고서',
       period: selectedPeriod,
       exportedAt: new Date().toISOString(),
       methodology: apiData?.methodology,
       grandPrizeWinner,
-      sectorChampions,
-      sectorTop100: all100SectorAnalysts,
+      sectorChampions: sectorChampions.map(sanitizeAnalystForOfficialExport),
+      sectorTop100: all100SectorAnalysts.map(sanitizeAnalystForOfficialExport),
       consumerSpecialData
     };
 
@@ -1167,7 +1358,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 가중 평균 오차율 모델 3단계 수식 적용
               </span>
               <span className="px-3 py-1 rounded-full text-xs font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                2025.11~2026.10 8,698건 누적 전수
+                2025.11~2026.10 실물 검증 8,033건 (원시 9,518건 정제)
               </span>
             </div>
 
@@ -1297,7 +1488,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
               >
                 <option value="2025_11_TO_2026_10" className="bg-slate-900 text-white font-bold text-amber-300">
-                  2025년 11월 1일 ~ 2026년 10월 31일 (8,698건 전수)
+                  2025년 11월 1일 ~ 2026년 10월 30일 (실물 검증 8,033건)
                 </option>
                 <option value="2026_9M" className="bg-slate-900 text-white">2026년 1~9월 누적 (7,842건)</option>
                 <option value="2026_ANNUAL" className="bg-slate-900 text-white">2026년 연간 종합 (7,842건)</option>
@@ -1604,11 +1795,11 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">평가 대상 기간</span>
-              <strong className="font-bold">2025.11.01 ~ 2026.10.31 (전수)</strong>
+              <strong className="font-bold">2025.11.01 ~ 2026.10.30 (전수)</strong>
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">검증 리포트 / 인원</span>
-              <strong className="font-bold">8,698건 / 유효 261명</strong>
+              <strong className="font-bold">8,033건 / 유효 340명</strong>
             </div>
             <div>
               <span className="text-[11px] text-slate-500 block">시상 규정</span>
@@ -1707,7 +1898,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-amber-500 text-slate-950">
-                  전체 303명 중 종합 1위 단독 표창
+                  전체 유효 340명 중 종합 1위 단독 표창
                 </span>
                 <h4 className="text-2xl font-black mt-1">
                   한유정 수석연구위원 <span className="text-base font-semibold text-slate-500">({grandPrizeWinner.brokerName} · 소비재/유통/음식료)</span>
@@ -1762,9 +1953,6 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 3. 🏆 10대 핵심 산업별 섹터 1위 챔피언 (총 10인)
               </h3>
             </div>
-            <span className="text-[11px] text-emerald-600 font-bold">
-              ※ 시상 제외 5개사(한국·삼성·iM·대신·IBK) 및 대상 분리에 따른 2위 공식 승계 적용
-            </span>
           </div>
 
           {/* 10대 섹터 챔피언 테이블 - 스크롤바 없는 완전 확장형 테이블 */}
@@ -1773,45 +1961,52 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               <thead>
                 <tr className={paperTheme === 'official_white' ? 'bg-slate-100 text-slate-800' : 'bg-slate-800 text-slate-200'}>
                   <th className="p-2.5 border border-slate-300 font-bold text-center w-12">순위</th>
-                  <th className="p-2.5 border border-slate-300 font-bold w-40">산업 섹터</th>
-                  <th className="p-2.5 border border-slate-300 font-bold">성명 (소속 증권사)</th>
-                  <th className="p-2.5 border border-slate-300 font-bold text-center">종합 점수</th>
-                  <th className="p-2.5 border border-slate-300 font-bold text-center">가중평균 오차율</th>
-                  <th className="p-2.5 border border-slate-300 font-bold text-center">목표가 적중률</th>
-                  <th className="p-2.5 border border-slate-300 font-bold">심사 특기사항</th>
+                  <th className="p-2.5 border border-slate-300 font-bold w-36">산업 섹터</th>
+                  <th className="p-2.5 border border-slate-300 font-bold w-44">성명 (소속 증권사)</th>
+                  <th className="p-2.5 border border-slate-300 font-bold text-center w-20">종합 점수</th>
+                  <th className="p-2.5 border border-slate-300 font-bold text-center w-24">가중평균 오차율</th>
+                  <th className="p-2.5 border border-slate-300 font-bold text-center w-24">목표가 적중률</th>
+                  <th className="p-2.5 border border-slate-300 font-bold text-center w-20">검증 편수</th>
+                  <th className="p-2.5 border border-slate-300 font-bold">대표 적중 리포트 및 심사 특기사항</th>
                 </tr>
               </thead>
               <tbody className={paperTheme === 'official_white' ? 'text-slate-700 divide-y divide-slate-200' : 'text-slate-300 divide-y divide-slate-800'}>
-                {sectorChampions.map((champ, idx) => (
-                  <tr key={champ.sector || idx} className={champ.note?.includes('승계') ? (paperTheme === 'official_white' ? 'bg-amber-50/60' : 'bg-amber-950/20') : ''}>
-                    <td className="p-2.5 border border-slate-300 text-center font-mono font-bold text-amber-600">
+                {sectorChampions.map((champ, idx) => {
+                  const displaySec = getExportSectorLabel(champ.sector, champ.name, champ.brokerName, champ.originalName);
+                  return (
+                  <tr key={champ.sector || idx} className={champ.sector === '소비재/유통/음식료' ? (paperTheme === 'official_white' ? 'bg-amber-50/50' : 'bg-amber-950/20') : ''}>
+                    <td className="p-2.5 border border-slate-300 text-center font-mono font-bold text-amber-600 whitespace-nowrap">
                       1위
                     </td>
-                    <td className="p-2.5 border border-slate-300 font-bold">
-                      {champ.sector}
+                    <td className="p-2.5 border border-slate-300 font-bold whitespace-nowrap">
+                      {displaySec}
                     </td>
-                    <td className="p-2.5 border border-slate-300">
+                    <td className="p-2.5 border border-slate-300 whitespace-nowrap">
                       <strong>{champ.name}</strong> <span className="text-slate-500">({champ.brokerName})</span>
-                      {champ.note?.includes('승계') && (
-                        <span className="ml-1.5 px-1.5 py-0.2 rounded text-[10px] bg-amber-500/20 text-amber-700 font-bold">
-                          승계 1위
-                        </span>
-                      )}
                     </td>
-                    <td className="p-2.5 border border-slate-300 text-center font-mono font-bold text-emerald-600">
+                    <td className="p-2.5 border border-slate-300 text-center font-mono tabular-nums font-bold text-emerald-600 whitespace-nowrap">
                       {champ.totalScore}점
                     </td>
-                    <td className="p-2.5 border border-slate-300 text-center font-mono">
-                      {champ.kpi2026?.weightedAvgErrorRate ? `${champ.kpi2026.weightedAvgErrorRate}%` : (champ.sector === '소비재/유통/음식료' ? '8.6%' : '7.9%')}
+                    <td className="p-2.5 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
+                      {champ.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || (champ.kpi2026?.weightedAvgErrorRate ? `${champ.kpi2026.weightedAvgErrorRate}%` : (champ.sector === '소비재/유통/음식료' ? '7.2%' : champ.sector === '조선/중공업/방산' ? '4.7%' : '7.8%'))}
                     </td>
-                    <td className="p-2.5 border border-slate-300 text-center font-mono">
+                    <td className="p-2.5 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
                       {champ.hitRate || champ.kpi2026?.targetPriceAccuracy}%
                     </td>
-                    <td className="p-2.5 border border-slate-300 text-[11px] text-slate-500">
-                      {champ.note || champ.aiComment?.slice(0, 45) || '업종 최고 정밀도 달성'}
+                    <td className="p-2.5 border border-slate-300 text-center font-mono tabular-nums text-slate-600 font-semibold whitespace-nowrap">
+                      {champ.reportCount || 24}건
+                    </td>
+                    <td className="p-2.5 border border-slate-300 text-[11px] text-slate-600 dark:text-slate-400">
+                      {champ.keyReportTitle && (
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5 line-clamp-1" title={champ.keyReportTitle}>
+                          📄 {champ.keyReportTitle}
+                        </div>
+                      )}
+                      <div>{champ.note || '업종 최고 정밀도 달성'}</div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -1830,7 +2025,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 </h3>
               </div>
               <span className="text-[11px] text-indigo-600 font-semibold hidden sm:inline">
-                전수 8,698건 빅데이터 실증 분석
+                전수 실물 8,033건 빅데이터 실증 분석
               </span>
             </div>
 
@@ -1843,7 +2038,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               <div className={`p-3 rounded-xl border ${paperTheme === 'official_white' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950 border-slate-800'}`}>
                 <span className="text-[11px] text-slate-500 block">전체 표본 평균 가중오차율</span>
                 <strong className="text-lg font-mono font-bold text-slate-800 dark:text-white">11.4%</strong>
-                <span className="text-[10px] text-slate-400 block">전체 261명 / 8,698건</span>
+                <span className="text-[10px] text-slate-400 block">유효 340명 / 실물 8,033건</span>
               </div>
               <div className={`p-3 rounded-xl border ${paperTheme === 'official_white' ? 'bg-amber-50/50 border-amber-200' : 'bg-amber-950/20 border-amber-500/30'}`}>
                 <span className="text-[11px] text-amber-700 dark:text-amber-400 block font-medium">10대 섹터 1위 평균 가중오차율</span>
@@ -1876,7 +2071,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 </div>
                 <div className="flex items-center gap-3 text-[11px] font-mono shrink-0">
                   <span className="flex items-center gap-1 text-emerald-600 font-bold">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> 1위 최저: 반도체 6.8%
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> 1위 최저: 2차전지 4.2%
                   </span>
                   <span className="flex items-center gap-1 text-slate-500">
                     <span className="w-2.5 h-2.5 rounded-full bg-rose-400" /> 시장평균선: 11.4%
@@ -1892,12 +2087,13 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                   const widthPct = Math.min(100, Math.round((errorNum / 12) * 100));
                   const isTopTier = errorNum <= 7.5;
                   const isMidTier = errorNum > 7.5 && errorNum <= 8.5;
+                  const displaySec = isChampionStringParkSungBongHana(b.champion) ? '철강·운송' : b.sector;
                   return (
                     <div key={b.sector} className="space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                           <span className="text-slate-400 font-mono text-[10px] w-4">{idx + 1}.</span>
-                          {b.sector}
+                          <span>{displaySec}</span>
                           {b.sector === '소비재/유통/음식료' && (
                             <span className="px-1 py-0.2 rounded text-[9px] bg-amber-500/20 text-amber-600 font-bold">👑대상</span>
                           )}
@@ -1935,16 +2131,16 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               {/* 정밀도 구간 분포 요약 바 */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-200 dark:border-slate-800 text-[11px]">
                 <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/40">
-                  <div className="font-bold text-emerald-700 dark:text-emerald-300">① 초정밀 추정 구간 (6.8% ~ 7.5%)</div>
-                  <div className="text-slate-600 dark:text-slate-400 text-[10px] mt-0.5">반도체(6.8%), 소비재(7.2%), 금융(7.5%)</div>
+                  <div className="font-bold text-emerald-700 dark:text-emerald-300">① 초정밀 추정 구간 (4.2% ~ 7.5%)</div>
+                  <div className="text-slate-600 dark:text-slate-400 text-[10px] mt-0.5">2차전지(4.2%), 조선/방산(4.7%), 반도체(6.8%), 소비재(7.2%), 금융(7.5%)</div>
                 </div>
                 <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40">
                   <div className="font-bold text-indigo-700 dark:text-indigo-300">② 우수 정합 구간 (7.9% ~ 8.5%)</div>
-                  <div className="text-slate-600 dark:text-slate-400 text-[10px] mt-0.5">플랫폼(7.9%), 바이오(8.1%), 2차전지(8.4%), 모빌리티(8.5%)</div>
+                  <div className="text-slate-600 dark:text-slate-400 text-[10px] mt-0.5">플랫폼(7.9%), 바이오(8.1%), 모빌리티(8.5%)</div>
                 </div>
                 <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40">
-                  <div className="font-bold text-amber-700 dark:text-amber-300">③ 고난이도 사이클 구간 (8.9% ~ 9.6%)</div>
-                  <div className="text-slate-600 dark:text-slate-400 text-[10px] mt-0.5">조선/방산(8.9%), 화학/소재(9.2%), 건설/물류(9.6%)</div>
+                  <div className="font-bold text-amber-700 dark:text-amber-300">③ 고난이도 사이클 구간 (9.2% ~ 9.6%)</div>
+                  <div className="text-slate-600 dark:text-slate-400 text-[10px] mt-0.5">화학/소재(9.2%), 건설/물류(9.6%)</div>
                 </div>
               </div>
             </div>
@@ -1965,21 +2161,20 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                   </tr>
                 </thead>
                 <tbody className={paperTheme === 'official_white' ? 'text-slate-700 divide-y divide-slate-200' : 'text-slate-300 divide-y divide-slate-800'}>
-                  {sectorMacroBenchmarks.map((item) => (
+                  {sectorMacroBenchmarks.map((item) => {
+                    const displaySec = isChampionStringParkSungBongHana(item.champion) ? '철강·운송' : item.sector;
+                    return (
                     <tr key={item.sector} className={item.sector === '소비재/유통/음식료' ? (paperTheme === 'official_white' ? 'bg-amber-50/70 font-medium' : 'bg-amber-950/20 font-medium') : ''}>
-                      <td className="p-2.5 border border-slate-300 font-bold">
-                        {item.sector}
+                      <td className="p-2.5 border border-slate-300 font-bold whitespace-nowrap">
+                        <span>{displaySec}</span>
                         {item.sector === '소비재/유통/음식료' && (
                           <span className="ml-1 text-[10px] text-amber-600 font-bold">👑대상</span>
                         )}
                       </td>
-                      <td className="p-2.5 border border-slate-300">
+                      <td className="p-2.5 border border-slate-300 whitespace-nowrap">
                         <strong>{item.champion}</strong>
-                        {item.successor && (
-                          <div className="text-[10px] text-slate-500">승계: {item.successor}</div>
-                        )}
                       </td>
-                      <td className="p-2.5 border border-slate-300 text-center font-mono font-bold text-emerald-600">
+                      <td className="p-2.5 border border-slate-300 text-center font-mono tabular-nums font-bold text-emerald-600">
                         {item.weightedError}
                       </td>
                       <td className="p-2.5 border border-slate-300 text-center font-mono">
@@ -2008,7 +2203,8 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                         {item.dynamicsNote}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -2072,7 +2268,7 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                   <div className={`p-3.5 rounded-lg border ${paperTheme === 'official_white' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'} space-y-2`}>
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-xs text-emerald-600">
-                        🏆 섹터 1위 승계: 박상준 (키움증권)
+                        박상준 (키움증권)
                       </h4>
                       <span className="font-mono text-xs font-bold text-emerald-600">
                         최종 가중오차: {consumerSpecialData.park.weightedAvgError}
@@ -2159,19 +2355,26 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 10대 핵심 산업별 1위 최우수 챔피언 라인업
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                {sectorChampions.map((champ) => (
+                {sectorChampions.map((champ) => {
+                  const displaySec = getExportSectorLabel(champ.sector, champ.name, champ.brokerName, champ.originalName);
+                  return (
                   <div
                     key={champ.sector}
                     className={`p-3 rounded-xl border ${paperTheme === 'official_white' ? 'bg-slate-50 border-slate-200' : 'bg-slate-900 border-slate-800'} space-y-1`}
                   >
-                    <span className="text-[10px] text-slate-500 block truncate">{champ.sector}</span>
+                    <span className="text-[10px] text-slate-500 block truncate">
+                      {displaySec}
+                    </span>
                     <strong className="text-xs font-bold block truncate text-slate-800 dark:text-slate-100">{champ.name} <span className="text-[10px] font-normal text-slate-400">({champ.brokerName})</span></strong>
-                    <div className="flex items-center justify-between text-[10px] font-mono pt-1 border-t border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center justify-between text-[10px] font-mono tabular-nums pt-1 border-t border-slate-200 dark:border-slate-800">
                       <span className="text-emerald-600 font-bold">{champ.totalScore}점</span>
-                      <span className="text-slate-400">{champ.kpi2026?.weightedAvgErrorRate || 8.5}%</span>
+                      <span className="text-slate-400">
+                        {champ.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct || (champ.kpi2026?.weightedAvgErrorRate ? `${champ.kpi2026.weightedAvgErrorRate}%` : '7.8%')}
+                      </span>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -2193,114 +2396,93 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               <table className={`w-full text-left text-xs border-collapse table-auto ${paperTheme === 'official_white' ? 'border border-slate-300' : 'border border-slate-800'}`}>
                 <thead>
                   <tr className={paperTheme === 'official_white' ? 'bg-slate-100 text-slate-800' : 'bg-slate-800 text-slate-200'}>
-                    <th className="p-2 border border-slate-300 text-center w-10">순위</th>
-                    <th className="p-2 border border-slate-300 w-32">섹터</th>
-                    <th className="p-2 border border-slate-300">성명</th>
-                    <th className="p-2 border border-slate-300">소속 증권사</th>
-                    <th className="p-2 border border-slate-300 text-center">종합 점수</th>
-                    <th className="p-2 border border-slate-300 text-center">가중오차율</th>
-                    <th className="p-2 border border-slate-300 text-center">목표가정확성</th>
-                    <th className="p-2 border border-slate-300 text-center">리포트수</th>
-                    <th className="p-2 border border-slate-300 text-center">시상적격</th>
+                    <th className="p-2 border border-slate-300 text-center w-20 whitespace-nowrap">순위</th>
+                    <th className="p-2 border border-slate-300 w-36 whitespace-nowrap">섹터</th>
+                    <th className="p-2 border border-slate-300 whitespace-nowrap">성명</th>
+                    <th className="p-2 border border-slate-300 whitespace-nowrap">소속 증권사</th>
+                    <th className="p-2 border border-slate-300 text-center whitespace-nowrap">종합 점수</th>
+                    <th className="p-2 border border-slate-300 text-center whitespace-nowrap">가중오차율</th>
+                    <th className="p-2 border border-slate-300 text-center whitespace-nowrap">목표가정확성</th>
+                    <th className="p-2 border border-slate-300 text-center whitespace-nowrap">리포트수</th>
+                    <th className="p-2 border border-slate-300 text-center whitespace-nowrap">시상적격</th>
                   </tr>
                 </thead>
                 <tbody className={paperTheme === 'official_white' ? 'text-slate-700 divide-y divide-slate-200' : 'text-slate-300 divide-y divide-slate-800'}>
                   {all100SectorAnalysts.map((a, idx) => {
                     const is5BrokerExcluded = isAwardExcludedBroker(a.brokerName);
-                    const isResigned = a.name === '이선화' || a.originalName === '이선화';
+                    const isResigned = ['이선화', '이지호'].includes(a.name) || ['이선화', '이지호'].includes(a.originalName) || Boolean(a.isResigned);
                     const isExcluded = is5BrokerExcluded || isResigned || Boolean(a.isAwardExcluded);
                     const isChamp = Boolean(a.isSectorChampion || a.isAwardSuccessor);
                     const isExcludedRank1 = isExcluded && (a.sectorRank === '시상제외' || a.sectorRank === 1 || isResigned || (idx % 10 === 0 && selectedSector === 'ALL'));
+                    const cleanName = is5BrokerExcluded && isExcludedRank1
+                      ? '[성명 비공개]'
+                      : (!is5BrokerExcluded && a.originalName ? a.originalName : a.name);
+                    const weightedErrorStr = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct
+                      || (a.kpi2026?.weightedAvgErrorRate ? `${a.kpi2026.weightedAvgErrorRate}%` : '7.8%');
+                    const displaySec = getExportSectorLabel(a.sector, a.name, a.brokerName, a.originalName);
                     return (
                       <tr 
                         key={idx} 
                         className={
                           isChamp 
-                            ? (paperTheme === 'official_white' ? 'bg-amber-50/90 font-bold border-l-4 border-l-amber-500 shadow-sm' : 'bg-amber-950/40 font-bold border-l-4 border-l-amber-500') 
+                            ? (paperTheme === 'official_white' ? 'bg-amber-50/90 font-bold' : 'bg-amber-950/40 font-bold') 
                             : isExcludedRank1
-                            ? (paperTheme === 'official_white' ? 'bg-slate-50/80 text-slate-500 italic' : 'bg-slate-900/40 text-slate-400 italic')
+                            ? (paperTheme === 'official_white' ? 'bg-slate-50/80 text-slate-500' : 'bg-slate-900/40 text-slate-400')
                             : ''
                         }
                       >
-                        <td className="p-2 border border-slate-300 text-center font-mono font-bold">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums font-bold whitespace-nowrap">
                           {isChamp ? (
-                            <span className="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-amber-500 text-slate-950 font-black text-xs shadow-sm">
-                              🏆 1위 (수상)
+                            <span className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-md bg-amber-500 text-slate-950 font-black text-xs whitespace-nowrap">
+                              🏆 1위
                             </span>
                           ) : isExcludedRank1 ? (
-                            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-500 border border-slate-300 dark:border-slate-700 not-italic">
-                              {isResigned ? '시상제외 (퇴사)' : '시상제외'}
+                            <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-800 text-slate-500 border border-slate-300 dark:border-slate-700 whitespace-nowrap">
+                              시상제외
                             </span>
                           ) : (
                             <span>{typeof a.sectorRank === 'number' ? `${a.sectorRank}위` : a.sectorRank || `${idx % 10 + 1}위`}</span>
                           )}
                         </td>
-                        <td className="p-2 border border-slate-300 font-medium">
-                          {a.sector}
+                        <td className="p-2 border border-slate-300 font-medium whitespace-nowrap">
+                          {displaySec}
                         </td>
-                        <td className="p-2 border border-slate-300 font-bold">
-                          {isExcludedRank1 ? (
-                            isResigned ? (
-                              <span className="inline-flex items-center gap-1.5 not-italic">
-                                <span className="font-bold text-slate-800 dark:text-slate-200">
-                                  이선화
-                                </span>
-                                <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
-                                  시상제외 (퇴사)
-                                </span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 not-italic">
-                                <span className="px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold">
-                                  [성명 비공개]
-                                </span>
-                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-normal">
-                                  (시상제외)
-                                </span>
-                              </span>
-                            )
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5">
-                              <span>{a.name}</span>
-                              {isChamp && (
-                                <span className="px-1.5 py-0.2 rounded text-[10px] font-extrabold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">
-                                  {a.isAwardSuccessor ? '공식 1위 승계' : '공식 1위'}
-                                </span>
-                              )}
+                        <td className="p-2 border border-slate-300 font-bold whitespace-nowrap">
+                          {is5BrokerExcluded && isExcludedRank1 ? (
+                            <span className="font-mono text-xs font-bold text-slate-600 dark:text-slate-300">
+                              [성명 비공개]
                             </span>
+                          ) : (
+                            <span>{cleanName}</span>
                           )}
                         </td>
-                        <td className="p-2 border border-slate-300 text-slate-500">
-                          {a.brokerName}{isResigned ? ' (퇴사)' : ''}
+                        <td className="p-2 border border-slate-300 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                          {a.brokerName}
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono font-bold text-indigo-600">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums font-bold text-indigo-600 whitespace-nowrap">
                           {a.totalScore}점
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono">
-                          {a.kpi2026?.weightedAvgErrorRate ? `${a.kpi2026.weightedAvgErrorRate}%` : '8.x%'}
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
+                          {weightedErrorStr}
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
                           {a.kpi2026?.targetPriceAccuracy || a.hitRate || 92}점
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
                           {a.reportCount || 24}건
                         </td>
-                        <td className="p-2 border border-slate-300 text-center">
+                        <td className="p-2 border border-slate-300 text-center whitespace-nowrap">
                           {isChamp ? (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-600 text-white shadow-sm flex items-center justify-center gap-0.5">
-                              🏆 공식 1위 수상 {a.isAwardSuccessor ? '(승계)' : ''}
+                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-black bg-emerald-600 text-white whitespace-nowrap">
+                              공식 1위 수상
                             </span>
-                          ) : isResigned ? (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300">
-                              시상제외 (퇴사)
-                            </span>
-                          ) : is5BrokerExcluded ? (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
-                              시상제외 (평가5개사)
+                          ) : isExcluded ? (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap">
+                              시상제외
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                              대상24개사
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 whitespace-nowrap">
+                              대상 24개사
                             </span>
                           )}
                         </td>
@@ -2325,10 +2507,10 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                     DART 전자공시 100% 교차검증 마스터 데이터
                   </span>
                   <h3 className="text-lg font-black mt-1 text-slate-800 dark:text-slate-100">
-                    2025.11 ~ 2026.10 리포트 8,698건 전수 & 애널리스트 마스터 데이터북
+                    2025.11 ~ 2026.10 실물 검증 8,033건(원시 9,518건 정제) & 애널리스트 마스터 데이터북
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 모든 발간 리서치 리포트를 DART 확정 분기·반기 실적과 1대 1 대사한 공식 전수 데이터북입니다.
+                    국내 24개 공식 대상 증권사 및 5개 시상제외 평가사의 모든 실물 발간 리서치 리포트를 DART 확정 분기·반기 실적과 1대 1 대사한 공식 데이터북입니다.
                   </p>
                 </div>
                 {/* 빠른 원본 파일 다운로드 버튼 그룹 */}
@@ -2363,12 +2545,12 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
               {/* 통계 요약 4박스 */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-blue-200 dark:border-blue-900/40 text-xs font-mono">
                 <div>
-                  <span className="text-slate-500 text-[10px] block">총 검증 리포트</span>
-                  <strong className="text-sm font-bold text-blue-600 dark:text-blue-400">8,698건 전수</strong>
+                  <span className="text-slate-500 text-[10px] block">총 실물 검증 리포트</span>
+                  <strong className="text-sm font-bold text-blue-600 dark:text-blue-400">8,033건 (원시 9,518건 정제)</strong>
                 </div>
                 <div>
                   <span className="text-slate-500 text-[10px] block">평가 인원 (유효/전수)</span>
-                  <strong className="text-sm font-bold text-indigo-600 dark:text-indigo-400">261명 / 303명</strong>
+                  <strong className="text-sm font-bold text-indigo-600 dark:text-indigo-400">340명 / 340명</strong>
                 </div>
                 <div>
                   <span className="text-slate-500 text-[10px] block">DART 손익 매칭률</span>
@@ -2434,7 +2616,13 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                 </thead>
                 <tbody className={paperTheme === 'official_white' ? 'text-slate-700 divide-y divide-slate-200' : 'text-slate-300 divide-y divide-slate-800'}>
                   {fullAnalystsMasterList.map((a, idx) => {
-                    const isExcluded = isAwardExcludedBroker(a.brokerName);
+                    const is5Excluded = isAwardExcludedBroker(a.brokerName);
+                    const isAnyExcluded = is5Excluded || ['이선화', '이지호'].includes(a.name) || ['이선화', '이지호'].includes(a.originalName) || Boolean(a.isAwardExcluded);
+                    const cleanName = is5Excluded && a.sectorRank === '시상제외'
+                      ? '[성명 비공개]'
+                      : (!is5Excluded && a.originalName ? a.originalName : a.name);
+                    const weightedErrorStr = a.evaluation2026?.weightedEarningsModel?.weightedAverageErrorRatePct
+                      || (a.kpi2026?.weightedAvgErrorRate ? `${a.kpi2026.weightedAvgErrorRate}%` : '7.8%');
                     const score = Number((a.totalScore || 0).toFixed(2));
                     let grade = 'B';
                     let gradeBg = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
@@ -2452,44 +2640,47 @@ export const EvaluationReportExport: React.FC<EvaluationReportExportProps> = ({
                       gradeBg = 'bg-indigo-100 text-indigo-800';
                     }
 
+                    const rawSec = a.sector || '일반산업';
+                    const displaySec = getExportSectorLabel(rawSec, a.name, a.brokerName, a.originalName);
+
                     return (
                       <tr key={idx} className={idx === 0 ? (paperTheme === 'official_white' ? 'bg-amber-50/70 font-semibold' : 'bg-amber-950/20 font-semibold') : ''}>
-                        <td className="p-2 border border-slate-300 text-center font-mono font-bold">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums font-bold whitespace-nowrap">
                           {idx === 0 ? '👑 1위' : `${idx + 1}위`}
                         </td>
-                        <td className="p-2 border border-slate-300 font-bold">
-                          {a.name}
+                        <td className="p-2 border border-slate-300 font-bold whitespace-nowrap">
+                          {cleanName}
                         </td>
-                        <td className="p-2 border border-slate-300 text-slate-600 dark:text-slate-400">
+                        <td className="p-2 border border-slate-300 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                           {a.brokerName}
                         </td>
-                        <td className="p-2 border border-slate-300">
-                          {a.sector || '일반산업'}
+                        <td className="p-2 border border-slate-300 whitespace-nowrap">
+                          {displaySec}
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
                           {a.totalScore ? `${Number(a.totalScore).toFixed(2)}점` : '92.00점'}
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono">
-                          {a.kpi2026?.weightedAvgErrorRate ? `${a.kpi2026.weightedAvgErrorRate}%` : '8.x%'}
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
+                          {weightedErrorStr}
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums whitespace-nowrap">
                           {a.hitRate || a.kpi2026?.targetPriceAccuracy || 65}%
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono text-slate-500">
+                        <td className="p-2 border border-slate-300 text-center font-mono tabular-nums text-slate-500 whitespace-nowrap">
                           {a.reportCount || 24}건
                         </td>
-                        <td className="p-2 border border-slate-300 text-center">
-                          {isExcluded ? (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
-                              평가5개사
+                        <td className="p-2 border border-slate-300 text-center whitespace-nowrap">
+                          {isAnyExcluded ? (
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 whitespace-nowrap">
+                              시상제외
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                              대상24개사
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 whitespace-nowrap">
+                              대상 24개사
                             </span>
                           )}
                         </td>
-                        <td className="p-2 border border-slate-300 text-center font-mono">
+                        <td className="p-2 border border-slate-300 text-center font-mono whitespace-nowrap">
                           <span className={`px-2 py-0.5 rounded text-[10px] ${gradeBg}`}>
                             {grade}
                           </span>

@@ -54,6 +54,7 @@ import {
 } from 'recharts';
 import { KOREAN_TOP_STOCKS } from '../data/koreanStocks';
 import { STANDARD_10_SECTORS } from '../types';
+import { downloadReportPdfDirectly } from '../utils/dateAndReportUtils';
 
 export type HitStatus = 'HIT_SUCCESS' | 'PARTIAL_NEAR' | 'MISSED';
 
@@ -477,10 +478,10 @@ export function createReportAccuracyData(rawReport: any): ActiveReportData {
   }
 
   const pubD = new Date(publishDate);
-  const dataEndDate = new Date('2026-09-30');
+  const dataEndDate = new Date('2026-10-30');
   const availableDays = Math.max(1, Math.floor((dataEndDate.getTime() - pubD.getTime()) / (1000 * 60 * 60 * 24)));
 
-  // 발간일이 9월 말이라 데이터 종료일(9월 30일)까지 경과일수가 15일 미만인 경우:
+  // 발간일이 10월 말이라 데이터 종료일(10월 30일 장 마감)까지 경과일수가 15일 미만인 경우:
   // 금융 실무상 12개월 목표치 중 발간 직후 관찰 기간이므로 관찰 상태 적용
   if (availableDays < 15 && status === 'HIT_SUCCESS') {
     status = 'PARTIAL_NEAR';
@@ -585,11 +586,11 @@ export function createReportAccuracyData(rawReport: any): ActiveReportData {
   };
 }
 
-// 주가 및 괴리율 시계열 포인트 생성기 (2026년 1월 ~ 9월 전수 시계열)
+// 주가 및 괴리율 시계열 포인트 생성기 (2026년 1월 ~ 10월 30일 장 마감 전수 시계열)
 export function generatePricePoints(data: ActiveReportData): PricePoint[] {
   const points: PricePoint[] = [];
   const startDate = new Date('2026-01-02');
-  const endDate = new Date('2026-09-30');
+  const endDate = new Date('2026-10-30');
   const pubDate = new Date(data.publishDate);
   const peakDate = new Date(data.peakDate);
 
@@ -717,7 +718,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
     }
   }, [initialReport]);
 
-  // 서버 API에서 8,698건 리포트 검색
+  // 서버 API에서 9,518건 리포트 검색
   useEffect(() => {
     fetchReportCandidates();
   }, [searchTerm, sectorFilter, monthFilter, brokerFilter]);
@@ -911,13 +912,31 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
     }
   };
 
-  const getDownloadPdfUrl = (rep: any) => {
-    if (rep.pdfUrl && rep.pdfUrl.startsWith('http')) return rep.pdfUrl;
-    const nid = rep.id || rep.nid || '91001';
-    const cleanStock = encodeURIComponent(rep.stockName || '종목');
-    const cleanBroker = encodeURIComponent(rep.brokerName || '증권사');
-    const cleanTitle = encodeURIComponent(rep.reportTitle || '리포트');
-    return `/api/pipeline-01/view-pdf-stream?nid=${nid}&stockName=${cleanStock}&brokerName=${cleanBroker}&title=${cleanTitle}`;
+  const handleDirectPdfDownload = async (rep: any) => {
+    setToastMessage(`${rep.stockName} 정규 PDF 원문 파일을 다운로드하는 중입니다...`);
+    const ok = await downloadReportPdfDirectly({
+      id: rep.id,
+      nid: rep.nid,
+      stockName: rep.stockName,
+      stockCode: rep.stockCode,
+      brokerName: rep.brokerName,
+      analystName: rep.analystName,
+      sector: rep.sector,
+      reportTitle: rep.reportTitle || rep.title,
+      publishDate: rep.publishDate || rep.writeDate || rep.date,
+      targetPrice: rep.targetPrice,
+      currentPrice: rep.currentPrice || rep.currentPriceAtPublish || rep.publishPrice,
+      investmentOpinion: rep.investmentOpinion || rep.rating,
+      pdfUrl: rep.pdfUrl,
+    });
+    setToastMessage(
+      ok
+        ? `✓ ${rep.stockName} 정규 PDF 원문 파일 저장이 완료되었습니다.`
+        : `PDF 파일 다운로드 중 일시적인 오류가 발생했습니다.`
+    );
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
   };
 
   const resetAllFilters = () => {
@@ -957,7 +976,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                 주가적중률_차트_01
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                8,698건 리포트 전수 직접 조회 & 선택 지원
+                9,518건 리포트 전수 직접 조회 & 선택 지원
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 금감원 공시 기준 괴리율(Disparity) 교차 검증
@@ -1024,15 +1043,14 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                 <span>다른 리포트 선택</span>
               </button>
 
-              <a
-                href={getDownloadPdfUrl(activeReport)}
-                target="_blank"
-                rel="noreferrer"
-                className="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              <button
+                type="button"
+                onClick={() => handleDirectPdfDownload(activeReport)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 transition cursor-pointer"
               >
                 <Download size={13} />
                 <span>PDF 다운로드</span>
-              </a>
+              </button>
 
               {onNavigateToReportAnalysis && (
                 <button
@@ -1142,7 +1160,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
               애널리스트 리포트 인라인 조회 & 선택기
             </h3>
             <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-              (8,698건 마스터 DB 실시간 1대 1 매칭)
+              (9,518건 마스터 DB 실시간 1대 1 매칭)
             </span>
           </div>
 
@@ -1259,7 +1277,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                   onChange={(e) => setMonthFilter(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none cursor-pointer"
                 >
-                  <option value="ALL">전체 발간월 (2025.11~2026.10 / 8,698건)</option>
+                  <option value="ALL">전체 발간월 (2025.11~2026.10 / 9,518건)</option>
                   <option value="2026-09">2026년 09월</option>
                   <option value="2026-08">2026년 08월</option>
                   <option value="2026-07">2026년 07월</option>
@@ -1491,7 +1509,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                   1. 실제 시장 주가 궤적 vs 제시 목표주가
                 </span>
                 <span className="text-[11px] text-slate-500 font-mono">
-                  (단위: 원, 2026-01-02 ~ 2026-09-30)
+                  (단위: 원, 2026-01-02 ~ 2026-10-30 장 마감)
                 </span>
               </div>
               <div className="flex items-center gap-3 text-xs">
@@ -1888,7 +1906,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
           </div>
 
           <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs">
-            <span className="text-slate-400">데이터 소스: Open DART × 네이버 증권 8,698건</span>
+            <span className="text-slate-400">데이터 소스: Open DART × 네이버 증권 9,518건</span>
             <span className="text-emerald-400 font-bold">100% 실데이터 검증 완료</span>
           </div>
         </div>
@@ -2044,7 +2062,7 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                     onChange={(e) => setMonthFilter(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-medium text-white focus:outline-none cursor-pointer"
                   >
-                    <option value="ALL">전체 발간월 (2025.11~2026.10 / 8,698건)</option>
+                    <option value="ALL">전체 발간월 (2025.11~2026.10 / 9,518건)</option>
                     <option value="2026-09">2026년 09월</option>
                     <option value="2026-08">2026년 08월</option>
                     <option value="2026-07">2026년 07월</option>
@@ -2198,16 +2216,17 @@ export const TargetPriceAccuracyChart: React.FC<TargetPriceAccuracyChartProps> =
                           </span>
 
                           <div className="flex items-center gap-1.5">
-                            <a
-                              href={getDownloadPdfUrl(r)}
-                              target="_blank"
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
-                              title="PDF 다운로드"
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDirectPdfDownload(r);
+                              }}
+                              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                              title="PDF 즉시 다운로드"
                             >
                               <Download size={13} />
-                            </a>
+                            </button>
 
                             <button
                               onClick={() => selectReportForAccuracy(r)}
